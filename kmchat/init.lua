@@ -29,85 +29,24 @@
 -- config zone {{{
 formats = {
 -- ["MATCH"]        = {"FORMAT"                  RANGE  COLOR     PRIV}, --
-   ["_(.+)"]        = {"%s (OOC): (( %s ))",     18,    0x9966AA, nil },
-   ["%(%((.+)%)%)"] = {"%s (OOC): (( %s ))",     18,    0x9966AA, nil },
-   ["!(.+)"]       = {"%s (shouts): %s",        68,    0xFFFFFF, nil },
-   ["=(.+)"]        = {"%s (whispers): %s",      3,     0xE0EEE0, nil },
-   ["*(.+)"]       = {"* %s %s",                18,    0xFFFF00, nil },
-   ["#(.+)"]       = {"*** %s: %s ***",         18,    0xFFFF00, "gm"},
-   ["?(.+)"]       = {"%s (OOC): %s ***",       31000, 0x20EEDD, nil },
+   ["_(.+)"]        = {"%s (OOC): (( %s ))",     18,    "9966AA", nil },
+   ["%(%((.+)%)%)"] = {"%s (OOC): (( %s ))",     18,    "9966AA", nil },
+   ["!(.+)"]       = {"%s (shouts): %s",        68,    "FFFFFF", nil },
+   ["=(.+)"]        = {"%s (whispers): %s",      3,     "E0EEE0", nil },
+   ["*(.+)"]       = {"* %s %s",                18,    "FFFF00", nil },
+   ["#(.+)"]       = {"*** %s: %s ***",         18,    "FFFF00", "gm"},
+   ["?(.+)"]       = {"%s (OOC): %s ***",       31000, "20EEDD", nil },
 }
 DEFAULT_FORMAT     = "%s: %s" 
 DEFAULT_RANGE      = 18
-DEFAULT_COLOR      = 0xEEF3EE
-DICE_COLOR         = 0xFFFF00
-GMSPY_COLOR        = 0x666666
+DEFAULT_COLOR      = "EEF3EE"
+DICE_COLOR         = "FFFF00"
+GMSPY_COLOR        = "666666"
 GM_PREFIX          = "[GM] "
-MESSAGES_ON_SCREEN = 10
-MAX_LENGTH         = 100
-LEFT_INDENT        = 0.01
-TOP_INDENT         = 0.92
-FONT_WIDTH         = 12
-FONT_HEIGHT        = 28
 
 fudge_levels = {"-","terrible--","terrible-","terrible", "poor", "mediocre", "fair", "good", "great", "superb", "legendary", "legendary+", "legendary++","like Allah"}
 
 -- config zone }}}
-
-firsthud = nil
-
-function addMessage(player, new_text, new_color)
-    local temp_text
-    local temp_color
-    local hud
-    for id = firsthud, (firsthud+MESSAGES_ON_SCREEN-1) do
-        hud = player:hud_get(id)
-        if hud.name == "chat" then
-            temp_text = hud.text
-            temp_color = hud.number
-            player:hud_change(id, "number", new_color)
-            player:hud_change(id, "text", new_text)
-            new_text = temp_text
-            new_color = temp_color
-        end
-    end
-end
-
-function sendMessage(player, message, color)
-    local splitter
-    while message:len() > MAX_LENGTH do
-        splitter = string.find (message, " ", MAX_LENGTH)
-        if splitter == nil then
-            splitter = MAX_LENGTH
-        end
-        addMessage(player, message:sub(0,splitter), color)
-        message = message:sub(splitter+1)
-    end
-    addMessage(player, message, color)
-end
-
-minetest.register_on_joinplayer(function(player)
-    minetest.after(2, function(player)
-        for i = 1, MESSAGES_ON_SCREEN do
-            local hud_id = player:hud_add({
-                hud_elem_type = "text",
-                text = "",
-                position = {x = LEFT_INDENT, y = TOP_INDENT},
-                name = "chat",
-                scale = {x=500, y=50},
-                number = 0xFFFFFF,
-                item = 0,
-                direction = 0,
-                alignment = {x=1, y=0},
-                offset = {x=0, y=-i*FONT_HEIGHT}
-            })
-            if not firsthud then
-                firsthud = hud_id
-            end
-        end
-        end, player)
-end)
-
 minetest.register_privilege("gm", "Gives accses to reading all messages in the chat")
 
 minetest.register_on_chat_message(function(name, message)
@@ -195,10 +134,11 @@ minetest.register_on_chat_message(function(name, message)
     senderpos = pl:getpos()
     for i = 1, #pls do
         recieverpos = pls[i]:getpos()
+        player_name = pls[i]:get_player_name()
         if math.sqrt((senderpos.x-recieverpos.x)^2 + (senderpos.y-recieverpos.y)^2 + (senderpos.z-recieverpos.z)^2) < range then
-            sendMessage(pls[i], string.format(fmt, name, submes), color)
+			minetest.chat_send_player(player_name , freeminer.colorize(color, string.format(fmt, name, submes)))
         elseif minetest.check_player_privs(pls[i]:get_player_name(), {gm=true}) then
-            sendMessage(pls[i], string.format(fmt, name, submes), GMSPY_COLOR)
+			minetest.chat_send_player(player_name , freeminer.colorize(GMSPY_COLOR, string.format(fmt, name, submes)))
         end
         print(string.format(fmt, name, submes))
     end
