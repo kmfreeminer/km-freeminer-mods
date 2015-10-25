@@ -28,10 +28,10 @@
 
 -- dices
 function dices_proc(pattern, submes, name)
-    dice = submes[1]
+    local dice = submes[1]
     if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
-        dice_result = math.random(dice)
-        pattern_result = string.format(pattern, "%s", dice, "%s")
+        local dice_result = math.random(dice)
+        local pattern_result = string.format(pattern, "%s", dice, "%s")
         return pattern_result, dice_result
     else
         return "%s: %s", nil
@@ -43,14 +43,14 @@ end
 fudge_levels = {"-","terrible--","terrible-","terrible", "poor", "mediocre", "fair", "good", "great", "superb", "legendary", "legendary+", "legendary++","like Allah"}
 
 function fudge_proc(pattern, submes, name)
-    fudge_dice_tmp = submes[1]
+    local fudge_dice_tmp = submes[1]
     for key, val in pairs(fudge_levels) do
-        fudge_level = string.match(fudge_dice_tmp, "^("..val..".*)")
-        fudge_level_key = key
+        local fudge_level = string.match(fudge_dice_tmp, "^("..val..".*)")
+        local fudge_level_key = key
         
         if fudge_level~=nil then
-            diff = 0
-            signs = ""
+            local diff = 0
+            local signs = ""
             
             for i = 1, 4 do
                 rand = math.random(3)
@@ -65,7 +65,7 @@ function fudge_proc(pattern, submes, name)
                 end
             end
             
-            pattern_result = string.format(pattern, "%s", signs, fudge_level, "%s")
+            local pattern_result = string.format(pattern, "%s", signs, fudge_level, "%s")
 
             fudge_level_key = fudge_level_key+diff
             
@@ -75,7 +75,7 @@ function fudge_proc(pattern, submes, name)
                 fudge_level_key = #fudge_levels
             end
             
-            dice_result = fudge_levels[fudge_level_key]
+            local dice_result = fudge_levels[fudge_level_key]
             return pattern_result, dice_result
         end
     end
@@ -83,12 +83,25 @@ function fudge_proc(pattern, submes, name)
 end
 
 -- language
+minetest.register_privilege("i_lang", "")
+minetest.register_privilege("c_lang", "")
 minetest.register_privilege("a_lang", "")
+minetest.register_privilege("h_lang", "")
+
+function lang_translate(word, lang_letter)
+    return "HUI"
+end
 
 function lang_proc(pattern, submes, name)
-    proc_message(name, "huihuhihiihihihih")
+    local phrase = ""
+    for word in string.gmatch(submes[2], "%S+") do
+        phrase = phrase..lang_translate(word).." "
+    end
+    
+    proc_message(name, phrase)
     return pattern, submes[2]
 end
+
 -- config zone {{{
 DEFAULT_FORMAT     = "%s: %s" 
 DEFAULT_RANGE      = 18
@@ -111,29 +124,36 @@ formats = {
    ["^sd(%d+).*"]    = {"*** %s rolls d%s silently and the result is %s ***",               3,     "D8DBB6",    nil,      nil,      dices_proc },
    ["^4dF (.*)$"]    = {"*** %s rolls 4df (%s) from %s and the result is %s ***",           18,    DICE_COLOR,  nil,      nil,      fudge_proc },
    ["^s4dF (.*)$"]   = {"*** %s rolls 4df (%s) from %s silently and the result is %s ***",  3,     "D8DBB6",    nil,      nil,      fudge_proc },
-   ["^%+(a)%+(.*)$"]  = {"***[[%s (avon): %s]]",                                            18,  DEFAULT_COLOR, "a_lang", nil,      lang_proc  },
+   ["^%+(i)%+(.*)$"] = {"[[%s (альвийский): %s]]",                                          18,  DEFAULT_COLOR, "i_lang", "i_lang", lang_proc  },
+   ["^%+(c)%+(.*)$"] = {"[[%s (цвергийский): %s]]",                                         18,  DEFAULT_COLOR, "c_lang", "c_lang", lang_proc  },
+   ["^%+(a)%+(.*)$"] = {"[[%s (авоонский): %s]]",                                           18,  DEFAULT_COLOR, "a_lang", "a_lang", lang_proc  },
+   ["^%+(h)%+(.*)$"] = {"[[%s (хольфийский): %s]]",                                         18,  DEFAULT_COLOR, "h_lang", "h_lang", lang_proc  },
 }
 
 -- config zone }}}
 minetest.register_privilege("gm", "Gives accses to reading all messages in the chat")
 
 function proc_message(name, message)
-    fmt = DEFAULT_FORMAT 
-    range = DEFAULT_RANGE
-    color = DEFAULT_COLOR
-    pl = minetest.get_player_by_name(name)
-    pls = minetest.get_connected_players()
+    local fmt = DEFAULT_FORMAT 
+    local range = DEFAULT_RANGE
+    local color = DEFAULT_COLOR
+    local priv = nil
+    
+    local pl = minetest.get_player_by_name(name)
+    local pls = minetest.get_connected_players()
+    
+    local submes = nil
     
     -- formats (see config zone)
     for m, f in pairs(formats) do
         submes = {string.match(message, m)}
         if submes[1] then
-            print((not f[4]) or minetest.check_player_privs(name, {[f[4]]=true}))
             if (not f[4]) or minetest.check_player_privs(name, {[f[4]]=true}) then  -- if PRIV==nil
-                print(submes[2])
                 fmt = f[1]
                 range = f[2]
                 color = f[3]
+                priv = f[5]
+                
                 if f[6]~=nil then
                     fmt, submes = f[6](fmt, submes, name)
                 else
@@ -155,12 +175,14 @@ function proc_message(name, message)
         name = GM_PREFIX .. name
     end
 
-    senderpos = pl:getpos()
-    for i = 1, #pls do
-        recieverpos = pls[i]:getpos()
-        player_name = pls[i]:get_player_name()
+    local senderpos = pl:getpos()
+    for i = 1, #pls do 
+        local recieverpos = pls[i]:getpos()
+        local player_name = pls[i]:get_player_name()
         if math.sqrt((senderpos.x-recieverpos.x)^2 + (senderpos.y-recieverpos.y)^2 + (senderpos.z-recieverpos.z)^2) < range then
-			minetest.chat_send_player(player_name , freeminer.colorize(color, string.format(fmt, name, submes)))
+            if (not priv) or minetest.check_player_privs(pls[i]:get_player_name(), {[priv]=true}) then
+                minetest.chat_send_player(player_name , freeminer.colorize(color, string.format(fmt, name, submes)))
+            end
         elseif minetest.check_player_privs(pls[i]:get_player_name(), {gm=true}) then
 			minetest.chat_send_player(player_name , freeminer.colorize(GMSPY_COLOR, string.format(fmt, name, submes)))
         end
