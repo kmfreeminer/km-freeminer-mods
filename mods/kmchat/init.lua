@@ -30,7 +30,6 @@
 function dices_proc(pattern, submes)
     dice = submes[1]
     if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
-        color = DICE_COLOR
         dice_result = math.random(dice)
         pattern_result = string.format(pattern, "%s", dice, "%s")
         return pattern_result, dice_result
@@ -93,18 +92,18 @@ GM_PREFIX          = "[GM] "
 
 -- formats
 formats = {
--- ["MATCH"]        = {"FORMAT"                                                  RANGE  COLOR       PRIV  PRIV_LIST   PROC_FUNCTION}, --
-   ["^_(.+)"]        = {"%s (OOC): (( %s ))",                                              18,    "9966AA",   nil,      nil,      nil        },
-   ["^%(%((.+)%)%)"] = {"%s (OOC): (( %s ))",                                              18,    "9966AA",   nil,      nil,      nil        },
-   ["^!(.+)"]        = {"%s (shouts): %s",                                                 68,    "FFFFFF",   nil,      nil,      nil        },
-   ["^=(.+)"]        = {"%s (whispers): %s",                                               3,     "E0EEE0",   nil,      nil,      nil        },
-   ["^*(.+)"]        = {"* %s %s",                                                         18,    "FFFF00",   nil,      nil,      nil        },
-   ["^#(.+)"]        = {"*** %s: %s ***",                                                  18,    "FFFF00",   "gm",     nil,      nil        },
-   ["^?(.+)"]        = {"%s (OOC): %s ***",                                                31000, "20EEDD",   nil,      nil,      nil        },
-   ["^d(%d+).*"]     = {"*** %s rolls d%s and the result is %s ***",                       18,    DICE_COLOR, nil,      nil,      dices_proc },
-   ["^sd(%d+).*"]    = {"*** %s rolls d%s silently and the result is %s ***",              3,     DICE_COLOR, nil,      nil,      dices_proc },
-   ["^4dF (.*)$"]    = {"*** %s rolls 4df (%s) from %s and the result is %s ***",          18,    DICE_COLOR, nil,      nil,      fudge_proc },
-   ["^s4dF (.*)$"]    = {"*** %s rolls 4df (%s) from %s silently and the result is %s ***", 18,   DICE_COLOR, nil,      nil,      fudge_proc },
+-- ["MATCH"]        = {"FORMAT"                                                            RANGE     COLOR     PRIV    PRIV_LIST   PROC_FUNCTION}, --
+   ["^_(.+)"]        = {"%s (OOC): (( %s ))",                                               18,    "9966AA",   nil,      nil,      nil        },
+   ["^%(%((.+)%)%)"] = {"%s (OOC): (( %s ))",                                               18,    "9966AA",   nil,      nil,      nil        },
+   ["^!(.+)"]        = {"%s (shouts): %s",                                                  68,    "FFFFFF",   nil,      nil,      nil        },
+   ["^=(.+)"]        = {"%s (whispers): %s",                                                3,     "E0EEE0",   nil,      nil,      nil        },
+   ["^*(.+)"]        = {"* %s %s",                                                          18,    "FFFF00",   nil,      nil,      nil        },
+   ["^#(.+)"]        = {"*** %s: %s ***",                                                   18,    "FFFF00",   "gm",     nil,      nil        },
+   ["^?(.+)"]        = {"%s (OOC): %s ***",                                                 31000, "20EEDD",   nil,      nil,      nil        },
+   ["^d(%d+).*"]     = {"*** %s rolls d%s and the result is %s ***",                        18,    DICE_COLOR, nil,      nil,      dices_proc },
+   ["^sd(%d+).*"]    = {"*** %s rolls d%s silently and the result is %s ***",               3,     "D8DBB6",   nil,      nil,      dices_proc },
+   ["^4dF (.*)$"]    = {"*** %s rolls 4df (%s) from %s and the result is %s ***",           18,    DICE_COLOR, nil,      nil,      fudge_proc },
+   ["^s4dF (.*)$"]   = {"*** %s rolls 4df (%s) from %s silently and the result is %s ***",  3,     "D8DBB6",   nil,      nil,      fudge_proc },
 }
 
 -- config zone }}}
@@ -120,14 +119,17 @@ minetest.register_on_chat_message(function(name, message)
     -- formats (see config zone)
     for m, f in pairs(formats) do
         submes = {string.match(message, m)}
-        print(submes[1])
         if submes[1] then
             if not f[4] then  -- if PRIV==nil
                 fmt = f[1]
                 range = f[2]
                 color = f[3]
+                print(f[3])
+                print(color)
                 if f[6]~=nil then
                     fmt, submes = f[6](fmt, submes)
+                    print(f[3])
+                    print(color)
                 else
                     submes = submes[1]
                 end
@@ -141,7 +143,7 @@ minetest.register_on_chat_message(function(name, message)
         end
         submes = submes[1]
     end
-    
+    print(color)
     if not submes then
         submes = message
         color = DEFAULT_COLOR
