@@ -103,7 +103,7 @@ function lang_proc(pattern, submes, name)
         if string.match(word, "[A-z]") then
             phrase = phrase .. word .. " "
         else
-            phrase = phrase .. translated_word .. " "            
+            phrase = phrase .. lang_translate(word, submes[2]) .. " "            
         end
     end
     
