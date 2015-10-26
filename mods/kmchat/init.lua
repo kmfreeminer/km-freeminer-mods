@@ -86,16 +86,25 @@ end
 minetest.register_privilege("i_lang", "")
 minetest.register_privilege("c_lang", "")
 minetest.register_privilege("a_lang", "")
-minetest.register_privilege("h_lang", "")
+
+function word_to_number(word)
+
+    return number
+end
 
 function lang_translate(word, lang_letter)
-    return "HUI"
+
+    return "test"
 end
 
 function lang_proc(pattern, submes, name)
     local phrase = ""
     for word in string.gmatch(submes[2], "%S+") do
-        phrase = phrase..lang_translate(word).." "
+        if string.match(word, "[A-z]") then
+            phrase = phrase .. word .. " "
+        else
+            phrase = phrase .. translated_word .. " "            
+        end
     end
     
     proc_message(name, phrase)
@@ -127,7 +136,6 @@ formats = {
    ["^%+(i)%+(.*)$"] = {"[[%s (альвийский): %s]]",                                          18,  DEFAULT_COLOR, "i_lang", "i_lang", lang_proc  },
    ["^%+(c)%+(.*)$"] = {"[[%s (цвергийский): %s]]",                                         18,  DEFAULT_COLOR, "c_lang", "c_lang", lang_proc  },
    ["^%+(a)%+(.*)$"] = {"[[%s (авоонский): %s]]",                                           18,  DEFAULT_COLOR, "a_lang", "a_lang", lang_proc  },
-   ["^%+(h)%+(.*)$"] = {"[[%s (хольфийский): %s]]",                                         18,  DEFAULT_COLOR, "h_lang", "h_lang", lang_proc  },
 }
 
 -- config zone }}}
