@@ -88,27 +88,71 @@ minetest.register_privilege("c_lang", "")
 minetest.register_privilege("a_lang", "")
 
 function word_to_number(word)
+    local number = 0
+
+    for i = 1, #word do
+        local char = string.sub(word, i, i)
+            number = number * (256) + string.byte(char)
+    end
 
     return number
 end
 
-function lang_translate(word, lang_letter)
+i_lang_parts = {"эль", "эль", "и", "ха", "ля", "ля", "р", "ая", "ма", "кю", "лют", "пил"}
+i_lang_max_size = 4
 
-    return "test"
+function lang_translate(word, lang_letter)
+    math.randomseed(word_to_number(word))
+    
+    local size = math.random(i_lang_max_size)
+    local translated_word = ""
+    for i = 1, size do 
+        local tmp = math.random(#i_lang_parts)
+        translated_word = translated_word .. i_lang_parts[tmp]
+    end
+    
+    return translated_word
 end
 
 function lang_proc(pattern, submes, name)
     local phrase = ""
+    local original = string.gsub(submes[2], "#", "")
+    
     for word in string.gmatch(submes[2], "%S+") do
-        if string.match(word, "[A-z]") then
-            phrase = phrase .. word .. " "
-        else
-            phrase = phrase .. lang_translate(word, submes[2]) .. " "            
+        local appendix  = ""
+        local prefix = ""
+        
+        loop = true
+        while loop do
+            tmp_char = string.sub(word, 0, 1)
+            loop = string.match(tmp_char, '%p')
+            if loop then
+                prefix = prefix .. tmp_char
+                word = string.sub(word, 2)
+            end
         end
+        
+        local loop = true
+        while loop do
+            tmp_char = string.sub(word, -1)
+            loop = string.match(tmp_char, '%p')
+            if loop then
+                appendix = tmp_char .. appendix
+                word = string.sub(word, 0, -2)
+            end
+        end
+        
+        if string.match(prefix, "#") or word == "" then
+            prefix = string.gsub(prefix, "#", "")
+            phrase =  phrase .. prefix ..word .. appendix .. " "
+        else
+            translated_word = lang_translate(word, submes[1] )
+            phrase = phrase .. prefix .. translated_word .. appendix .. " " 
+        end    
     end
     
     proc_message(name, phrase)
-    return pattern, submes[2]
+    return pattern, original
 end
 
 -- config zone {{{
