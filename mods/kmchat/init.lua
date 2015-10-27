@@ -102,7 +102,7 @@ cyrillic_uppercase = {"А","Б","В","Г","Д","Е","Ё","Ж","З","И","Й","К
 cyrillic_lowercase = {"а","б","в","г","д","е","ё","ж","з","и","й","к","л","м","н","о","п","р","с","т","у","ф","х","ц","ч","ш","щ","ъ","ы","ь","э","ю","я"}
 
 function cyrillic_lower(phrase)
-    for i = 1, #phrase do 
+    for i = 1, #cyrillic_uppercase do 
         phrase = string.gsub(phrase, cyrillic_uppercase[i], cyrillic_lowercase[i])
     end
     return phrase
