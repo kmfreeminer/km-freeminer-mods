@@ -87,33 +87,29 @@ end
 -- Lavacooling
 --
 
-default.cool_lava_source = function(pos)
-	minetest.set_node(pos, {name="default:obsidian"})
-	minetest.sound_play("default_cool_lava", {pos = pos,  gain = 0.25})
-end
-
-default.cool_lava_flowing = function(pos)
-	minetest.set_node(pos, {name="default:stone"})
-	minetest.sound_play("default_cool_lava", {pos = pos,  gain = 0.25})
-end
-
 minetest.register_abm({
-	nodenames = {"default:lava_flowing"},
+	nodenames = {"default:lava_source", "default:lava_flowing"},
 	neighbors = {"group:water"},
-	interval = 1,
-	chance = 1,
+	interval = 3,
+	chance = 3,
 	action = function(pos, node, active_object_count, active_object_count_wider)
-		default.cool_lava_flowing(pos, node, active_object_count, active_object_count_wider)
+		core.freeze_melt(pos, -1);
+		minetest.sound_play("default_cool_lava", {pos = pos, max_hear_distance = 16, gain = 0.25})
 	end,
 })
 
 minetest.register_abm({
-	nodenames = {"default:lava_source"},
-	neighbors = {"group:water"},
-	interval = 1,
-	chance = 1,
+	nodenames = {"default:lava_source", "default:lava_flowing"},
+	interval = 100,
+	chance = 10,
 	action = function(pos, node, active_object_count, active_object_count_wider)
-		default.cool_lava_source(pos, node, active_object_count, active_object_count_wider)
+		-- bad place: to not freeze lava in caves
+		if not pos.y or pos.y < -100 then return end
+		-- skip springs
+		if node.param2 >= 128 then return end
+		local light = core.get_node_light({x=pos.x,y=pos.y+1, z=pos.z}, 0.5)
+		if not light or light < default.LIGHT_MAX then return end
+		core.freeze_melt(pos, -1);
 	end,
 })
 
@@ -190,17 +186,6 @@ end
 -- Leafdecay
 --
 
--- To enable leaf decay for a node, add it to the "leafdecay" group.
---
--- The rating of the group determines how far from a node in the group "tree"
--- the node can be without decaying.
---
--- If param2 of the node is ~= 0, the node will always be preserved. Thus, if
--- the player places a node of that kind, you will want to set param2=1 or so.
---
--- If the node is in the leafdecay_drop group then the it will always be dropped
--- as an item
-
 default.leafdecay_trunk_cache = {}
 default.leafdecay_enable_cache = true
 -- Spread the load of finding trunks
@@ -212,12 +197,18 @@ minetest.register_globalstep(function(dtime)
 			math.floor(dtime * finds_per_second)
 end)
 
+default.after_place_leaves = function(pos, placer, itemstack, pointed_thing)
+	local node = minetest.get_node(pos)
+	node.param2 = 1
+	minetest.set_node(pos, node)
+end
+
 minetest.register_abm({
 	nodenames = {"group:leafdecay"},
 	neighbors = {"air", "group:liquid"},
 	-- A low interval and a high inverse chance spreads the load
-	interval = 2,
-	chance = 5,
+	interval = 10,
+	chance = 3,
 
 	action = function(p0, node, _, _)
 		--print("leafdecay ABM at "..p0.x..", "..p0.y..", "..p0.z..")")
@@ -239,8 +230,10 @@ minetest.register_abm({
 			if trunkp then
 				local n = minetest.get_node(trunkp)
 				local reg = minetest.registered_nodes[n.name]
-				-- Assume ignore is a trunk, to make the thing work at the border of the active area
-				if n.name == "ignore" or (reg and reg.groups.tree and reg.groups.tree ~= 0) then
+				-- Assume ignore is a trunk, to make the thing
+				-- work at the border of the active area
+				if n.name == "ignore" or (reg and reg.groups.tree and
+						reg.groups.tree ~= 0) then
 					--print("cached trunk still exists")
 					return
 				end
@@ -254,7 +247,8 @@ minetest.register_abm({
 		end
 		default.leafdecay_trunk_find_allow_accumulator =
 				default.leafdecay_trunk_find_allow_accumulator - 1
-		-- Assume ignore is a trunk, to make the thing work at the border of the active area
+		-- Assume ignore is a trunk, to make the thing
+		-- work at the border of the active area
 		local p1 = minetest.find_node_near(p0, d, {"ignore", "group:tree"})
 		if p1 then
 			do_preserve = true
@@ -266,7 +260,7 @@ minetest.register_abm({
 		end
 		if not do_preserve then
 			-- Drop stuff other than the node itself
-			itemstacks = minetest.get_node_drops(n0.name)
+			local itemstacks = minetest.get_node_drops(n0.name)
 			for _, itemname in ipairs(itemstacks) do
 				if minetest.get_item_group(n0.name, "leafdecay_drop") ~= 0 or
 						itemname ~= n0.name then
@@ -282,5 +276,71 @@ minetest.register_abm({
 			minetest.remove_node(p0)
 			nodeupdate(p0)
 		end
+	end
+})
+
+
+--
+-- Grass growing on well-lit dirt
+--
+
+if not default.weather then
+
+minetest.register_abm({
+	nodenames = {"default:dirt"},
+	interval = 2,
+	chance = 200,
+	action = function(pos, node)
+		local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+		local name = minetest.get_node(above).name
+		local nodedef = minetest.registered_nodes[name]
+		if nodedef and (nodedef.sunlight_propagates or nodedef.paramtype == "light") and
+				nodedef.liquidtype == "none" and
+				(minetest.get_node_light(above) or 0) >= 13 then
+			if name == "default:snow" or name == "default:snowblock" then
+				minetest.set_node(pos, {name = "default:dirt_with_snow"})
+			else
+				minetest.set_node(pos, {name = "default:dirt_with_grass"})
+			end
+		end
+	end
+})
+
+
+--
+-- Grass and dry grass removed in darkness
+--
+
+minetest.register_abm({
+	nodenames = {"default:dirt_with_grass", "default:dirt_with_dry_grass"},
+	interval = 2,
+	chance = 20,
+	action = function(pos, node)
+		local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+		local name = minetest.get_node(above).name
+		local nodedef = minetest.registered_nodes[name]
+		if name ~= "ignore" and nodedef and not ((nodedef.sunlight_propagates or
+				nodedef.paramtype == "light") and
+				nodedef.liquidtype == "none") then
+			minetest.set_node(pos, {name = "default:dirt"})
+		end
+	end
+})
+
+end
+
+--
+-- Moss growth on cobble near water
+--
+
+minetest.register_abm({
+	nodenames = {"default:cobble"},
+	neighbors = {"group:water"},
+	interval = 17,
+	chance = 200,
+	neighbors_range = 2,
+	--catch_up = false,
+	action = function(pos, node)
+		minetest.set_node(pos, {name = "default:mossycobble"})
 	end
 })
