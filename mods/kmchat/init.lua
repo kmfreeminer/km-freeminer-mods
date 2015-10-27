@@ -111,7 +111,8 @@ end
 i_lang_parts = {"эль", "эль", "и", "ха", "ля", "ля", "р", "ая", "ма", "кю", "лют", "пил"}
 i_lang_max_size = 4
 
-function lang_translate(word, lang_letter)
+lang_translate = {
+["i"] = function(word)
     math.randomseed(word_to_number(word))
     
     local size = math.random(i_lang_max_size)
@@ -122,7 +123,14 @@ function lang_translate(word, lang_letter)
     end
     
     return translated_word
-end
+end,
+["c"] = function(word)
+    return word
+end,
+["a"] = function(word)    
+    return word
+end,
+}
 
 function lang_proc(pattern, submes, name)
     local phrase = ""
@@ -157,7 +165,7 @@ function lang_proc(pattern, submes, name)
             prefix = string.gsub(prefix, "#", "")
             phrase =  phrase .. prefix ..word .. appendix .. " "
         else
-            translated_word = lang_translate(word, submes[1] )
+            translated_word = lang_translate[submes[1]](word)
             phrase = phrase .. prefix .. translated_word .. appendix .. " " 
         end    
     end
