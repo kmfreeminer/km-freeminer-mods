@@ -2,9 +2,13 @@ WATER_ALPHA = 160
 WATER_VISC = 1
 LAVA_VISC = 7
 LIGHT_MAX = 14
+MAP_GENERATION_LIMIT=31000
 
 -- Definitions made by this mod that other mods can use too
 default = {}
+
+default.weather = core.setting_getbool("weather")
+if default.weather == 0 then default.weather = nil end
 
 -- GUI related stuff
 default.gui_bg = "bgcolor[#080808BB;true]"

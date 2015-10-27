@@ -15,6 +15,20 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
+	output = 'default:pine_wood 16',
+	recipe = {
+		{'default:pine_tree'},
+	}
+})
+
+minetest.register_craft({
+	output = 'default:acacia_wood 4',
+	recipe = {
+		{'default:acacia_tree'},
+	}
+})
+
+minetest.register_craft({
 	output = 'default:stick 4',
 	recipe = {
 		{'group:wood'},
@@ -96,8 +110,8 @@ minetest.register_craft({
 	output = 'default:axe_wood',
 	recipe = {
 		{'group:wood', 'group:wood'},
-		{'default:stick', 'group:wood'},
-		{'default:stick',''},
+		{'group:stick', 'group:wood'},
+		{'group:stick',''},
 	}
 })
 
@@ -105,8 +119,8 @@ minetest.register_craft({
 	output = 'default:axe_stone',
 	recipe = {
 		{'group:stone', 'group:stone'},
-		{'default:stick', 'group:stone'},
-		{'default:stick', ''},
+		{'group:stick', 'group:stone'},
+		{'group:stick', ''},
 	}
 })
 
@@ -156,6 +170,13 @@ minetest.register_craft({
 	recipe = {
 		{'default:clay_lump', 'default:clay_lump'},
 		{'default:clay_lump', 'default:clay_lump'},
+	}
+})
+
+minetest.register_craft({
+	output = 'default:clay_lump 4',
+	recipe = {
+		{'default:clay'},
 	}
 })
 
@@ -221,6 +242,14 @@ minetest.register_craft({
 		{'default:obsidian_shard', 'default:obsidian_shard', 'default:obsidian_shard'},
 		{'default:obsidian_shard', 'default:obsidian_shard', 'default:obsidian_shard'},
 		{'default:obsidian_shard', 'default:obsidian_shard', 'default:obsidian_shard'},
+	}
+})
+
+minetest.register_craft({
+	output = 'default:obsidianbrick 4',
+	recipe = {
+		{'default:obsidian', 'default:obsidian'},
+		{'default:obsidian', 'default:obsidian'}
 	}
 })
 
@@ -376,7 +405,7 @@ minetest.register_craft({
 
 minetest.register_craft({
 	type = "fuel",
-	recipe = "default:sapling",
+	recipe = "group:sapling",
 	burntime = 10,
 })
 
@@ -388,12 +417,12 @@ minetest.register_craft({
 
 minetest.register_craft({
 	type = "fuel",
-	recipe = "default:junglesapling",
-	burntime = 10,
+	recipe = "default:grass_1",
+	burntime = 2,
 })
 
 minetest.register_craft({
 	type = "fuel",
-	recipe = "default:grass_1",
+	recipe = "default:dry_grass_1",
 	burntime = 2,
 })
