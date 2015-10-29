@@ -1,102 +1,54 @@
-MINERALS_LIST={
-	'lazurite',
-	'anthracite',
-	'lignite',
-	'bituminous_coal',
-	'magnetite',
-	'hematite',
-	'limonite',
-	'bismuthinite',
-	'cassiterite',
-	'galena',
-	'garnierite',
-	'malachite',
-	'native_copper',
-	'native_gold',
-	'native_platinum',
-	'native_silver',
-	'sphalerite',
-	'tetrahedrite',
-	'bauxite',
-	---------------------------
-	'cinnabar',
-	'cryolite',
-	'graphite',
-	'gypsum',
-	'jet',
-	'kaolinite',
-	'kimberlite',
-	'olivine',
-	'petrified_wood',
-	'pitchblende',
-	'saltpeter',
-	'satin_spar',
-	'serpentine',
-	'sulfur',
-	'sylvite',
-	'tenorite',
-	'charcoal'
+minerals = {}
+
+minerals.list = {
+    lazurite          = 'Лазурит',
+    anthracite        = 'Антрацит',
+    lignite           = 'Бурый уголь',
+    bituminous_coal   = 'Каменный уголь',
+    magnetite         = 'Магнетит',
+    hematite          = 'Гематит',
+    limonite          = 'Лимонит',
+    bismuthinite      = 'Висмутин',
+    cassiterite       = 'Касситерит',
+    galena            = 'Галенит',
+    garnierite        = 'Гарниерит',
+    malachite         = 'Малахит',
+    native_copper     = 'Самородная медь',
+    native_gold       = 'Самородное золото',
+    native_platinum   = 'Самородная платина',
+    native_silver     = 'Самородное серебро',
+    sphalerite        = 'Сфалерит',
+    tetrahedrite      = 'Тетраэдрит',
+    bauxite           = 'Боксит',
+    cinnabar          = 'Киноварь',
+    cryolite          = 'Криолит',
+    graphite          = 'Графит',
+    gypsum            = 'Гипс',
+    jet               = 'Гагат',
+    kaolinite         = 'Каолинит',
+    kimberlite        = 'Кимберлит',
+    olivine           = 'Оливин',
+    petrified_wood    = 'Окаменелое дерево',
+    pitchblende       = 'Настуран',
+    saltpeter         = 'Селитра',
+    satin_spar        = 'Селенит',
+    serpentine        = 'Змеевик',
+    sulfur            = 'Сера',
+    sylvite           = 'Сильвин',
+    tenorite          = 'Тенорит',
+    charcoal          = 'Древесный уголь',
+    flux              = 'Флюс', -- может убрать? херь какая-то
+    borax             = 'Бура́',
 }
 
-MINERALS_DESC_LIST={
-	'Лазурит',
-	'Антрацит',
-	'Бурый уголь', -- Lignite
-	'Каменный уголь', -- Bituminous coal
-	'Магнетит',
-	'Гематит',
-	'Лимонит',
-	'Висмутин',
-	'Касситерит',
-	'Галенит',
-	'Гарниерит',
-	'Малахит',
-	'Самородная медь',
-	'Самородное золото',
-	'Самородная платина',
-	'Самородное серебро',
-	'Сфалерит',
-	'Тетраэдрит',
-	'Боксит',
-	---------------------------
-	'Киноварь',
-	'Криолит',
-	'Графит',
-	'Гипс',
-	'Гагат', -- Jet
-	'Каолинит',
-	'Кимберлит',
-	'Оливин',
-	'Окаменелое дерево',
-	'Настуран',
-	'Селитра',
-	'Селенит', -- Satin spar
-	'Змеевик',
-	'Сера',
-	'Сильвин',
-	'Тенорит',
-	'Древесный уголь'
-}
-
-for i=1, #MINERALS_LIST do
-	minetest.register_craftitem("minerals:"..MINERALS_LIST[i], {
-		description = MINERALS_DESC_LIST[i],
-		inventory_image = "minerals_"..MINERALS_LIST[i]..".png",
+for mineral, mineral_desc in pairs(minerals.list) do
+	minetest.register_craftitem("minerals:"..mineral, {
+		description = mineral_desk,
+		inventory_image = "minerals_"..mineral..".png",
 	})
 end
 
-minetest.register_craftitem("minerals:flux", {
-	description = "Flux",
-	inventory_image = "minerals_flux.png",
-})
-
-minetest.register_craftitem("minerals:borax", {
-	description = "Borax",
-	inventory_image = "minerals_borax.png",
-})
-
--------------------------------------------------
-
+--{{{ Fuel registration
 minetest.register_craft({
 	type = "fuel",
 	recipe = "minerals:charcoal",
@@ -120,3 +72,4 @@ minetest.register_craft({
 	recipe = "minerals:anthracite",
 	burntime = 50,
 })
+--}}}
