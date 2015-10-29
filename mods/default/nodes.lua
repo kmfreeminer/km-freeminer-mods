@@ -201,10 +201,14 @@ minetest.register_node("default:dirt_dry", {
 	description = "Dry dirt",
 	tiles = {"default_dirt_dry.png"},
 	is_ground_content = true,
-	groups = {crumbly = 3, soil = 1, melt = 65},
-	drowning = 1,
+	groups = {crumbly = 3, soil = 1},
 	sounds = default.node_sound_dirt_defaults(),
-	melt = "default:sand",
+
+	groups = {crumbly = 3, soil = 1, liquid_drop = flowing_sand_liquid_drop, weight = 2000},
+	leveled = flowing_sand_leveled,
+	liquidtype = flowing_sand_type,
+	paramtype2 = flowing_sand_paramtype2,
+	drowning = 1,
 })
 
 
