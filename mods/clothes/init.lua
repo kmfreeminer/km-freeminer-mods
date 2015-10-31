@@ -1,7 +1,7 @@
-clothing = {}
+clothes = {}
 
 --{{{ Functions
-clothing.get = function (itemstack)
+clothes.get = function (itemstack)
     if itemstack:is_empty() then
         return nil
     end
@@ -46,7 +46,7 @@ local function download(texture)
     return "httpload:" .. texture
 end
 
-clothing.update_skin = function (player)
+clothes.update_skin = function (player)
     -- Get base player skin
     local name = player:get_player_name()
     local skin = download(name .. ".png")
@@ -62,7 +62,7 @@ clothing.update_skin = function (player)
         )
     else
         for _,itemstack in ipairs(clothes) do
-            local texture = clothing.get(itemstack)
+            local texture = clothes.get(itemstack)
             if texture then
                 skin = skin .. "^" .. texture
             end
@@ -147,17 +147,17 @@ minetest.register_chatcommand("clothes", {
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if (formname == "" or formname:sub(0,9) == "inventory") then
-        clothing.update_skin(player)
+        clothes.update_skin(player)
     end
 end)
 
 minetest.register_on_joinplayer(function(player)
-    clothing.update_skin(player)
+    clothes.update_skin(player)
 end)
 --}}}
 
 --{{{ Clothes registration
-clothing.list = {
+clothes.list = {
     hat = "Шляпа",
     shirt = "Рубашка",
     pants = "Штаны",
@@ -172,16 +172,16 @@ clothing.list = {
     dummy = "Одежда",
 }
 
-for name, desc in pairs(clothing.list) do
-    minetest.register_craftitem("clothing:" .. name, {
+for name, desc in pairs(clothes.list) do
+    minetest.register_craftitem("clothes:" .. name, {
         description = desc,
         groups = {clothes = 1},
-        inventory_image = "clothing_" ..name.. "_inv.png",
-        wield_image = "clothing_" ..name.. "_inv.png",
+        inventory_image = "clothes_" ..name.. "_inv.png",
+        wield_image = "clothes_" ..name.. "_inv.png",
         stack_max = 1,
 
         -- Default value
-        clothes = "clothing_" ..name.. ".png"
+        clothes = "clothes_" ..name.. ".png"
     })
 end
 --}}}
