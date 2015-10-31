@@ -2,6 +2,7 @@ inventory = {}
 
 inventory.width = 9
 inventory.height = 1
+inventory.clothes_height = 3
 
 minetest.register_on_newplayer(function(player)
     local invref = player:get_inventory()
@@ -9,9 +10,9 @@ minetest.register_on_newplayer(function(player)
     -- Main list
     invref:set_size("main", inventory.width * inventory.height)
 
-    -- Wear list, for clothes
-    invref:set_list("wear", {})
-    invref:set_size("wear", inventory.width * 3)
+    -- Clothes list
+    invref:set_list("clothes", {})
+    invref:set_size("clothes", inventory.width * inventory.clothes_height)
 
     -- Left and right hand (is this needed?)
     --invref:set_list("left_hand", {})
@@ -22,9 +23,10 @@ end)
 
 minetest.register_on_joinplayer(function(player)
     -- For already existing players
-    if not player:get_inventory():get_list("wear") then
-        invref:set_list("wear", {})
-        invref:set_size("wear", inventory.width * 3)
+    if not player:get_inventory():get_list("clothes") then
+        local invref = player:get_inventory()
+        invref:set_list("clothes", {})
+        invref:set_size("clothes", inventory.width * inventory.clothes_height)
     end
 
 	if not minetest.setting_getbool("creative_mode") then
@@ -44,11 +46,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
                 "",
                 inventory.craft
             )
-        elseif fields.wear_inv then
+        elseif fields.clothes_inv then
             minetest.show_formspec(
                 player:get_player_name(),
-                "inventory:wear",
-                inventory.wear
+                "inventory:clothes",
+                inventory.clothes
             )
         --elseif fields.notes_inv then
         --    minetest.show_formspec(
@@ -58,7 +60,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         --    )
         end
     end
-    print("For debug (from inventory mod) inv. fields:",dump(fields))
 end)
 
 inventory.base = 
@@ -67,7 +68,7 @@ inventory.base =
     default.gui_bg_img..
     default.gui_slots..
     "button[0.25,4.9;4.25,0.1;craft_inv;Craft]"..
-    "button[4.5,4.9;4.25,0.1;wear_inv;Clothes]"--..
+    "button[4.5,4.9;4.25,0.1;clothes_inv;Clothes]"--..
     --"button[6.25,4.9;2.5,0.1;notes_inv;Notes]"
 
 inventory.main = function(x,y)
@@ -88,11 +89,12 @@ inventory.craft =
     --"list[current_player;right_hand;7.75,1;1,1;]"..
     
 
-inventory.wear = 
+inventory.clothes = 
     inventory.base..
-    "list[current_player;wear;0,0;9,3;]"..
+    "list[current_player;clothes;0,0;"..
+        inventory.width .. "," .. inventory.clothes_height .. ";]"..
     inventory.main(0,3.5)
 
 inventory.notes = 
     inventory.base..
-    "textarea[0.3,0;9,4.5;inv_notes;Quick notes;]"
+    "textarea[0.3,0;" .. inventory.width .. ",4.5;inv_notes;Quick notes;]"

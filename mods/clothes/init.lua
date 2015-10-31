@@ -1,5 +1,9 @@
 clothes = {}
 
+local function download(texture)
+    return "httpload:" .. texture
+end
+
 --{{{ Functions
 clothes.get = function (itemstack)
     if itemstack:is_empty() then
@@ -42,18 +46,14 @@ clothes.get = function (itemstack)
     end
 end
 
-local function download(texture)
-    return "httpload:" .. texture
-end
-
 clothes.update_skin = function (player)
     -- Get base player skin
     local name = player:get_player_name()
     local skin = download(name .. ".png")
 
     -- Add clothes
-    local clothes = player:get_inventory():get_list("clothes")
-    if clothes == nil then
+    local clothes_list = player:get_inventory():get_list("clothes")
+    if clothes_list == nil then
         minetest.log("error",
             name ..  " doesn't have an inventory list " .. '"clothes"'
         )
@@ -61,7 +61,7 @@ clothes.update_skin = function (player)
             "no clothes were applyed to the skin of player " ..  name
         )
     else
-        for _,itemstack in ipairs(clothes) do
+        for _,itemstack in ipairs(clothes_list) do
             local texture = clothes.get(itemstack)
             if texture then
                 skin = skin .. "^" .. texture
@@ -73,7 +73,8 @@ clothes.update_skin = function (player)
     if player:get_properties().textures[1] ~= skin then
         default.player_set_textures(player, {skin})
         minetest.log("action",
-             name .. " updated his skin"
+             name .. " updated his skin. Now his skin is: " ..
+             player:get_properties().textures[1]
         )
     end
 end
@@ -118,11 +119,13 @@ minetest.register_chatcommand("clothes", {
             metatable.clothes = texture .. ".png"
             metadata = minetest.serialize(metatable)
             item:set_metadata(metadata)
+            player:set_wielded_item(item)
             minetest.log("action",
                 playername ..
                 " added a clothes texture to the metadata of item " ..
                 "(" ..prev.. ").\n" ..
-                "Now the item is: (" ..  item:to_string() .. ")"
+                "Now the item is: " ..
+                "(" .. player:get_wielded_item():to_string() .. ")"
             )
             minetest.chat_send_player(playername, "Texture added")
             return true
@@ -130,11 +133,13 @@ minetest.register_chatcommand("clothes", {
             metatable.clothes = nil
             metadata = minetest.serialize(metatable)
             item:set_metadata(metadata)
+            player:set_wielded_item(item)
             minetest.log("action",
                 playername ..
                 " removed a clothes texture from the metadata of item " ..
                 "(" ..prev.. ").\n" ..
-                "Now the item is: (" ..  item:to_string() .. ")"
+                "Now the item is: " ..
+                "(" .. player:get_wielded_item():to_string() .. ")"
             )
             minetest.chat_send_player(playername, "Texture removed")
             return true
