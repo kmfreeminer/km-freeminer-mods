@@ -5,23 +5,40 @@ clothing.get = function (itemstack)
     if itemstack:is_empty() then
         return nil
     end
+
     local meta = minetest.deserialize(itemstack:get_metadata())
+    local default = itemstack:get_definition().clothes
+
+    -- If there is serialized metadata, then we check,
+    -- have it clothes path or not.
+    -- If not¸ then we try to use default texture.
+    -- If there is no serialized metadata, then we still try to use default
+    -- texture.
+
     if meta then
         if meta.clothes == nil then
-            minetest.log("error",
-                "Item (" .. itemstack:to_string() .. ") "..
-                "doesn't have a clothes texture"
-            )
-            return nil
+            if default ~= nil then
+                return default
+            else
+                minetest.log("error",
+                    "Item (" .. itemstack:to_string() .. ") "..
+                    "doesn't have a clothes texture"
+                )
+                return nil
+            end
         else
-            return meta.clothes
+            return download(meta.clothes)
         end
     else
-        minetest.log("error",
-            "Item (" .. itemstack:to_string() .. ") " ..
-            "doesn't have a serialized metadata"
-        )
-        return nil
+        if default ~= nil then
+            return default
+        else
+            minetest.log("error",
+                "Item (" .. itemstack:to_string() .. ") " ..
+                "doesn't have a serialized metadata"
+            )
+            return nil
+        end
     end
 end
 
@@ -45,9 +62,9 @@ clothing.update_skin = function (player)
         )
     else
         for _,itemstack in ipairs(clothes) do
-            local texture = clothing_get(itemstack)
+            local texture = clothing.get(itemstack)
             if texture then
-                skin = skin .. "^" .. download(path)
+                skin = skin .. "^" .. texture
             end
         end
     end
@@ -139,60 +156,36 @@ minetest.register_on_joinplayer(function(player)
 end)
 --}}}
 
---{{{ Cloth
+--{{{ Clothes registration
+clothing.list = {
+    hat = "Шляпа",
+    shirt = "Рубашка",
+    pants = "Штаны",
+    shoes = "Обувь",
+    сoat = "Пальто",
+    cape = "Плащ",
+    dress = "Платье",
+    scarf = "Шарф",
+    gloves = "Перчатки",
 
--- Names of items (and textures) for autoregistration
-clothing.registered = {
-    "black_coat",
-    "black_glasses",
-    "blue_longskirt",
-    "blue_waistcoat",
-    "brown_hat",
-    "brown_hat_wth_badge",
-    "hazel_scarf",
-    "jabot",
-    "leather_boots",
-    "leather_dirty_coat",
-    "leather_high_boot",
-    "leather_long_gloves",
-    "linen_shirt",
-    "salmon_long_dress",
-    "white_apron",
-    "white_blouse",
-    "white_bonnet",
-    "white_greek_dress",
+    -- If player can't define his clothes as anything from above
+    dummy = "Одежда",
 }
 
-for _,name in pairs(clothing.registered) do
+for name, desc in pairs(clothing.list) do
     minetest.register_craftitem("clothing:" .. name, {
-        description = name:gsub("_", " "):gsub("^.", string.upper),
+        description = desc,
+        groups = {clothes = 1},
         inventory_image = "clothing_" ..name.. "_inv.png",
         wield_image = "clothing_" ..name.. "_inv.png",
-        wear_image = "clothing_" ..name.. ".png",
         stack_max = 1,
+
+        -- Default value
+        clothes = "clothing_" ..name.. ".png"
     })
 end
+--}}}
 
--- Special case
-minetest.register_craftitem("clothing:test1", {
-    description = "Test cloth 1",
-    inventory_image = "None.png",
-    wield_image = "None.png",
-    wear_image = "None.png",
-    stack_max = 1,
-})
-minetest.register_craftitem("clothing:test2", {
-    description = "Test cloth 2",
-    inventory_image = "clothing_test2.png",
-    wield_image = "clothing_test2.png",
-    wear_image = "clothing_test2.png",
-    stack_max = 1,
-})
-minetest.register_craftitem("clothing:test3", {
-    description = "Test cloth 3",
-    inventory_image = "clothing_test3.png",
-    wield_image = "clothing_test3.png",
-    wear_image = "clothing_test3.png",
-    stack_max = 1,
-})
+--{{{ Clothes crafting
+--TODO
 --}}}
