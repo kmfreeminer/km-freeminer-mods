@@ -158,18 +158,18 @@ end)
 
 --{{{ Clothes registration
 clothes.list = {
-    hat = "Шляпа",
-    shirt = "Рубашка",
-    pants = "Штаны",
-    shoes = "Обувь",
-    сoat = "Пальто",
-    cape = "Плащ",
-    dress = "Платье",
-    scarf = "Шарф",
+    hat    = "Шляпа",
+    shirt  = "Рубашка",
+    pants  = "Штаны",
+    shoes  = "Обувь",
+    coat   = "Пальто",
+    cape   = "Плащ",
+    dress  = "Платье",
+    scarf  = "Шарф",
     gloves = "Перчатки",
 
     -- If player can't define his clothes as anything from above
-    dummy = "Одежда",
+    dummy  = "Одежда",
 }
 
 for name, desc in pairs(clothes.list) do
