@@ -1,20 +1,30 @@
 clothing = {}
 
+clothing.get = function (itemstack)
+    return itemstack:get_definition().wear_image
+end
+
+local function download(texture)
+    return "httpload:" .. texture
+end
+
 -- Wear clothing
-clothing.update_skin = function(player)
+clothing.update_skin = function (player)
     -- Function gets the player's "wear" inventory list.
     -- It's created by mod "inventory"
     local weared = player:get_inventory():get_list("wear")
-    local skin = player:get_player_name() .. ".png"
+    -- TODO: Add check — what to do if there is no inventory list "wear"
+
+    local skin = download(player:get_player_name() .. ".png")
     for _,itemstack in ipairs(weared) do
         if not itemstack:is_empty() then
-            skin = skin .. "^" .. itemstack:get_definition().wear_image
+            skin = skin .. "^" .. download(clothing.get(itemstack))
         end
     end
+
     default.player_set_textures(player, {skin})
     minetest.log("action",
-        "update skin for player " ..
-        player:get_player_name()
+         player:get_player_name() .. "updated his skin"
     )
 end
 
@@ -66,9 +76,9 @@ end
 -- Special case
 minetest.register_craftitem("clothing:test1", {
     description = "Test cloth 1",
-    inventory_image = "clothing_test.png",
-    wield_image = "clothing_test.png",
-    wear_image = "clothing_test.png",
+    inventory_image = "None.png",
+    wield_image = "None.png",
+    wear_image = "None.png",
     stack_max = 1,
 })
 minetest.register_craftitem("clothing:test2", {
