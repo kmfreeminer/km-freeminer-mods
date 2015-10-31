@@ -1,7 +1,28 @@
 clothing = {}
 
+--{{{ Functions
 clothing.get = function (itemstack)
-    return itemstack:get_definition().wear_image
+    if itemstack:is_empty() then
+        return nil
+    end
+    local meta = minetest.deserialize(itemstack:get_metadata())
+    if meta then
+        if meta.clothes == nil then
+            minetest.log("error",
+                "Item (" .. itemstack:to_string() .. ") "..
+                "doesn't have a clothes texture"
+            )
+            return nil
+        else
+            return meta.clothes
+        end
+    else
+        minetest.log("error",
+            "Item (" .. itemstack:to_string() .. ") " ..
+            "doesn't have a serialized metadata"
+        )
+        return nil
+    end
 end
 
 local function download(texture)
@@ -24,8 +45,9 @@ clothing.update_skin = function (player)
         )
     else
         for _,itemstack in ipairs(clothes) do
-            if not itemstack:is_empty() then
-                skin = skin .. "^" .. download(clothing.get(itemstack))
+            local texture = clothing_get(itemstack)
+            if texture then
+                skin = skin .. "^" .. download(path)
             end
         end
     end
@@ -38,6 +60,73 @@ clothing.update_skin = function (player)
         )
     end
 end
+--}}}
+
+--{{{ minetest.register...
+minetest.register_chatcommand("clothes", {
+    params = "<action> <texture> [force]",
+    description =
+        "Adds texture path into metadata, for clothes.\n" ..
+        '    <action> — "set" or "remove",\n' ..
+        '    <texture> - texture name without extension, for "set",\n' ..
+        '    [force] - optional, will set metadata even if there are errors.',
+    privs = {}, --TODO
+    func = function(playername, param)
+        local params = {}
+        for p in string.gmatch(param, "%g+") do table.insert(params, p) end
+        local action, texture, force = params[1], params[2], params[3]
+
+        local player = minetest.get_player_by_name(playername)
+        local item = player:get_wielded_item()
+        local prev = item:to_string()
+        local metadata = item:get_metadata()
+        local metatable = minetest.deserialize(metadata)
+
+        if metatable == nil then
+            if metadata == "" then
+                metatable = {}
+            else
+                if action == "set" and force == "force" then
+                    metatable = {}
+                else
+                    minetest.chat_send_player(playername,
+                        "This item has unempty not serialized metadata"
+                    )
+                    return false
+                end
+            end
+        end
+        
+        if action == "set" then
+            metatable.clothes = texture .. ".png"
+            metadata = minetest.serialize(metatable)
+            item:set_metadata(metadata)
+            minetest.log("action",
+                playername ..
+                " added a clothes texture to the metadata of item " ..
+                "(" ..prev.. ").\n" ..
+                "Now the item is: (" ..  item:to_string() .. ")"
+            )
+            minetest.chat_send_player(playername, "Texture added")
+            return true
+        elseif action == "remove" then
+            metatable.clothes = nil
+            metadata = minetest.serialize(metatable)
+            item:set_metadata(metadata)
+            minetest.log("action",
+                playername ..
+                " removed a clothes texture from the metadata of item " ..
+                "(" ..prev.. ").\n" ..
+                "Now the item is: (" ..  item:to_string() .. ")"
+            )
+            minetest.chat_send_player(playername, "Texture removed")
+            return true
+        else
+            minetest.chat_send_player(playername, "Unrecognized action")
+            return false
+        end
+    end
+})
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if (formname == "" or formname:sub(0,9) == "inventory") then
@@ -48,6 +137,7 @@ end)
 minetest.register_on_joinplayer(function(player)
     clothing.update_skin(player)
 end)
+--}}}
 
 --{{{ Cloth
 
