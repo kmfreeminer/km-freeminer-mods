@@ -8,31 +8,41 @@ local function download(texture)
     return "httpload:" .. texture
 end
 
--- Wear clothing
 clothing.update_skin = function (player)
-    -- Function gets the player's "wear" inventory list.
-    -- It's created by mod "inventory"
-    local weared = player:get_inventory():get_list("wear")
-    -- TODO: Add check — what to do if there is no inventory list "wear"
+    -- Get base player skin
+    local name = player:get_player_name()
+    local skin = download(name .. ".png")
 
-    local skin = download(player:get_player_name() .. ".png")
-    for _,itemstack in ipairs(weared) do
-        if not itemstack:is_empty() then
-            skin = skin .. "^" .. download(clothing.get(itemstack))
+    -- Add clothes
+    local clothes = player:get_inventory():get_list("clothes")
+    if clothes == nil then
+        minetest.log("error",
+            name ..  " doesn't have an inventory list " .. '"clothes"'
+        )
+        minetest.log("warning",
+            "no clothes were applyed to the skin of player " ..  name
+        )
+    else
+        for _,itemstack in ipairs(clothes) do
+            if not itemstack:is_empty() then
+                skin = skin .. "^" .. download(clothing.get(itemstack))
+            end
         end
     end
 
-    default.player_set_textures(player, {skin})
-    minetest.log("action",
-         player:get_player_name() .. "updated his skin"
-    )
+    -- Update skin only if it really changes
+    if player:get_properties().textures[1] ~= skin then
+        default.player_set_textures(player, {skin})
+        minetest.log("action",
+             name .. " updated his skin"
+        )
+    end
 end
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if (formname == "" or formname:sub(0,9) == "inventory") then
         clothing.update_skin(player)
     end
-    print("For debug (from clothing mod) inv. fields:",dump(fields))
 end)
 
 minetest.register_on_joinplayer(function(player)
