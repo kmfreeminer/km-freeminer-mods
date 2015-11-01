@@ -1,5 +1,15 @@
 clothes = {}
 
+clothes.privilege = "clothes"
+clothes.chatcommand = "clothes"
+
+clothes.privilege_desc = "Разрешает изменять текстуру одежды у предмета " ..
+    "(команда /" .. clothes.chatcommand .. ")"
+clothes.command_desc = [[Добавляет текстуру одежды в соответствующее поле метадаты у предмета в руке.
+    <action> — "set" или "remove",
+    <texture> - название текстуры (без расширения), учитывается только при "set",
+    [force] - не обязательный параметр, включает игнорирование ошибок, учитывается только при "set".]]
+
 local function download(texture)
     return "httpload:" .. texture
 end
@@ -81,25 +91,26 @@ end
 --}}}
 
 --{{{ minetest.register...
-minetest.register_chatcommand("clothes", {
+minetest.register_privilege(clothes.privilege, clothes.privilege_desc)
+
+minetest.register_chatcommand(clothes.chatcommand, {
     params = "<action> <texture> [force]",
-    description =
-        "Adds texture path into metadata, for clothes.\n" ..
-        '    <action> — "set" or "remove",\n' ..
-        '    <texture> - texture name without extension, for "set",\n' ..
-        '    [force] - optional, will set metadata even if there are errors.',
-    privs = {}, --TODO
+    description = clothes.command_desc,
+    privs = {[clothes.privilege] = true},
     func = function(playername, param)
+        -- Parse parameters
         local params = {}
         for p in string.gmatch(param, "%g+") do table.insert(params, p) end
         local action, texture, force = params[1], params[2], params[3]
 
+        -- Locals
         local player = minetest.get_player_by_name(playername)
         local item = player:get_wielded_item()
-        local prev = item:to_string()
+        local prev = item
         local metadata = item:get_metadata()
         local metatable = minetest.deserialize(metadata)
 
+        -- Item metadata check
         if metatable == nil then
             if metadata == "" then
                 metatable = {}
@@ -107,45 +118,54 @@ minetest.register_chatcommand("clothes", {
                 if action == "set" and force == "force" then
                     metatable = {}
                 else
-                    minetest.chat_send_player(playername,
-                        "This item has unempty not serialized metadata"
-                    )
-                    return false
+                    return false, "This item has unempty not serialized metadata"
                 end
             end
         end
         
+        -- Applying needed changes
         if action == "set" then
             metatable.clothes = texture .. ".png"
             metadata = minetest.serialize(metatable)
             item:set_metadata(metadata)
             player:set_wielded_item(item)
+
+            local new = player:get_wielded_item()
+
             minetest.log("action",
                 playername ..
                 " added a clothes texture to the metadata of item " ..
-                "(" ..prev.. ").\n" ..
+                "(" .. prev:to_string() .. ").\n" ..
                 "Now the item is: " ..
-                "(" .. player:get_wielded_item():to_string() .. ")"
+                "(" .. new:to_string() .. ")"
             )
-            minetest.chat_send_player(playername, "Texture added")
-            return true
+            return true, "Texture added: " ..
+                dump(minetest.deserialize(new:get_metadata()))
+
         elseif action == "remove" then
             metatable.clothes = nil
             metadata = minetest.serialize(metatable)
             item:set_metadata(metadata)
             player:set_wielded_item(item)
+
+            local new = player:get_wielded_item()
+
             minetest.log("action",
                 playername ..
                 " removed a clothes texture from the metadata of item " ..
-                "(" ..prev.. ").\n" ..
+                "(" .. prev:to_string() .. ").\n" ..
                 "Now the item is: " ..
-                "(" .. player:get_wielded_item():to_string() .. ")"
+                "(" .. new:to_string() .. ")"
             )
-            minetest.chat_send_player(playername, "Texture removed")
-            return true
+            return true, "Texture removed: " ..
+                dump(minetest.deserialize(new:get_metadata()))
+
+        elseif action == nil then
+            return true, "/clothes <action> <texture> [force]\n" ..
+                clothes.command_desc
         else
-            minetest.chat_send_player(playername, "Unrecognized action")
-            return false
+            return false, "Unrecognized action. Command description:\n" ..
+                clothes.command_desc
         end
     end
 })
