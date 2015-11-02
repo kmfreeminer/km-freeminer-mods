@@ -48,6 +48,9 @@ for mineral, mineral_desc in pairs(minerals.list) do
 	})
 end
 
+minetest.override_item("minerals:flux", { groups = {flux = 1} })
+minetest.override_item("minerals:borax", { groups = {flux = 1} })
+
 --{{{ Fuel registration
 minetest.register_craft({
 	type = "fuel",
