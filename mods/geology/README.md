@@ -2,26 +2,26 @@
 =========================
 
 # Руды
-     Предмет    |      Название      | Где встречается | Применение 
---------------- | ------------------ | --------------- | ---------- 
-charcoal        | Древесный уголь    |                 | Топливо
-bituminous_coal | Каменный уголь     | default:stone (от -6000 до -3000 | Топливо
-anthracite      | Антрацит           | default:stone (от -8000 до -6000) | Топливо
-                |                    |                 |
-iron_ore        | Железная руда      |  default:stone  | Выплавка чугуна
-cassiterite     | Касситерит         |  default:stone  | Выплавка олова
-galena          | Галенит            |  default:stone  | Выплавка свинца
-native_copper   | Самородная медь    | default:stone, default:desertstone | Выплавка меди
-native_gold     | Самородное золото  | default:stone, default:desertstone | Выплавка золота
-native_silver   | Самородное серебро |  default:stone  | Выплавка серебра
-cinnabar        | Киноварь           |  default:stone  | TODO: получение ртути
-saltpeter       | Селитра            |  default:stone  | TODO: не понял Финна
-sulfur          | Сера               |                 | TODO: алхимия
-                |                    |                 |
-lazurite        | Лазурит            |  default:stone  | TODO: крафт ювелирки, крафт красителя
-malachite       | Малахит            |  default:stone  | Выплавка меди, TODO: крафт чего-нибудь
-marble          | Мрамор             |  default:stone  | Флюс, TODO: крафт чего-нибудь
-limestone       | Известняк          |  default:stone  | Флюс, TODO: крафт чего-нибудь
+     Название      | Где встречается | Применение 
+------------------ | --------------- | ---------- 
+Древесный уголь    |                 | Топливо
+Каменный уголь     | default:stone (от -6000 до -3000 | Топливо
+Антрацит           | default:stone (от -8000 до -6000) | Топливо
+                   |                 |
+Железная руда      |  default:stone  | Выплавка чугуна
+Касситерит         |  default:stone  | Выплавка олова
+Галенит            |  default:stone  | Выплавка свинца
+Самородная медь    | default:stone, default:desertstone | Выплавка меди
+Самородное золото  | default:stone, default:desertstone | Выплавка золота
+Самородное серебро |  default:stone  | Выплавка серебра
+Киноварь           |  default:stone  | TODO: получение ртути
+Селитра            |  default:stone  | TODO: не понял Финна
+Сера               |                 | TODO: алхимия
+                   |                 |
+Лазурит            |  default:stone  | TODO: крафт ювелирки, крафт красителя
+Малахит            |  default:stone  | Выплавка меди, TODO: крафт чего-нибудь
+Мрамор             |  default:stone  | Флюс, TODO: крафт чего-нибудь
+Известняк          |  default:stone  | Флюс, TODO: крафт чего-нибудь
 
 # Сплавы металлов
 Сплав | Составные металлы
