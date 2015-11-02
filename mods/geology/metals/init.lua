@@ -115,20 +115,6 @@ end
 --{{{ Metals registration
 
 ------ Level 0 ------
-metals.register_metal("bismuth", {
-    description = "Висмут",
-    level = 0,
-    is_alloy = false,
-    minerals = { "bismuthinite" }
-})
-
-metals.register_metal("zinc", {
-    description = "Цинк",
-    level = 0,
-    is_alloy = false,
-    minerals = { "sphalerite" }
-})
-
 metals.register_metal("tin", {
     description = "Олово",
     level = 0,
@@ -141,7 +127,7 @@ metals.register_metal("copper", {
     description = "Медь",
     level = 1,
     is_alloy = false,
-    minerals = { "malachite", "native_copper", "tetrahedrite" }
+    minerals = { "malachite", "native_copper" }
 })
 
 ------ Level 2 ------
@@ -166,13 +152,6 @@ metals.register_metal("gold", {
     minerals = { "native_gold" },
 })
 
-metals.register_metal("aluminium", {
-    description = "Алюминий",
-    level = 2,
-    is_alloy = false,
-    minerals = { "bauxite" },
-})
-
 -- Alloys
 metals.register_metal("brass", {
     description = "Латунь",
@@ -180,7 +159,7 @@ metals.register_metal("brass", {
     is_alloy = true,
     alloy = {
         {"metals:copper_unshaped","metals:copper_unshaped"},
-        {"metals:copper_unshaped","metals:zinc_unshaped"}
+        {"metals:copper_unshaped","metals:wrought_iron_unshaped"}
     }
 })
 
@@ -204,16 +183,6 @@ metals.register_metal("rose_gold", {
     }
 })
 
-metals.register_metal("oroide", {
-    description = "Альвийское золото", -- Французское золото
-    level = 2,
-    is_alloy = true,
-    alloy = {
-        {"metals:copper_unshaped","metals:copper_unshaped"},
-        {"metals:tin_unshaped","metals:zinc_unshaped"}
-    }
-})
-
 metals.register_metal("bronze", {
     description = "Бронза",
     level = 2,
@@ -221,16 +190,6 @@ metals.register_metal("bronze", {
     alloy = {
         {"metals:copper_unshaped","metals:copper_unshaped"},
         {"metals:copper_unshaped","metals:tin_unshaped"}
-    }
-})
-
-metals.register_metal("bismuth_bronze", {
-    description = "Висмутовая бронза",
-    level = 2,
-    is_alloy = true,
-    alloy = {
-        {"metals:copper_unshaped","metals:copper_unshaped"},
-        {"metals:bismuth_unshaped","metals:tin_unshaped"}
     }
 })
 
@@ -255,22 +214,14 @@ metals.register_metal("tumbaga", {
 })
 
 ------ Level 3 ------
-metals.register_metal("platinum", {
-    description = "Платина",
-    level = 3,
-    is_alloy = false,
-    minerals = { "native_platinum" }
-})
-
 metals.register_metal("pig_iron", {
     description = "Чугун",
     level = 3,
     is_alloy = false,
-    minerals = {"magnetite", "hematite", "limonite"}
+    minerals = {"iron_ore"}
 })
 
 -- Alloys
-
 metals.register_metal("wrought_iron", {
     description = "Железо",
     level = 3,
@@ -279,34 +230,7 @@ metals.register_metal("wrought_iron", {
 })
 
 ------ Level 4 ------
-metals.register_metal("nickel", {
-    description = "Никель",
-    level = 4,
-    is_alloy = false,
-    minerals = { "garnierite" }
-})
-
 -- Alloys
-metals.register_metal("german_silver", {
-    description = "Мэльхиор", -- изобретено цвергами (двумя), используется для монет
-    level = 4,
-    is_alloy = true,
-    alloy = {
-        {"metals:copper_unshaped","metals:copper_unshaped"},
-        {"metals:copper_unshaped","metals:nickel_unshaped"}
-    }
-})
-
-metals.register_metal("albata", {
-    description = "Нейзильбер", -- изобретено цвергами, используется для монет
-    level = 4,
-    is_alloy = true,
-    alloy = {
-        {"metals:copper_unshaped","metals:nickel_unshaped"},
-        {"metals:zinc_unshaped","metals:zinc_unshaped"}
-    }
-})
-
 metals.register_metal("steel", {
     description = "Сталь",
     level = 4,
@@ -319,13 +243,4 @@ metals.register_metal("steel", {
 
 ------ Level 5 ------
 -- Alloys
-metals.register_metal("black_steel", {
-    description = "Чёрная сталь", -- секрет выплавки известен цвергам и они им очень дорожат
-    level = 5,
-    is_alloy = true,
-    recipe = {
-        {"metals:steel_unshaped","metals:steel_unshaped"},
-        {"metals:nickel_unshaped","metals:black_bronze_unshaped"}
-    }
-})
 --}}}
