@@ -15,7 +15,7 @@
 Самородное золото  | default:stone, default:desertstone | Выплавка золота
 Самородное серебро |  default:stone  | Выплавка серебра
 Киноварь           |  default:stone  | TODO: получение ртути
-Селитра            |  default:stone  | TODO: не понял Финна
+Селитра            |  default:stone  | TODO: алхимия, удобрение, порох
 Сера               |                 | TODO: алхимия
                    |                 |
 Лазурит            |  default:stone  | TODO: крафт ювелирки, крафт красителя
