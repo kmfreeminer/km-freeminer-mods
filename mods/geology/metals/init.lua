@@ -3,7 +3,7 @@ metals = {}
 metals.registered = {}
 
 metals.register_metal = function (metal, metal_desc)
-    table.insert(metals.registered, metal_desc)
+    metals.registered[metal] = metal_desc
 
     --{{{ Craftitems
     minetest.register_craftitem("metals:" .. metal .. "_unshaped", {
@@ -113,7 +113,6 @@ metals.register_metal = function (metal, metal_desc)
 end
 
 --{{{ Metals registration
-
 ------ Level 0 ------
 metals.register_metal("tin", {
     description = "Олово",
