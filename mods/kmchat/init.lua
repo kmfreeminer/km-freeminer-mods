@@ -40,7 +40,7 @@ function dices_proc(pattern, submes, name)
 end
 
 -- fudge dices
-fudge_levels = {"-","terrible--","terrible-","terrible", "poor", "mediocre", "fair", "good", "great", "superb", "legendary", "legendary+", "legendary++","like Allah"}
+fudge_levels = {"-","ужасно--","ужасно-","ужасно", "плохо", "посредственно", "нормально", "хорошо", "отлично", "супер", "легендарно", "легендарно+", "легендарно++","как Аллах"}
 
 function fudge_proc(pattern, submes, name)
     local fudge_dice_tmp = submes[1]
@@ -184,25 +184,25 @@ GM_PREFIX          = "[GM] "
 
 -- formats
 formats = {
--- ["MATCH"]        = {"FORMAT"                                                            RANGE     COLOR      PRIV    PRIV_LIST   PROC_FUNCTION}, --
-   ["^_(.+)"]        = {"%s (OOC): (( %s ))",                                               18,    "9966AA",    nil,      nil,      nil        },
-   ["^%(%((.+)%)%)"] = {"%s (OOC): (( %s ))",                                               18,    "9966AA",    nil,      nil,      nil        },
-   ["^!(.+)"]        = {"%s (shouts): %s",                                                  68,    "FFFFFF",    nil,      nil,      nil        },
-   ["^=(.+)"]        = {"%s (whispers): %s",                                                3,     "E0EEE0",    nil,      nil,      nil        },
-   ["^*(.+)"]        = {"* %s %s",                                                          18,    "FFFF00",    nil,      nil,      nil        },
-   ["^#(.+)"]        = {"*** %s: %s ***",                                                   18,    "FFFF00",    "gm",     nil,      nil        },
-   ["^?(.+)"]        = {"%s (OOC): %s ***",                                                 31000, "20EEDD",    nil,      nil,      nil        },
-   ["^d(%d+).*"]     = {"*** %s rolls d%s and the result is %s ***",                        18,    DICE_COLOR,  nil,      nil,      dices_proc },
-   ["^sd(%d+).*"]    = {"*** %s rolls d%s silently and the result is %s ***",               3,     "D8DBB6",    nil,      nil,      dices_proc },
-   ["^4dF (.*)$"]    = {"*** %s rolls 4df (%s) from %s and the result is %s ***",           18,    DICE_COLOR,  nil,      nil,      fudge_proc },
-   ["^s4dF (.*)$"]   = {"*** %s rolls 4df (%s) from %s silently and the result is %s ***",  3,     "D8DBB6",    nil,      nil,      fudge_proc },
-   ["^%+(i)%+(.*)$"] = {"[[%s (альвийский): %s]]",                                          18,  DEFAULT_COLOR, "i_lang", "i_lang", lang_proc  },
-   ["^%+(c)%+(.*)$"] = {"[[%s (цвергийский): %s]]",                                         18,  DEFAULT_COLOR, "c_lang", "c_lang", lang_proc  },
-   ["^%+(a)%+(.*)$"] = {"[[%s (авоонский): %s]]",                                           18,  DEFAULT_COLOR, "a_lang", "a_lang", lang_proc  },
+-- ["MATCH"]            = {"FORMAT"                                                            RANGE     COLOR      PRIV    PRIV_LIST   PROC_FUNCTION}, --
+   ["^_(.+)"]           = {"%s (OOC): (( %s ))",                                               18,    "9966AA",    nil,      nil,      nil        },
+   ["^%(%((.+)%)%)"]    = {"%s (OOC): (( %s ))",                                               18,    "9966AA",    nil,      nil,      nil        },
+   ["^!%s?(.+)"]        = {"%s (кричит): %s",                                                  68,    "FFFFFF",    nil,      nil,      nil        },
+   ["^=%s?(.+)"]        = {"%s (шепчет): %s",                                                  3,     "E0EEE0",    nil,      nil,      nil        },
+   ["^*%s?(.+)"]        = {"* %s %s",                                                          18,    "FFFF00",    nil,      nil,      nil        },
+   ["^#%s?(.+)"]        = {"*** %s: %s ***",                                                   18,    "FFFF00",    "gm",     nil,      nil        },
+   ["^?%s?(.+)"]        = {"%s (OOC): %s ***",                                                 31000, "20EEDD",    nil,      nil,      nil        },
+   ["^d(%d+).*"]        = {"*** %s кидает d%s и выкидывает %s ***",                            18,    DICE_COLOR,  nil,      nil,      dices_proc },
+   ["^sd(%d+).*"]       = {"*** %s скрытно кидает d%s и выкидывает %s ***",                    3,     "D8DBB6",    nil,      nil,      dices_proc },
+   ["^4dF (.*)$"]       = {"*** %s кидает 4df (%s) от %s и выкидывает %s ***",                 18,    DICE_COLOR,  nil,      nil,      fudge_proc },
+   ["^s4dF (.*)$"]      = {"*** %s скрытно кидает 4df (%s) от %s и выкидывает %s ***",         3,     "D8DBB6",    nil,      nil,      fudge_proc },
+   ["^%+(i)%+%s?(.*)$"] = {"%s (альвийский): %s",                                              18,    "00BFFF",   "i_lang", "i_lang", lang_proc  },
+   ["^%+(c)%+%s?(.*)$"] = {"%s (цвергийский): %s",                                             18,    "00BFFF",   "c_lang", "c_lang", lang_proc  },
+   ["^%+(a)%+%s?(.*)$"] = {"%s (авоонский): %s",                                               18,    "00BFFF",   "a_lang", "a_lang", lang_proc  },
 }
 
 -- config zone }}}
-minetest.register_privilege("gm", "Gives accses to reading all messages in the chat")
+minetest.register_privilege("gm", "Позволяет читать все сообщения в чате")
 
 function proc_message(name, message)
     local fmt = DEFAULT_FORMAT 
