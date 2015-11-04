@@ -196,9 +196,9 @@ formats = {
    ["^sd(%d+).*"]       = {"*** %s скрытно кидает d%s и выкидывает %s ***",                    3,     "D8DBB6",    nil,      nil,      dices_proc },
    ["^4dF (.*)$"]       = {"*** %s кидает 4df (%s) от %s и выкидывает %s ***",                 18,    DICE_COLOR,  nil,      nil,      fudge_proc },
    ["^s4dF (.*)$"]      = {"*** %s скрытно кидает 4df (%s) от %s и выкидывает %s ***",         3,     "D8DBB6",    nil,      nil,      fudge_proc },
-   ["^%+(i)%+%s?(.*)$"] = {"%s (альвийский): %s",                                              18,    "00BFFF",   "i_lang", "i_lang", lang_proc  },
-   ["^%+(c)%+%s?(.*)$"] = {"%s (цвергийский): %s",                                             18,    "00BFFF",   "c_lang", "c_lang", lang_proc  },
-   ["^%+(a)%+%s?(.*)$"] = {"%s (авоонский): %s",                                               18,    "00BFFF",   "a_lang", "a_lang", lang_proc  },
+   ["^%+(i)%+%s?(.*)$"] = {"%s (альвийский): %s",                                              18,    "BBBBBB",   "i_lang", "i_lang", lang_proc  },
+   ["^%+(c)%+%s?(.*)$"] = {"%s (цвергийский): %s",                                             18,    "BBBBBB",   "c_lang", "c_lang", lang_proc  },
+   ["^%+(a)%+%s?(.*)$"] = {"%s (авоонский): %s",                                               18,    "BBBBBB",   "a_lang", "a_lang", lang_proc  },
 }
 
 -- config zone }}}
