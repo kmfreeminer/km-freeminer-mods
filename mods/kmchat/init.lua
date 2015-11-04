@@ -27,14 +27,17 @@
 --  * Dices
 
 -- dices
-function dices_proc(pattern, submes, name)
-    local dice = submes[1]
+--function dices_proc(pattern, substr, name)
+function dices_proc(name, pattern, range, color, priv, substr)
+    local dice = substr[1]
     if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
         local dice_result = math.random(dice)
         local pattern_result = string.format(pattern, "%s", dice, "%s")
-        return pattern_result, dice_result
+        --return pattern_result, dice_result
+        return name, pattern_result, range, color, priv, dice_result
     else
-        return "%s: %s", nil
+        --return "%s: %s", nil
+        return name, "%s: %s", range, color, priv, nil
     end
 
 end
@@ -42,8 +45,10 @@ end
 -- fudge dices
 fudge_levels = {"-","ужасно--","ужасно-","ужасно", "плохо", "посредственно", "нормально", "хорошо", "отлично", "супер", "легендарно", "легендарно+", "легендарно++","как Аллах"}
 
-function fudge_proc(pattern, submes, name)
-    local fudge_dice_tmp = submes[1]
+
+--function fudge_proc(pattern, substr, name)
+function fudge_proc(name, pattern, range, color, priv, substr)
+    local fudge_dice_tmp = substr[1]
     for key, val in pairs(fudge_levels) do
         local fudge_level = string.match(fudge_dice_tmp, "^("..val..".*)")
         local fudge_level_key = key
@@ -76,10 +81,11 @@ function fudge_proc(pattern, submes, name)
             end
             
             local dice_result = fudge_levels[fudge_level_key]
-            return pattern_result, dice_result
+            --return pattern_result, dice_result
+            return name, pattern_result, range, color, priv, dice_result
         end
     end
-    return "%s: %s", nil
+    return name, "%s: %s", range, color, priv, nil
 end
 
 -- language
@@ -132,12 +138,14 @@ end,
 end,
 }
 
-function lang_proc(pattern, submes, name)
+
+--function lang_proc(pattern, substr, name)
+function lang_proc(name, pattern, range, color, priv, substr)
     local phrase = ""
-    local original = string.gsub(submes[2], "#", "")
-    
-    submes[2] = cyrillic_lower(submes[2])
-    for word in string.gmatch(submes[2], "%S+") do
+    local original = string.gsub(substr[2], "#", "")
+    print('test')
+    substr[2] = cyrillic_lower(substr[2])
+    for word in string.gmatch(substr[2], "%S+") do
         local appendix  = ""
         local prefix = ""
         
@@ -165,99 +173,124 @@ function lang_proc(pattern, submes, name)
             prefix = string.gsub(prefix, "#", "")
             phrase =  phrase .. prefix ..word .. appendix .. " "
         else
-            translated_word = lang_translate[submes[1]](word)
+            translated_word = lang_translate[substr[1]](word)
             phrase = phrase .. prefix .. translated_word .. appendix .. " " 
         end    
     end
     
+    local range_delta = range - DEFAULT_RANGE
+    if range_delta     > 0 then
+        phrase = string.rep("!", range_delta)..phrase
+    elseif range_delta < 0 then
+        range_delta = -range_delta
+        phrase = string.rep("=", range_delta)..phrase
+    end
+    print(phrase)
     proc_message(name, phrase)
-    return pattern, original
+    -- return pattern, original
+    return name, pattern, range, color, priv, original 
 end
 
 -- config zone {{{
-DEFAULT_FORMAT     = "%s: %s" 
-DEFAULT_RANGE      = 18
+DEFAULT_FORMAT     = "%s%s: %s" 
+DEFAULT_RANGE      = 3
 DEFAULT_COLOR      = "EEF3EE"
 DICE_COLOR         = "FFFF00"
 GMSPY_COLOR        = "666666"
 GM_PREFIX          = "[GM] "
+RANGES             = {
+                         {3,  "(скрытно)"}, 
+                         {8,  "(тихо)"  }, 
+                         {14, ""        }, 
+                         {24, "(громко)"}, 
+                         {65, "(громогласно)"}
+                     }
 
 -- formats
 formats = {
--- ["MATCH"]            = {"FORMAT"                                                            RANGE     COLOR      PRIV    PRIV_LIST   PROC_FUNCTION}, --
-   ["^_(.+)"]           = {"%s (OOC): (( %s ))",                                               18,    "9966AA",    nil,      nil,      nil        },
-   ["^%(%((.+)%)%)"]    = {"%s (OOC): (( %s ))",                                               18,    "9966AA",    nil,      nil,      nil        },
-   ["^!%s?(.+)"]        = {"%s (кричит): %s",                                                  68,    "FFFFFF",    nil,      nil,      nil        },
-   ["^=%s?(.+)"]        = {"%s (шепчет): %s",                                                  3,     "E0EEE0",    nil,      nil,      nil        },
-   ["^*%s?(.+)"]        = {"* %s %s",                                                          18,    "FFFF00",    nil,      nil,      nil        },
-   ["^#%s?(.+)"]        = {"*** %s: %s ***",                                                   18,    "FFFF00",    "gm",     nil,      nil        },
-   ["^?%s?(.+)"]        = {"%s (OOC): %s ***",                                                 31000, "20EEDD",    nil,      nil,      nil        },
-   ["^d(%d+).*"]        = {"*** %s кидает d%s и выкидывает %s ***",                            18,    DICE_COLOR,  nil,      nil,      dices_proc },
-   ["^sd(%d+).*"]       = {"*** %s скрытно кидает d%s и выкидывает %s ***",                    3,     "D8DBB6",    nil,      nil,      dices_proc },
-   ["^4dF (.*)$"]       = {"*** %s кидает 4df (%s) от %s и выкидывает %s ***",                 18,    DICE_COLOR,  nil,      nil,      fudge_proc },
-   ["^s4dF (.*)$"]      = {"*** %s скрытно кидает 4df (%s) от %s и выкидывает %s ***",         3,     "D8DBB6",    nil,      nil,      fudge_proc },
-   ["^%+(i)%+%s?(.*)$"] = {"%s (альвийский): %s",                                              18,    "BBBBBB",   "i_lang", "i_lang", lang_proc  },
-   ["^%+(c)%+%s?(.*)$"] = {"%s (цвергийский): %s",                                             18,    "BBBBBB",   "c_lang", "c_lang", lang_proc  },
-   ["^%+(a)%+%s?(.*)$"] = {"%s (авоонский): %s",                                               18,    "BBBBBB",   "a_lang", "a_lang", lang_proc  },
+-- ["MATCH"]            = {"FORMAT"                                                  COLOR      PRIV    PRIV_LIST   PROC_FUNCTION}, --
+   ["^_(.+)"]           = {"%s%s (OOC): (( %s ))",                                   "9966AA",    nil,      nil,      nil        },
+   ["^%(%((.+)%)%)"]    = {"%s%s (OOC): (( %s ))",                                   "9966AA",    nil,      nil,      nil        },
+   ["^*%s?(.+)"]        = {"* %s%s %s",                                              "FFFF00",    nil,      nil,      nil        },
+   ["^#%s?(.+)"]        = {"*** %s%s: %s ***",                                       "FFFF00",    "gm",     nil,      nil        },
+   ["^?%s?(.+)"]        = {"%s%s (OOC): %s ***",                                     "20EEDD",    nil,      nil,      nil        },
+   ["^d(%d+).*"]        = {"*** %s%s кидает d%s и выкидывает %s ***",                DICE_COLOR,  nil,      nil,      dices_proc },
+   ["^4d[Ff] (.*)$"]    = {"*** %s%s кидает 4df (%s) от %s и выкидывает %s ***",     DICE_COLOR,  nil,      nil,      fudge_proc },
+   ["^%%%%%% (.*)$"]    = {"*** %s%s кидает 4df (%s) от %s и выкидывает %s ***",     DICE_COLOR,  nil,      nil,      fudge_proc },
+   ["^%+(i)%+%s?(.*)$"] = {"%s%s (альвийский): %s",                                  "BBBBBB",   "i_lang", "i_lang",  lang_proc  },
+   ["^%+(c)%+%s?(.*)$"] = {"%s%s (цвергийский): %s",                                 "BBBBBB",   "c_lang", "c_lang",  lang_proc  },
+   ["^%+(a)%+%s?(.*)$"] = {"%s%s (авоонский): %s",                                   "BBBBBB",   "a_lang", "a_lang",  lang_proc  },
 }
 
 -- config zone }}}
+
 minetest.register_privilege("gm", "Позволяет читать все сообщения в чате")
 
 function proc_message(name, message)
-    local fmt = DEFAULT_FORMAT 
-    local range = DEFAULT_RANGE
-    local color = DEFAULT_COLOR
-    local priv = nil
+    local fmt       = DEFAULT_FORMAT 
+    local range     = DEFAULT_RANGE
+    local color     = DEFAULT_COLOR
+    local privilege = nil
     
-    local pl = minetest.get_player_by_name(name)
-    local pls = minetest.get_connected_players()
+    local player_name = name
+        
+    local player  = minetest.get_player_by_name(player_name)
+    local players = minetest.get_connected_players()
     
-    local submes = nil
+    local loud_control = string.match(message, '^[!=]*')
+    range = range + #(string.match(string.gsub(message,"=",""), '!*'))
+    range = range - #(string.match(string.gsub(message,"!",""), '=*'))
     
+    if range < 1 then
+        range = 1
+    elseif range > #RANGES then
+        range = #RANGES
+    end
+    
+    message = string.gsub(message, "^[!=]*", "")
+    
+    local substr = nil
     -- formats (see config zone)
-    for m, f in pairs(formats) do
-        submes = {string.match(message, m)}
-        if submes[1] then
-            if (not f[4]) or minetest.check_player_privs(name, {[f[4]]=true}) then  -- if PRIV==nil
-                fmt = f[1]
-                range = f[2]
-                color = f[3]
-                priv = f[5]
-                
-                if f[6]~=nil then
-                    fmt, submes = f[6](fmt, submes, name)
+    for regexp, properties in pairs(formats) do
+        substr = {string.match(message, regexp)}
+        if substr[1] then
+            if (not properties[3]) or minetest.check_player_privs(player_name, {[properties[3]]=true}) then  -- if PRIV==nil
+                if properties[5]~=nil then
+                    player_name, fmt, range, color, priv, substr = properties[5](player_name, properties[1], range, properties[2], properties[4], substr)
                 else
-                    submes = submes[1]
+                    fmt    = properties[1];
+                    color  = properties[2];
+                    priv   = properties[4];
+                    substr = substr[1]
                 end
                 break
             end
         end
-        submes = submes[1]
+        substr = substr[1]
     end
 
-    if not submes then
-        submes = message
+    if not substr then
+        substr = message
         color = DEFAULT_COLOR
     end
 
     -- GM's prefix
     if minetest.check_player_privs(name, {["gm"]=true,}) then
-        name = GM_PREFIX .. name
+        player_name = GM_PREFIX .. player_name
     end
 
-    local senderpos = pl:getpos()
-    for i = 1, #pls do 
-        local recieverpos = pls[i]:getpos()
-        local player_name = pls[i]:get_player_name()
-        if math.sqrt((senderpos.x-recieverpos.x)^2 + (senderpos.y-recieverpos.y)^2 + (senderpos.z-recieverpos.z)^2) < range then
-            if (not priv) or minetest.check_player_privs(pls[i]:get_player_name(), {[priv]=true}) then
-                minetest.chat_send_player(player_name , freeminer.colorize(color, string.format(fmt, name, submes)))
+    local sender_pos = player:getpos()
+    for i = 1, #players do 
+        local reciever_name = players[i]:get_player_name()
+        local reciever_pos  = players[i]:getpos()
+        if math.sqrt((sender_pos.x-reciever_pos.x)^2 + (sender_pos.y-reciever_pos.y)^2 + (sender_pos.z-reciever_pos.z)^2) < RANGES[range][1] then
+            if (not priv) or minetest.check_player_privs(reciever_name, {[priv]=true}) then
+                minetest.chat_send_player(reciever_name, freeminer.colorize(color, string.format(fmt, player_name, RANGES[range][2], substr)))
             end
-        elseif minetest.check_player_privs(pls[i]:get_player_name(), {gm=true}) then
-			minetest.chat_send_player(player_name , freeminer.colorize(GMSPY_COLOR, string.format(fmt, name, submes)))
+        elseif minetest.check_player_privs(players[i]:get_player_name(), {gm=true}) then
+			minetest.chat_send_player(reciever_name , freeminer.colorize(GMSPY_COLOR, string.format(fmt, player_name, RANGES[range][2],  substr)))
         end
-        print(string.format(fmt, name, submes))
+        print(string.format(fmt, player_name, RANGES[range][2], substr))
     end
 
     return true
