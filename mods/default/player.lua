@@ -145,6 +145,11 @@ minetest.register_on_joinplayer(function(player)
 	default.player_set_model(player, "character.b3d")
 	player:set_local_animation({x=0, y=79}, {x=168, y=187}, {x=189, y=198}, {x=200, y=219}, 30)
     default.player_set_textures(player, {"character.png"})
+
+    -- Set default alpha
+    player:set_nametag_attributes({color = 
+        {a = default.nametag_alpha, red = 255, g = 255, b = 255}
+    })
 end)
 
 minetest.register_on_leaveplayer(function(player)

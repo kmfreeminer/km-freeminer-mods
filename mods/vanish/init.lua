@@ -13,7 +13,7 @@ minetest.register_chatcommand("vanish", {
         -- Toggle vanish
         vanish.is_vanished[name] = not vanish.is_vanished[name]
         
-        if vanished_players[name] then
+        if vanish.is_vanished[name] then
             -- Hide model
             player:set_properties({
                 visual_size = {x = 0,y = 0},
@@ -29,7 +29,9 @@ minetest.register_chatcommand("vanish", {
                 collisionbox = {-0.35, -1, -0.35, 0.35, 1, 0.35},
             })
             -- Show nickname
-            player:set_nametag_attributes({color = 0xFFFFFFFF})
+            player:set_nametag_attributes({color =
+                {a = default.nametag_alpha, r = 255, g = 255, b = 255}
+            })
         end
     end
 })
