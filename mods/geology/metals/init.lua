@@ -25,7 +25,7 @@ metals.register_metal = function (metal, metal_desc)
     
     minetest.register_craftitem("metals:" .. metal .. "_sheet", {
         description = metal_desc.description .. " (лист)",
-        inventory_image = "metals_" . .. metal .. "_sheet.png",
+        inventory_image = "metals_" .. metal .. "_sheet.png",
     })
     
     --[[
