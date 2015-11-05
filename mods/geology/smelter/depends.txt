@@ -1,0 +1,4 @@
+default
+inventory
+crafter
+metals
