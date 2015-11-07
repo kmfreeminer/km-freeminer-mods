@@ -248,6 +248,17 @@ minetest.register_node("smelter:smelter", {
 	is_ground_content = false,
 	sounds = default.node_sound_stone_defaults(),
 
+    on_construct = function (pos)
+        local meta = minetest.get_meta(pos)
+
+        -- Inizialize inventory
+        local inv = meta:get_inventory()
+        for listname, size in pairs({src = 4, fuel = 1, dst = 1}) do
+            inv:set_size(listname, size)
+        end
+
+        meta:set_string("formspec", smelter.inactive_formspec)
+    end,
 	--can_dig = function(pos,player) -- REWORK
 	allow_metadata_inventory_put = smelter.allow_metadata_inventory_put,
 	allow_metadata_inventory_move = smelter.allow_metadata_inventory_move,
@@ -289,7 +300,7 @@ smelter.step = function (pos, node, meta)
     local src_time = meta:get_float("src_time") or 0
     local fuel_totaltime = meta:get_float("fuel_totaltime") or 0
 
-    -- Inizialize inventory
+    -- Check inventory
     local inv = meta:get_inventory()
     for listname, size in pairs({src = 4, fuel = 1, dst = 1}) do
         if inv:get_size(listname) ~= size then
@@ -394,7 +405,7 @@ minetest.register_abm({
 		if meta:get_string("game_time") == "" then
 			meta:set_int("game_time", gametime - 1)
 		end
-        minetest.debug(gametime)
+
 		for i = 1, math.min(1200, gametime - meta:get_int("game_time")) do
 			smelter.step(pos, node, meta)
 			if node.name == "smelter:smelter" then break end
