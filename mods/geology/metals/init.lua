@@ -92,21 +92,19 @@ metals.register_metal = function (metal, metal_desc)
     --{{{ Smelting
     if not metal_desc.is_alloy then
         for _, mineral in ipairs(metal_desc.minerals) do
-            crafter.register_craft({
-                type = "melt",
-                recipe = { {"minerals:" .. mineral} },
-                output = "metals:" .. metal .. "_unshaped",
+            smelter.register_craft("metals:" .. metal .. "_unshaped", {
+                items = {["minerals:" .. mineral] = 1},
+                time = 5,
             })
         end
     else
-        local count = 0
-        for _, row in ipairs(metal_desc.alloy) do
-            count = count + #row
+        local total_count = 0
+        for metal, count in pairs(metal_desc.alloy) do
+            total_count = total_count + count
         end
-        crafter.register_craft({
-            type = "melt",
-            recipe = metal_desc.alloy,
-            output = "metals:" .. metal .. "_unshaped " .. count,
+        smelter.register_craft("metals:"..metal.."_unshaped "..total_count, {
+            items = metal_desc.alloy,
+            time = 7,
         })
     end
     --}}}
@@ -152,33 +150,13 @@ metals.register_metal("gold", {
 })
 
 -- Alloys
-metals.register_metal("brass", {
-    description = "Латунь",
-    level = 2,
-    is_alloy = true,
-    alloy = {
-        {"metals:copper_unshaped","metals:copper_unshaped"},
-        {"metals:copper_unshaped","metals:wrought_iron_unshaped"}
-    }
-})
-
 metals.register_metal("sterling_silver", {
     description = "Кхатцкое серебро",
     level = 2,
     is_alloy = true,
     alloy = {
-        {"metals:silver_unshaped","metals:silver_unshaped"},
-        {"metals:silver_unshaped","metals:copper_unshaped"}
-    }
-})
-
-metals.register_metal("rose_gold", {
-    description = "Розовое золото",
-    level = 2,
-    is_alloy = true,
-    alloy = {
-        {"metals:gold_unshaped","metals:gold_unshaped"},
-        {"metals:gold_unshaped","metals:brass_unshaped"}
+        ["metals:silver_unshaped"] = 3,
+        ["metals:copper_unshaped"] = 1,
     }
 })
 
@@ -187,8 +165,8 @@ metals.register_metal("bronze", {
     level = 2,
     is_alloy = true,
     alloy = {
-        {"metals:copper_unshaped","metals:copper_unshaped"},
-        {"metals:copper_unshaped","metals:tin_unshaped"}
+        ["metals:copper_unshaped"] = 3,
+        ["metals:tin_unshaped"] = 1,
     }
 })
 
@@ -197,8 +175,9 @@ metals.register_metal("black_bronze", {
     level = 2,
     is_alloy = true,
     alloy = {
-        {"metals:copper_unshaped","metals:copper_unshaped"},
-        {"metals:gold_unshaped","metals:silver_unshaped"}
+        ["metals:copper_unshaped"] = 2,
+        ["metals:gold_unshaped"] = 1,
+        ["metals:silver_unshaped"] = 1,
     }
 })
 
@@ -207,8 +186,8 @@ metals.register_metal("tumbaga", {
     level = 2,
     is_alloy = true,
     alloy = {
-        {"metals:copper_unshaped","metals:copper_unshaped"},
-        {"metals:gold_unshaped","metals:gold_unshaped"}
+        ["metals:copper_unshaped"] = 1,
+        ["metals:gold_unshaped"] = 1,
     }
 })
 
@@ -225,7 +204,27 @@ metals.register_metal("wrought_iron", {
     description = "Железо",
     level = 3,
     is_alloy = true,
-    alloy = { {"metals:pig_iron_unshaped"} }
+    alloy = { ["metals:pig_iron_unshaped"] = 1 }
+})
+
+-- depends
+metals.register_metal("brass", {
+    description = "Латунь",
+    level = 2,
+    is_alloy = true,
+    alloy = {
+        ["metals:copper_unshaped"] = 3,
+        ["metals:wrought_iron_unshaped"] = 1,
+    }
+})
+metals.register_metal("rose_gold", {
+    description = "Розовое золото",
+    level = 2,
+    is_alloy = true,
+    alloy = {
+        ["metals:gold_unshaped"] = 3,
+        ["metals:brass_unshaped"] = 1,
+    }
 })
 
 ------ Level 4 ------
@@ -235,8 +234,9 @@ metals.register_metal("steel", {
     level = 4,
     is_alloy = true,
     alloy = {
-        {"metals:wrought_iron_unshaped","metals:wrought_iron_unshaped"},
-        {"metals:pig_iron_unshaped","group:flux"}
+        ["metals:wrought_iron_unshaped"] = 2,
+        ["metals:pig_iron_unshaped"] = 1,
+        ["group:flux"] = 1,
     }
 })
 

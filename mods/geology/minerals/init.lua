@@ -23,7 +23,7 @@ minerals.list = {
 
 for mineral, mineral_desc in pairs(minerals.list) do
 	minetest.register_craftitem("minerals:"..mineral, {
-		description = mineral_desk,
+		description = mineral_desc,
 		inventory_image = "minerals_"..mineral..".png",
 	})
 end

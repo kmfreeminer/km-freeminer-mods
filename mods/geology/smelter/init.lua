@@ -8,13 +8,11 @@ smelter.register_craft = function(output, inputdef)
     if modname == nil then
         modname = ""
     else
-        modname = 'Mod "' .. modname .. '"'
+        modname = 'Mod "' .. modname .. '": '
     end
 
     -- Protection
     if not ItemStack(output):is_known() then
-        minetest.debug(minetest.get_current_modname())
-        minetest.debug(output)
         minetest.log("error",
             modname ..
             "failed to register smelter recipe for item " .. output ..": "..
@@ -23,7 +21,9 @@ smelter.register_craft = function(output, inputdef)
         return false
     end
     for itemname, count in pairs(inputdef.items) do
-        if not ItemStack(itemname):is_known() then
+        if (not ItemStack(itemname):is_known())
+        and itemname:sub(1, itemname:find(":") - 1) ~= "group"
+        then
             minetest.log("error",
                 modname ..
                 "failed to register smelter recipe for item " .. output ..": "..
@@ -39,26 +39,29 @@ smelter.register_craft = function(output, inputdef)
             return false
         end
     end
-    if inputdef.fuel ~= nil and not ItemStack(inputdef.fuel):is_known() then
-        minetest.log("error",
-            modname ..
-            "failed to register smelter recipe for item " .. output ..": "..
-            inputdef.fuel .. " is not a known item."
-        )
-        return false
-    end
-    local fuel, afterfuel = minetest.get_craft_result({
-        method = "fuel",
-        width = 1,
-        items = {[1] = ItemStack(inputdef.fuel)}
-    })
-    if fuel.time == 0 then
-        minetest.log("error",
-            modname ..
-            "failed to register smelter recipe for item " .. output ..": "..
-            inputdef.fuel .. " is not a valid fuel."
-        )
-        return false
+    if inputdef.fuel ~= nil then
+        if not ItemStack(inputdef.fuel):is_known() then
+            minetest.log("error",
+                modname ..
+                "failed to register smelter recipe for item " ..output..": "..
+                inputdef.fuel .. " is not a known item."
+            )
+            return false
+        end
+
+        local fuel, afterfuel = minetest.get_craft_result({
+            method = "fuel",
+            width = 1,
+            items = {[1] = ItemStack(inputdef.fuel)}
+        })
+        if fuel.time == 0 then
+            minetest.log("error",
+                modname ..
+                "failed to register smelter recipe for item " ..output..": "..
+                inputdef.fuel .. " is not a valid fuel."
+            )
+            return false
+        end
     end
     if inputdef.time < 0 then
         minetest.log("error",
@@ -98,14 +101,36 @@ smelter.get_craft_result = function (sourcelist)
 
     for result, recipe in pairs(smelter.registered) do
         local checked = {}
+        local groups = {}
         local equal = false
         for itemname, count in pairs(recipe.items) do
-            if source[itemname] == nil or source[itemname] < count then
-                equal = false
-                break
+            if itemname:sub(1, itemname:find(":") - 1) ~= "group" then
+                if source[itemname] == nil or source[itemname] < count then
+                    equal = false
+                    break
+                else
+                    checked[itemname] = true
+                    equal = true
+                end
             else
-                checked[itemname] = true
-                equal = true
+                table.insert(groups, itemname:sub(itemname:find(":") + 1))
+            end
+        end
+
+        if #groups > 0 then
+            for itemname, count in pairs(source) do
+                if not checked[itemname] then
+                    for i = 1, #groups do
+                        if minetest.get_item_group(itemname,groups[i]) > 0 then
+                            checked[itemname] = true
+                        end
+                    end
+
+                    if not checked[itemname] then
+                        equal = false
+                        break
+                    end
+                end
             end
         end
 
@@ -128,7 +153,8 @@ end
 
 smelter.take_source = function (invref, from_invlist)
     for k, itemstack in ipairs(invref:get_list(from_invlist)) do
-        invref:set_stack(from_invlist, k, itemstack:take_item())
+        itemstack:take_item()
+        invref:set_stack(from_invlist, k, itemstack)
     end
 end
 --}}}
@@ -202,7 +228,9 @@ function (pos, from_list, from_index, to_list, to_index, count, player)
 	local meta = minetest.get_meta(pos)
 	local inv = meta:get_inventory()
 	local stack = inv:get_stack(from_list, from_index)
-	return allow_metadata_inventory_put(pos, to_list, to_index, stack, player)
+	return smelter.allow_metadata_inventory_put(
+        pos, to_list, to_index, stack, player
+    )
 end
 --}}}
 
@@ -287,8 +315,10 @@ smelter.step = function (pos, node, meta)
         -- If there is a meltable item then check if it is ready yet
         if meltable then
             src_time = src_time + 1
-            if src_time >= time then
+            if src_time >= melt_time then
                 -- Place result in dst list if possible
+                print(result)
+                print(inv:room_for_item("dst", result))
                 if inv:room_for_item("dst", result) then
                     inv:add_item("dst", result)
                     smelter.take_source(inv, "src")
@@ -329,11 +359,11 @@ smelter.step = function (pos, node, meta)
     end
     
     -- Update formspec, infotext and node
-    local formspec = inactive_formspec
+    local formspec = smelter.inactive_formspec
 
     local item_percent = 0
     if meltable then
-        item_percent =  math.floor(src_time / time * 100)
+        item_percent =  math.floor(src_time / melt_time * 100)
     end
     
     if fuel_time <= fuel_totaltime and fuel_totaltime ~= 0 then
