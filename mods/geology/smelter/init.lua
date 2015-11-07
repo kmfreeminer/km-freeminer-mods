@@ -328,8 +328,6 @@ smelter.step = function (pos, node, meta)
             src_time = src_time + 1
             if src_time >= melt_time then
                 -- Place result in dst list if possible
-                print(result)
-                print(inv:room_for_item("dst", result))
                 if inv:room_for_item("dst", result) then
                     inv:add_item("dst", result)
                     smelter.take_source(inv, "src")
