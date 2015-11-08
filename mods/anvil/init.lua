@@ -7,13 +7,16 @@ anvil.formspec =
     default.gui_bg..
     default.gui_bg_img..
     default.gui_slots..
-    "list[current_name;src;2,0;3,3;]" ..
-    "image[5,1;1,1;gui_furnace_arrow_bg.png^[transformR270]" ..
-    "list[current_name;dst;6,1;1,1;]" ..
+    "list[current_name;hammer;1,1;1,1;]" ..
+    "list[current_name;src;2.25,0;3,3;]" ..
+    "image[5.5,1;1,1;gui_furnace_arrow_bg.png^[transformR270]" ..
+    "list[current_name;dst;7,1;1,1;]" ..
     inventory.main(0, 3.2) ..
     "listring[current_name;dst]" ..
     "listring[current_player;main]" ..
     "listring[current_name;src]" ..
+    "listring[current_player;main]" ..
+    "listring[current_name;hammer]" ..
     "listring[current_player;main]"
 
 anvil.contains_metals = function (invlist)
