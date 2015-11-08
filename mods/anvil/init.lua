@@ -1,21 +1,20 @@
 anvil = {}
 
-anvil.formspec = function (pos)
-	local spos = pos.x .. "," .. pos.y .. "," .. pos.z
-    return
-        "size[" ..inventory.width.. "," ..(inventory.height + 3).. "]" ..
-        default.gui_bg..
-        default.gui_bg_img..
-        default.gui_slots..
-        "list[nodemeta:" .. spos .. ";src;2,0;3,3;]" ..
-        "image[5,1;1,1;gui_furnace_arrow_bg.png^[transformR270]" ..
-        "list[nodemeta:" .. spos .. ";dst;6,1;1,1;]" ..
-        inventory.main(0, 3.2) ..
-        "listring[nodemeta:" .. spos .. ";dst]" ..
-        "listring[current_player;main]" ..
-        "listring[nodemeta:" .. spos .. ";src]" ..
-        "listring[current_player;main]"
-end
+anvil.multiplier_default = 3
+anvil.multiplier_neg = 2
+anvil.formspec =
+    "size[" ..inventory.width.. "," ..(inventory.height + 3).. "]" ..
+    default.gui_bg..
+    default.gui_bg_img..
+    default.gui_slots..
+    "list[current_name;src;2,0;3,3;]" ..
+    "image[5,1;1,1;gui_furnace_arrow_bg.png^[transformR270]" ..
+    "list[current_name;dst;6,1;1,1;]" ..
+    inventory.main(0, 3.2) ..
+    "listring[current_name;dst]" ..
+    "listring[current_player;main]" ..
+    "listring[current_name;src]" ..
+    "listring[current_player;main]"
 
 anvil.contains_metals = function (invlist)
     for k, itemstack in ipairs(invlist) do
@@ -42,11 +41,10 @@ anvil.craft_predict = function(pos, player)
 
     if output.item:get_name() ~= "" and output.time == 0 then
         if anvil.contains_metals(craftlist) then
-            local hammer = player:get_wielded_item()
-            local hammer_level = minetest.get_item_group(hammer, "level")
-            local output_level = minetest.get_item_group(output.item, "level")
+            local hammer = inv:get_stack("hammer", 1)
+            local is_hammer = minetest.get_item_group(hammer, "hammer") > 0
 
-            if hammer_level >= output_level - 1 then
+            if is_hammer then
                 inv:set_stack("dst", 1, output.item)
             else
                 inv:set_stack("dst", 1, nil)
@@ -71,17 +69,24 @@ anvil.craft = function (pos, player)
     })
 
     if anvil.contains_metals(craftlist) then
-        local hammer = player:get_wielded_item()
+        local hammer = inv:get_stack("hammer", 1)
         local hammer_level = minetest.get_item_group(hammer, "level")
         local output_level = minetest.get_item_group(output.item, "level")
-        local uses = minetest.get_item_group(hammer, "uses")
-
-        inv:set_list("src", decr_input.items)
+        local uses = minetest.registered_tools[hammer].tool_capabilities.groupcaps.anvil.uses
 
         local leveldiff = hammer_level - output_level
-        if leveldiff == -1 then leveldiff = 0 end
-        hammer:add_wear(65535/(uses*3^leveldiff)) -- CHECK IN SOURCE
-        player:set_wielded_item(hammer)
+
+        local multiplier = anvil.multiplier_default
+        if leveldiff < 0 then multiplier = anvil.multiplier_neg end
+
+        -- uses | leveldiff | actual uses
+        -- 10   |  0        | 10
+        -- 10   |  1        | 10*3
+        -- 10   | -1        | 10/2
+        hammer:add_wear(65535/(uses * multiplier^leveldiff))
+        inv:set_stack("hammer", 1, hammer)
+        inv:set_list("src", decr_input.items)
+
     else
         inv:set_list("src", decr_input.items)
     end
@@ -130,17 +135,8 @@ anvil.register = function (material, anvil_def)
             inv:set_size("src", 9)
             inv:set_width("src", 3)
             inv:set_size("dst", 1)
-        end,
-        on_rightclick = function (pos, node, clicker, itemstack, pointed_thing)
-            if minetest.get_item_group(itemstack, "hammer") > 0 then
-                minetest.show_formspec(
-                    clicker:get_player_name(),
-                    "anvil:" .. material_name,
-                    anvil.formspec(pos)
-                )
-                return itemstack
-            end
-            return itemstack
+            inv:set_size("hammer", 1)
+            meta:set_string("formspec", anvil.formspec)
         end,
 
         allow_metadata_inventory_put =
