@@ -2,14 +2,15 @@ anvil = {}
 
 anvil.multiplier_default = 3
 anvil.multiplier_neg = 2
+
 anvil.formspec =
     "size[" ..inventory.width.. "," ..(inventory.height + 3).. "]" ..
     default.gui_bg..
     default.gui_bg_img..
     default.gui_slots..
     "list[current_name;hammer;1,1;1,1;]" ..
-    "list[current_name;src;2.25,0;3,3;]" ..
-    "image[5.5,1;1,1;gui_furnace_arrow_bg.png^[transformR270]" ..
+    "list[current_name;src;2.4,0;3,3;]" ..
+    "image[5.7,1;1,1;gui_furnace_arrow_bg.png^[transformR270]" ..
     "list[current_name;dst;7,1;1,1;]" ..
     inventory.main(0, 3.2) ..
     "listring[current_name;dst]" ..
@@ -18,17 +19,6 @@ anvil.formspec =
     "listring[current_player;main]" ..
     "listring[current_name;hammer]" ..
     "listring[current_player;main]"
-
-anvil.contains_metals = function (invlist)
-    for k, itemstack in ipairs(invlist) do
-        if itemstack:sub(1, itemstack:find(":") - 1) == "metals"
-        or minetest.get_item_group(itemstack:get_name(), "metal") > 0 then
-            return true
-        end
-    end
-
-    return false
-end
 
 --{{{ Functions
 anvil.craft_predict = function(pos, player)
@@ -43,7 +33,7 @@ anvil.craft_predict = function(pos, player)
     })
 
     if output.item:get_name() ~= "" and output.time == 0 then
-        if anvil.contains_metals(craftlist) then
+        if metals.contains_metals(craftlist) then
             local hammer = inv:get_stack("hammer", 1)
             local is_hammer = minetest.get_item_group(hammer, "hammer") > 0
 
@@ -71,7 +61,7 @@ anvil.craft = function (pos, player)
         items = craftlist
     })
 
-    if anvil.contains_metals(craftlist) then
+    if metals.contains_metals(craftlist) then
         local hammer = inv:get_stack("hammer", 1)
         local hammer_level = minetest.get_item_group(hammer, "level")
         local output_level = minetest.get_item_group(output.item, "level")
@@ -97,13 +87,22 @@ end
 
 anvil.register = function (material, anvil_def)
     local material_name = material:sub(material:find(":") + 1)
+    local groups = anvil_def.groups
+        or {oddly_breakable_by_hand = 2, falling_node = 1, dig_immediate = 1}
+    groups.level = minetest.get_item_group(material, "level")
+
+    local material_tile = material_name
+    if material_name:sub(1, material_name:find(":") - 1) == "metals" then
+        material_tile = material_tile:sub(1, material_name:find("_unshaped") - 1)
+    end
 
     minetest.register_node("anvil:" .. material_name, {
         description = anvil_def.description or "Накавайня",
-        tiles = {
-            "anvil_" .. material_name .. "_top.png",
-            "anvil_" .. material_name .. "_top.png",
-            "anvil_" .. material_name .. "_side.png"},
+        tiles = anvil_def.tiles or {
+            "anvil_" .. material_tile .. "_top.png",
+            "anvil_" .. material_tile .. "_top.png",
+            "anvil_" .. material_tile .. "_side.png"
+        },
         drawtype = "nodebox",
         paramtype = "light",
         paramtype2 = "facedir",
@@ -125,8 +124,7 @@ anvil.register = function (material, anvil_def)
                 {-0.35,-0.1,-0.2,0.35,0.1,0.2},
             },
         },
-        groups = anvil_def.groups or
-            {oddly_breakable_by_hand = 2, falling_node = 1, dig_immediate = 1},
+        groups = groups,
         sounds = anvil_def.sounds or
             default.node_sound_stone_defaults(),
 
@@ -177,9 +175,6 @@ anvil.register = function (material, anvil_def)
             end,
     })
 
-    if material:sub(1, material:find(":") - 1) == "metals" then
-        material = material .. "_ingot"
-    end
     minetest.register_craft({
         output = "anvil:" .. material_name,
         recipe = {
@@ -192,27 +187,171 @@ end
 --}}}
 
 --{{{ Anvils registrations
-anvil.register("default:stone", {})
-anvil.register("metals:bronze", {})
+anvil.register("default:cobble", {
+    description = "Каменная наковальня",
+    tiles = {
+        "anvil_stone_top.png",
+        "anvil_stone_top.png",
+        "anvil_stone_side.png"
+    },
+    groups = {
+        oddly_breakable_by_hand = 2,
+        cracky = 3,
+        stone = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
 
-local anvils = {
-    {'stone', 'Stone', 0, 61*2.3},
-    {'desert_stone', 'Desert Stone', 0, 61*2.3},
-    {'copper', 'Copper', 1, 411*2.3},
-    {'bronze', 'Bronze', 2, 601*2.3},
-    {'wrought_iron', 'Wrought Iron', 3, 801*2.3},
-    {'steel', 'Steel', 4, 1101*2.3},
-}
+anvil.register("default:desert_cobble", {
+    description = "Каменная наковальня",
+    tiles = {
+        "anvil_desert_stone_top.png",
+        "anvil_desert_stone_top.png",
+        "anvil_desert_stone_side.png"
+    },
+    groups = {
+        oddly_breakable_by_hand = 2,
+        cracky = 3,
+        stone = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+--anvil.register("minerals:malachite", {
+--    description = "Малахитовая наковальня",
+--    groups = {
+--        oddly_breakable_by_hand = 2,
+--        cracky = 3,
+--        stone = 3,
+--        falling_node = 1,
+--        dig_immediate = 2,
+--    },
+--})
+--
+--anvil.register("minerals:marble", {
+--    description = "Мраморная наковальня",
+--    groups = {
+--        oddly_breakable_by_hand = 2,
+--        cracky = 3,
+--        stone = 3,
+--        falling_node = 1,
+--        dig_immediate = 2,
+--    },
+--})
+
+anvil.register("metals:copper_unshaped", {
+    description = "Медная наковальня",
+    groups = {
+        oddly_breakable_by_hand = 2,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+anvil.register("metals:lead_unshaped", {
+    description = "Свинцовая наковальня",
+    groups = {
+        oddly_breakable_by_hand = 2,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+anvil.register("metals:bronze_unshaped", {
+    description = "Бронзовая наковальня",
+    groups = {
+        oddly_breakable_by_hand = 2,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+anvil.register("metals:brass_unshaped", {
+    description = "Латунная наковальня",
+    groups = {
+        oddly_breakable_by_hand = 1,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+anvil.register("metals:black_bronze_unshaped", {
+    description = "Тёмная наковальня",
+    groups = {
+        oddly_breakable_by_hand = 1,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+anvil.register("metals:tumbaga_unshaped", {
+    description = "Блестящая жёлтая наковальня",
+    groups = {
+        oddly_breakable_by_hand = 1,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+anvil.register("metals:pig_iron_unshaped", {
+    description = "Чугунная наковальня",
+    groups = {
+        oddly_breakable_by_hand = 1,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+anvil.register("metals:wrought_iron_unshaped", {
+    description = "Железная наковальня",
+    groups = {
+        oddly_breakable_by_hand = 1,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
+
+anvil.register("metals:steel_unshaped", {
+    description = "Стальная наковальня",
+    groups = {
+        oddly_breakable_by_hand = 1,
+        metal = 3,
+        snappy = 1,
+        cracky = 2,
+        falling_node = 1,
+        dig_immediate = 1,
+    },
+})
 --}}}
 
 --{{{ Crafts
 
---for i, metal in ipairs(metals.list) do
---    realtest.register_anvil_recipe({
---        item1 = "metals:"..metal.."_unshaped",
---        output = "metals:"..metal.."_ingot",
---        material = metal,
---    })
 --    realtest.register_anvil_recipe({
 --        item1 = "metals:"..metal.."_sheet",
 --        item2 = "scribing_table:plan_bucket",
@@ -221,67 +360,6 @@ local anvils = {
 --        level = metals.levels[i],
 --        material = metal,
 --    })
---    realtest.register_anvil_recipe({
---        item1 = "metals:"..metal.."_doubleingot",
---        output = "metals:"..metal.."_sheet",
---        level = metals.levels[i] - 1,
---        material = metal,
---    })
---    realtest.register_anvil_recipe({
---        item1 = "metals:"..metal.."_doubleingot",
---        output = "metals:"..metal.."_ingot 2",
---        level = metals.levels[i] - 1,
---        instrument = "chisel",
---        material = metal,
---    })
---    realtest.register_anvil_recipe({
---        item1 = "metals:"..metal.."_doublesheet",
---        output = "metals:"..metal.."_sheet 2",
---        level = metals.levels[i] - 1,
---        instrument = "chisel",
---        material = metal,
---    })
---    realtest.register_anvil_recipe({
---        type = "weld",
---        item1 = "metals:"..metal.."_ingot",
---        item2 = "metals:"..metal.."_ingot",
---        output = "metals:"..metal.."_doubleingot",
---        level = metals.levels[i] - 1,
---        material = metal,
---    })
---    realtest.register_anvil_recipe({
---        type = "weld",
---        item1 = "metals:"..metal.."_sheet",
---        item2 = "metals:"..metal.."_sheet",
---        output = "metals:"..metal.."_doublesheet",
---        level = metals.levels[i] - 1,
---        material = metal,
---    })
---    realtest.register_anvil_recipe({
---        item1 = "metals:"..metal.."_ingot",
---        item2 = "scribing_table:plan_lock",
---        rmitem2 = false,
---        output = "metals:"..metal.."_lock",
---        level = metals.levels[i],
---        material = metal,
---    })
---    realtest.register_anvil_recipe({
---        item1 = "metals:"..metal.."_ingot",
---        item2 = "scribing_table:plan_hatch",
---        rmitem2 = false,
---        output = "hatches:"..metal.."_hatch_closed",
---        level = metals.levels[i],
---        material = metal,
---    })
---end
----- receipe for coin production
---realtest.register_anvil_recipe({
---    item1 = "metals:gold_sheet",
---    output = "money:coin 15",
---    level = metals.levels[i],
---    instrument = "chisel",
---    material = "gold",
---})
 ----Instruments
 --local anvil_instruments = 
 --    {{"axe", "_ingot"}, 
@@ -293,21 +371,4 @@ local anvils = {
 --     {"hammer", "_doubleingot"},
 --     {"saw", "_sheet"}
 --    }
---for _, instrument in ipairs(anvil_instruments) do
---    for i, metal in ipairs(metals.list) do
---        -- the proper way to do that is to check whether we have metal in instruments.metals list or not
---        -- but who cares?
---        local output_name = "instruments:"..instrument[1].."_"..metal.."_head"
---        if minetest.registered_items[output_name] then
---            realtest.register_anvil_recipe({
---                item1 = "metals:"..metal..instrument[2],
---                item2 = "scribing_table:plan_"..instrument[1],
---                rmitem2 = false,
---                output = output_name,
---                level = metals.levels[i],
---                material = metal,
---            })
---        end
---    end
---end
 --}}}

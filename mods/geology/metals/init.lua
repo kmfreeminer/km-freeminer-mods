@@ -1,49 +1,60 @@
 metals = {}
-
 metals.registered = {}
 
+-- Function that check if inventory list contains metal items.
+-- Use for cheking if craft is possible
+metals.contains_metals = function (invlist)
+    for k, itemstack in ipairs(invlist) do
+        local itemname = itemstack:get_name()
+        if itemname ~= "" and (
+            itemname:sub(1, itemname:find(":") - 1) == "metals"
+            or minetest.get_item_group(itemname, "metal") > 0
+        ) then
+            return true
+        end
+    end
+
+    return false
+end
+
+--{{{ metals.register_metal
 metals.register_metal = function (metal, metal_desc)
     metals.registered[metal] = metal_desc
 
-    --{{{ Craftitems
+    -- Craftitems
     minetest.register_craftitem("metals:" .. metal .. "_unshaped", {
         description = metal_desc.description .. " (необработано)",
         inventory_image = "metals_" .. metal .. "_unshaped.png",
+        groups = {metal = 1, level = metal_desc.level},
     })
     
     minetest.register_craftitem("metals:" .. metal .. "_ingot", {
         description = metal_desc.description .. " (слиток)",
         inventory_image = "metals_" .. metal .. "_ingot.png",
+        groups = {metal = 1, level = metal_desc.level},
     })
-    
-    --[[
-    minetest.register_craftitem("metals:" .. metal .. "_doubleingot", {
-        description = metal_desc.description .. " Double Ingot",
-        inventory_image = "metals_" .. metal .. "_doubleingot.png",
-    })
-    --]]
     
     minetest.register_craftitem("metals:" .. metal .. "_sheet", {
         description = metal_desc.description .. " (лист)",
         inventory_image = "metals_" .. metal .. "_sheet.png",
+        groups = {metal = 1, level = metal_desc.level - 1},
     })
-    
-    --[[
-    minetest.register_craftitem("metals:" .. metal .. "_doublesheet", {
-        description = metal_desc.description .. " Double Sheet",
-        inventory_image = "metals_" .. metal .. "_doublesheet.png",
-    })
-    --]]
-    --}}}
 
-    --{{{ Nodes
+    -- Nodes
     minetest.register_node("metals:" .. metal .. "_block", {
         description = metal_desc.description .. " (блок)",
         tiles = {"metals_" .. metal .. "_block.png"},
         particle_image = {"metals_" .. metal .. "_block.png"},
         is_ground_content = false,
         drop = "metals:" .. metal .. "_block",
-        groups = {snappy=1,bendy=2,cracky=2,melty=2,level=2,drop_on_dig=1},
+        groups = {
+            snappy = 1,
+            bendy = 2,
+            cracky = 2,
+            melty = 2,
+            metal = 2,
+            level = metal_desc.level,
+        },
         sounds = default.node_sound_stone_defaults(),
     })
     --[[ нужно или нет?
@@ -52,10 +63,8 @@ metals.register_metal = function (metal, metal_desc)
     realtest.register_slab("metals:" .. metal .. "_block",nil,nil,nil,metal_desc.description .. " Slab",nil,
             "metals:" .. metal .. "_doubleingot 2")
     --]]
-    --}}}
 
-    --{{{ Craft
-    --[[ в мод на наковальню
+    -- Craft
     minetest.register_craft({
         output = "metals:" .. metal .. "_block",
         recipe = {
@@ -63,7 +72,16 @@ metals.register_metal = function (metal, metal_desc)
             {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
         }
     })
-    --]]
+
+    minetest.register_craft({
+        output = "metals:" .. metal .. "_ingot",
+        recipe = { "metals:" .. metal .. "_unshaped" },
+    })
+
+    minetest.register_craft({
+        output = "metals:" .. metal .. "_sheet",
+        recipe = { "metals:" .. metal .. "_ingot" },
+    })
 
     --[[ нужно или нет?
     minetest.register_craft({
@@ -87,9 +105,8 @@ metals.register_metal = function (metal, metal_desc)
         },
     })
     --]]
-    --}}}
 
-    --{{{ Smelting
+    -- Smelting
     if not metal_desc.is_alloy then
         for _, mineral in ipairs(metal_desc.minerals) do
             smelter.register_craft("metals:" .. metal .. "_unshaped", {
@@ -107,8 +124,16 @@ metals.register_metal = function (metal, metal_desc)
             time = 7,
         })
     end
-    --}}}
+    smelter.register_craft("metals:"..metal.."_unshaped", {
+        items = { ["metals:" ..metal.. "_ingot"] = 1 },
+        time = 5,
+    })
+    smelter.register_craft("metals:"..metal.."_unshaped", {
+        items = { ["metals:" ..metal.. "_list"] = 1 },
+        time = 5,
+    })
 end
+--}}}
 
 --{{{ Metals registration
 ------ Level 0 ------
@@ -213,7 +238,8 @@ metals.register_metal("brass", {
     level = 2,
     is_alloy = true,
     alloy = {
-        ["metals:copper_unshaped"] = 3,
+        ["metals:copper_unshaped"] = 2,
+        ["metals:tin_unshaped"] = 1,
         ["metals:wrought_iron_unshaped"] = 1,
     }
 })
