@@ -63,8 +63,6 @@ VanessaE (WTFPL):
   default_nc_side.png
   default_grass_*.png
   default_desert_sand.png
-  default_desert_stone.png
-  default_desert_stone_brick.png
   default_sand.png
   default_sandstone_brick.png
 

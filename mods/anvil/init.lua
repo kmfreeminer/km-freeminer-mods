@@ -258,22 +258,6 @@ anvil.register("default:cobble", {
     },
 })
 
-anvil.register("default:desert_cobble", {
-    description = "Каменная наковальня",
-    tiles = {
-        "anvil_desert_stone_top.png",
-        "anvil_desert_stone_top.png",
-        "anvil_desert_stone_side.png"
-    },
-    groups = {
-        oddly_breakable_by_hand = 2,
-        cracky = 3,
-        stone = 2,
-        falling_node = 1,
-        dig_immediate = 1,
-    },
-})
-
 --anvil.register("minerals:malachite", {
 --    description = "Малахитовая наковальня",
 --    groups = {

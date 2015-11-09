@@ -262,14 +262,6 @@ minetest.register_craft({
 })
 
 minetest.register_craft({
-	output = 'default:desert_stonebrick 4',
-	recipe = {
-		{'default:desert_stone', 'default:desert_stone'},
-		{'default:desert_stone', 'default:desert_stone'},
-	}
-})
-
-minetest.register_craft({
 	output = 'default:snowblock',
 	recipe = {
 		{'default:snow', 'default:snow', 'default:snow'},
@@ -313,12 +305,6 @@ minetest.register_craft({
 	type = "cooking",
 	output = "default:stone",
 	recipe = "default:cobble",
-})
-
-minetest.register_craft({
-	type = "cooking",
-	output = "default:desert_stone",
-	recipe = "default:desert_cobble",
 })
 
 minetest.register_craft({

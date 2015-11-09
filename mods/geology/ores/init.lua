@@ -85,8 +85,6 @@ end
 ores.manual_reg = {
     anthracite = true,
     bituminous_coal = true,
-    native_copper = true,
-    native_gold = true,
     sulfur = true,
     charcoal = true,
 }
@@ -98,24 +96,6 @@ for ore, ore_desc in pairs(minerals.list) do
 end
 
 -- Semi-manual registration, becouse not all parameters are defaults
-ores.register_ore("ores:native_copper", {
-    description = minerals.list["native_copper"],
-    wherein = "default:stone"
-})
-ores.register_ore("ores:native_copper", {
-    description = minerals.list["native_copper"],
-    wherein = "default:desert_stone"
-})
-
-ores.register_ore("ores:native_gold", {
-    description = minerals.list["native_gold"],
-    wherein = "default:stone"
-})
-ores.register_ore("ores:native_gold", {
-    description = minerals.list["native_gold"],
-    wherein = "default:desert_stone"
-})
-
 ores.register_ore("ores:bituminous_coal", {
     description = minerals.list["bituminous_coal"],
     height_max = -3000,

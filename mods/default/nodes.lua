@@ -42,34 +42,6 @@ minetest.register_node("default:mossycobble", {
 })
 
 
-minetest.register_node("default:desert_stone", {
-	description = "Desert Stone",
-	tiles = {"default_desert_stone.png"},
-	groups = {cracky=3, stone=1, melt = 3000},
-	drop = 'default:desert_cobble',
-	legacy_mineral = true,
-	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
-})
-
-minetest.register_node("default:desert_cobble", {
-	description = "Desert Cobblestone",
-	tiles = {"default_desert_cobble.png"},
-	is_ground_content = false,
-	groups = {cracky = 3, stone = 2, melt=3000},
-	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
-})
-
-minetest.register_node("default:desert_stonebrick", {
-	description = "Desert Stone Brick",
-	tiles = {"default_desert_stone_brick.png"},
-	is_ground_content = false,
-	groups = {cracky=2, stone=1, melt = 3000},
-	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
-})
-
 minetest.register_node("default:sandstone", {
 	description = "Sandstone",
 	tiles = {"default_sandstone.png"},

@@ -10,7 +10,6 @@ minetest.register_alias("mapgen_water_source", "default:water_source")
 minetest.register_alias("mapgen_river_water_source", "default:river_water_source")
 minetest.register_alias("mapgen_lava_source", "default:lava_source")
 minetest.register_alias("mapgen_gravel", "default:gravel")
-minetest.register_alias("mapgen_desert_stone", "default:desert_stone")
 minetest.register_alias("mapgen_desert_sand", "default:desert_sand")
 minetest.register_alias("mapgen_dirt_with_snow", "default:dirt_with_snow")
 minetest.register_alias("mapgen_snowblock", "default:snowblock")
@@ -53,7 +52,6 @@ local mg_params = {
 		{ name = "default:water_source",       y_min = -3000, y_max = -70, thickness  = 3},
 		{ name = "default:stone",              y_min = -3000, y_max = -70, }, -- stone after water
 		{ name = "default:dirt",               y_min = -500,  y_max = 50, },
-		{ name = "default:desert_stone",       thickness  = 3, },
 		--{ name = "default:stone_with_iron",    y_max = -2000, },
 		{ name = "default:gravel",             y_max = -1, },
 		--{ name = "default:stone_with_copper",  y_max = -3000, },
@@ -561,7 +559,7 @@ function default.register_biomes()
 		depth_top = 1,
 		node_filler = "default:desert_sand",
 		depth_filler = 1,
-		node_stone = "default:desert_stone",
+		--node_stone = "default:desert_stone",
 		--node_water_top = "",
 		--depth_water_top = ,
 		--node_water = "",
@@ -579,7 +577,7 @@ function default.register_biomes()
 		depth_top = 1,
 		node_filler = "default:sand",
 		depth_filler = 2,
-		node_stone = "default:desert_stone",
+		--node_stone = "default:desert_stone",
 		--node_water_top = "",
 		--depth_water_top = ,
 		--node_water = "",
