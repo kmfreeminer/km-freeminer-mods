@@ -20,6 +20,20 @@ anvil.formspec =
     "listring[current_name;hammer]" ..
     "listring[current_player;main]"
 
+--{{{ Craft protection
+minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv)
+    if metals.contains_metals(old_craft_grid)
+    and itemstack:get_name():sub(1, itemstack:get_name():find(":") - 1) ~= "anvil"
+    then
+        minetest.chat_send_player(player:get_player_name(),
+            "Этот предмет нельзя создать голыми руками."
+        )
+        craft_inv:set_list("craft", old_craft_grid)
+        return ItemStack("")
+    end
+end)
+--}}}
+
 --{{{ Functions
 anvil.craft_predict = function(pos, player)
     local meta = minetest.get_meta(pos)
@@ -33,7 +47,9 @@ anvil.craft_predict = function(pos, player)
     })
 
     if output.item:get_name() ~= "" and output.time == 0 then
-        if metals.contains_metals(craftlist) then
+        if metals.contains_metals(craftlist)
+        and output.item:get_name():sub(1, output.item:get_name():find(":") - 1) ~= "anvil"
+        then
             local hammer = inv:get_stack("hammer", 1)
             local is_hammer = minetest.get_item_group(hammer, "hammer") > 0
 
@@ -63,26 +79,34 @@ anvil.craft = function (pos, player)
 
     if metals.contains_metals(craftlist) then
         local hammer = inv:get_stack("hammer", 1)
-        local hammer_level = minetest.get_item_group(hammer, "level")
-        local output_level = minetest.get_item_group(output.item, "level")
-        local uses = minetest.registered_tools[hammer].tool_capabilities.groupcaps.anvil.uses
+        if hammer:get_name() ~= "" then
+            local hammer_level = minetest.get_item_group(hammer, "level")
+            local output_level = minetest.get_item_group(output.item, "level")
+            local uses = minetest.registered_tools[hammer].tool_capabilities.groupcaps.anvil.uses
 
-        local leveldiff = hammer_level - output_level
+            local leveldiff = hammer_level - output_level
 
-        local multiplier = anvil.multiplier_default
-        if leveldiff < 0 then multiplier = anvil.multiplier_neg end
+            local multiplier = anvil.multiplier_default
+            if leveldiff < 0 then multiplier = anvil.multiplier_neg end
 
-        -- uses | leveldiff | actual uses
-        -- 10   |  0        | 10
-        -- 10   |  1        | 10*3
-        -- 10   | -1        | 10/2
-        hammer:add_wear(65535/(uses * multiplier^leveldiff))
-        inv:set_stack("hammer", 1, hammer)
+            -- uses | leveldiff | actual uses
+            -- 10   |  0        | 10
+            -- 10   |  1        | 10*3
+            -- 10   | -1        | 10/2
+            hammer:add_wear(65535/(uses * multiplier^leveldiff))
+            inv:set_stack("hammer", 1, hammer)
+        end
         inv:set_list("src", decr_input.items)
 
     else
         inv:set_list("src", decr_input.items)
     end
+
+    minetest.log("action",
+        "player " .. player:get_player_name() ..
+        " crafts " .. output.item:get_name() ..
+        " on an " .. minetest.get_node(pos).name
+    )
 end
 
 anvil.register = function (material, anvil_def)
@@ -92,7 +116,7 @@ anvil.register = function (material, anvil_def)
     groups.level = minetest.get_item_group(material, "level")
 
     local material_tile = material_name
-    if material_name:sub(1, material_name:find(":") - 1) == "metals" then
+    if material:sub(1, material:find(":") - 1) == "metals" then
         material_tile = material_tile:sub(1, material_name:find("_unshaped") - 1)
     end
 
@@ -253,6 +277,7 @@ anvil.register("metals:copper_unshaped", {
     },
 })
 
+--[[
 anvil.register("metals:lead_unshaped", {
     description = "Свинцовая наковальня",
     groups = {
@@ -264,6 +289,7 @@ anvil.register("metals:lead_unshaped", {
         dig_immediate = 1,
     },
 })
+--]]
 
 anvil.register("metals:bronze_unshaped", {
     description = "Бронзовая наковальня",
@@ -277,6 +303,7 @@ anvil.register("metals:bronze_unshaped", {
     },
 })
 
+--[[
 anvil.register("metals:brass_unshaped", {
     description = "Латунная наковальня",
     groups = {
@@ -288,7 +315,9 @@ anvil.register("metals:brass_unshaped", {
         dig_immediate = 1,
     },
 })
+--]]
 
+--[[
 anvil.register("metals:black_bronze_unshaped", {
     description = "Тёмная наковальня",
     groups = {
@@ -300,7 +329,9 @@ anvil.register("metals:black_bronze_unshaped", {
         dig_immediate = 1,
     },
 })
+--]]
 
+--[[
 anvil.register("metals:tumbaga_unshaped", {
     description = "Блестящая жёлтая наковальня",
     groups = {
@@ -312,7 +343,9 @@ anvil.register("metals:tumbaga_unshaped", {
         dig_immediate = 1,
     },
 })
+--]]
 
+--[[
 anvil.register("metals:pig_iron_unshaped", {
     description = "Чугунная наковальня",
     groups = {
@@ -324,6 +357,7 @@ anvil.register("metals:pig_iron_unshaped", {
         dig_immediate = 1,
     },
 })
+--]]
 
 anvil.register("metals:wrought_iron_unshaped", {
     description = "Железная наковальня",

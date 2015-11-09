@@ -74,11 +74,13 @@ metals.register_metal = function (metal, metal_desc)
     })
 
     minetest.register_craft({
+        type = "shapeless",
         output = "metals:" .. metal .. "_ingot",
         recipe = { "metals:" .. metal .. "_unshaped" },
     })
 
     minetest.register_craft({
+        type = "shapeless",
         output = "metals:" .. metal .. "_sheet",
         recipe = { "metals:" .. metal .. "_ingot" },
     })
@@ -129,7 +131,7 @@ metals.register_metal = function (metal, metal_desc)
         time = 5,
     })
     smelter.register_craft("metals:"..metal.."_unshaped", {
-        items = { ["metals:" ..metal.. "_list"] = 1 },
+        items = { ["metals:" ..metal.. "_sheet"] = 1 },
         time = 5,
     })
 end
