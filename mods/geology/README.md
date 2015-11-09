@@ -49,4 +49,3 @@ ores:anthracite_in_stone | Алмаз
 ores:bituminous_coal_in_stone | Алмаз
 Кварц | Рубин, сапфир, аметист
 Гранит | Топаз, изумруд, аквамарин, аметист, алмаз
-
