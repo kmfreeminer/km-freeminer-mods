@@ -232,6 +232,25 @@ function (pos, from_list, from_index, to_list, to_index, count, player)
         pos, to_list, to_index, stack, player
     )
 end
+
+smelter.after_dig_node =
+function(pos, oldnode, oldmetadata, digger)
+    for k, itemstack in pairs(oldmetadata.inventory.src) do
+        if itemstack:get_name() ~= "" then
+            minetest.add_item(pos, itemstack)
+        end
+    end
+    local fuel = oldmetadata.inventory.fuel[1]
+    if fuel:get_name() ~= "" then
+        minetest.add_item(pos, fuel)
+    end
+    local dst = oldmetadata.inventory.dst[1]
+    if dst:get_name() ~= "" then
+        minetest.add_item(pos, dst)
+    end
+end
+
+
 --}}}
 
 --{{{ Nodes
@@ -259,7 +278,7 @@ minetest.register_node("smelter:smelter", {
 
         meta:set_string("formspec", smelter.inactive_formspec)
     end,
-	--can_dig = function(pos,player) -- REWORK
+    after_dig_node = smelter.after_dig_node,
 	allow_metadata_inventory_put = smelter.allow_metadata_inventory_put,
 	allow_metadata_inventory_move = smelter.allow_metadata_inventory_move,
 })
@@ -279,7 +298,7 @@ minetest.register_node("smelter:smelter_active", {
 	sounds = default.node_sound_stone_defaults(),
 	drop = "smelter:smelter",
 
-	--can_dig = function(pos,player) -- REWORK
+    after_dig_node = smelter.after_dig_node,
 	allow_metadata_inventory_put = smelter.allow_metadata_inventory_put,
 	allow_metadata_inventory_move = smelter.allow_metadata_inventory_move,
 })

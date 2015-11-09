@@ -35,6 +35,20 @@ end)
 --}}}
 
 --{{{ Functions
+local function is_hammer(itemstack)
+    local name = itemstack:get_name()
+    local tool = minetest.registered_tools[name]
+    if tool ~= nil and tool.tool_capabilities.groupcaps.anvil ~= nil
+    then return true
+    else return false
+    end
+end
+
+local function get_uses(itemstack)
+    local name = itemstack:get_name()
+    return minetest.registered_tools[name].tool_capabilities.groupcaps.anvil.uses
+end
+
 anvil.craft_predict = function(pos, player)
     local meta = minetest.get_meta(pos)
     local inv = meta:get_inventory()
@@ -51,9 +65,7 @@ anvil.craft_predict = function(pos, player)
         and output.item:get_name():sub(1, output.item:get_name():find(":") - 1) ~= "anvil"
         then
             local hammer = inv:get_stack("hammer", 1)
-            local is_hammer = minetest.get_item_group(hammer, "hammer") > 0
-
-            if is_hammer then
+            if hammer:get_name() ~= "" then
                 inv:set_stack("dst", 1, output.item)
             else
                 inv:set_stack("dst", 1, nil)
@@ -82,7 +94,7 @@ anvil.craft = function (pos, player)
         if hammer:get_name() ~= "" then
             local hammer_level = minetest.get_item_group(hammer, "level")
             local output_level = minetest.get_item_group(output.item, "level")
-            local uses = minetest.registered_tools[hammer].tool_capabilities.groupcaps.anvil.uses
+            local uses = get_uses(hammer)
 
             local leveldiff = hammer_level - output_level
 
@@ -152,8 +164,6 @@ anvil.register = function (material, anvil_def)
         sounds = anvil_def.sounds or
             default.node_sound_stone_defaults(),
 
-        -- can_dig = function(pos,player) -- TODO
-        -- end,
         on_construct = function(pos)
             local meta = minetest.get_meta(pos)
             local inv = meta:get_inventory()
@@ -163,19 +173,40 @@ anvil.register = function (material, anvil_def)
             inv:set_size("hammer", 1)
             meta:set_string("formspec", anvil.formspec)
         end,
+        after_dig_node = function(pos, oldnode, oldmetadata, digger)
+            for k, itemstack in pairs(oldmetadata.inventory.src) do
+                if itemstack:get_name() ~= "" then
+                    minetest.add_item(pos, itemstack)
+                end
+            end
+            local hammer = oldmetadata.inventory.hammer[1]
+            if hammer:get_name() ~= "" then
+                minetest.add_item(pos, hammer)
+            end
+        end,
 
         allow_metadata_inventory_put =
             function (pos, listname, index, stack, player)
                 if listname == "dst" then
                     return 0
+                elseif listname == "hammer" then
+                    if is_hammer(stack)
+                    then return stack:get_count()
+                    else return 0
+                    end
                 else
                     return stack:get_count()
                 end
             end,
         allow_metadata_inventory_move = 
             function (pos, from_list, from_index, to_list, to_index, count, player)
-                if to_list == "dst" then
+                if to_list == "dst" or from_list == "dst" then
                     return 0
+                elseif to_list == "hammer" then
+                    if is_hammer(stack)
+                    then return stack:get_count()
+                    else return 0
+                    end
                 else
                     return count
                 end
@@ -382,27 +413,4 @@ anvil.register("metals:steel_unshaped", {
         dig_immediate = 1,
     },
 })
---}}}
-
---{{{ Crafts
-
---    realtest.register_anvil_recipe({
---        item1 = "metals:"..metal.."_sheet",
---        item2 = "scribing_table:plan_bucket",
---        rmitem2 = false,
---        output = "instruments:bucket_"..metal,
---        level = metals.levels[i],
---        material = metal,
---    })
-----Instruments
---local anvil_instruments = 
---    {{"axe", "_ingot"}, 
---     {"pick", "_ingot"},
---     {"shovel", "_ingot"},
---     {"spear", "_ingot"},
---     {"chisel", "_ingot"},
---     {"sword", "_doubleingot"},
---     {"hammer", "_doubleingot"},
---     {"saw", "_sheet"}
---    }
 --}}}
