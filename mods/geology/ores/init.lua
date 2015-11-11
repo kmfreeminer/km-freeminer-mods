@@ -69,13 +69,11 @@ function ores.register_ore(name, OreDef)
     })
 
     -- Register ore
-    if not OreDef.generate == false then
-        -- copy is needed becouse some ores are in several whereins,
-        -- so there be several different tables
-        local oredef = table.copy(ore)
-        oredef.ore = name.."_in_"..wherein_
-        minetest.register_ore(oredef)
-    end
+    -- copy is needed becouse some ores are in several whereins,
+    -- so there be several different tables
+    local oredef = table.copy(ore)
+    oredef.ore = name.."_in_"..wherein_
+    minetest.register_ore(oredef)
 end
 --}}}
 
