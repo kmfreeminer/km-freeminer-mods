@@ -42,11 +42,11 @@
 #Самоцветы
 Блок | Возможные самоцветы
 ---- | -------------------
-default:stone | Аквамарин, аметист, алмаз
-ores:iron_ore_in_stone | Рубин, опал, топаз, изумруд, сапфир
-ores:tin_in_stone | Топаз
-ores:copper_in_stone | Изумруд
-ores:anthracite_in_stone | Алмаз
-ores:bituminous_coal_in_stone | Алмаз
-Кварц | Рубин, сапфир, аметист
-Гранит | Топаз, изумруд, аквамарин, аметист, алмаз
+default:stone | Аквамарин (VR), аметист (VR), алмаз (VR)
+ores:iron_ore_in_stone | Рубин (R), опал (R), сапфир (R), топаз (VR), изумруд (VR)
+ores:tin_in_stone | Топаз (VR)
+ores:copper_in_stone | Изумруд (VR)
+ores:anthracite_in_stone | Алмаз (VR)
+ores:bituminous_coal_in_stone | Алмаз (VR)
+Кварц | Рубин (R), аметист (R), сапфир (VR)
+Гранит | Топаз (R), изумруд (VR), аквамарин (VR), аметист (VR), алмаз (VR)
