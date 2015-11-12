@@ -53,15 +53,15 @@ gems.quartz = {
     morion       = "Морион",
 }
 
-for quartz, def in pairs(gems.quartz) do
+for quartz, description in pairs(gems.quartz) do
     minetest.register_craftitem("gems:" .. quartz, {
-        definition = def,
+        description = description,
         groups = {quartz = 1, gem = 1},
         inventory_image = "gems_quartz.png[colorize:" .. gems.color[quartz],
     })
 
     minetest.register_node("gems:" .. quartz .. "_in_stone", {
-        definition = def .. " (руда)",
+        description = description .. " (руда)",
         tiles = {
             "default_stone.png^" .. 
             "(gems_quartz_ore.png[colorize:" .. gems.color[quartz] ..")"
@@ -72,16 +72,7 @@ for quartz, def in pairs(gems.quartz) do
             ore = 1,
             dropping_like_stone = 1
         },
-        drop = {
-            max_items = 1,
-            items = {
-                { items = {"gems:" .. quartz .. " 2"},
-                  rarity = 2
-                },
-                { items = {"gems:" .. quartz}
-                }
-            }
-        },
+        drop = "gems:" .. quartz,
         sounds = default.node_sound_stone_defaults()
     })
 
@@ -117,7 +108,9 @@ gems.register_drop = function(wherein, gems)
         return false
     end
 
-    local drops = ItemStack(wherein):get_definition().drop
+    local wherein_def = ItemStack(wherein):get_definition()
+    local drops = wherein_def.drop
+    local too_many_items = false
 	if drops == nil then
 		drops = {
             max_items = 2,
@@ -130,26 +123,58 @@ gems.register_drop = function(wherein, gems)
         }
 	elseif drops.items == nil then
 		-- drop = {} in definition disables default drop
+        drops = table.copy(wherein_def.drop) -- we never should modify original table
 		drops = {
             max_items = 1,
             items = {}
         }
+    elseif #drops.items > 1 then
+        too_many_items = true
+        drops = table.copy(wherein_def.drop) -- we never should modify original table
+        drops.items = {}
     else
+        drops = table.copy(wherein_def.drop) -- we never should modify original table
         drops.max_items = drops.max_items + 1
 	end
 
-    local fix = 0
+    local prev = 0
     for gem, howrare in pairs(gems) do
         table.insert(drops.items, {
             items = {"gems:" .. gem},
-            rarity = howrare - fix,
+            rarity = howrare * (1 - prev),
         })
-        fix = fix + 1
+        prev = prev + 1/howrare
     end
 
-    minetest.override_item(wherein, {
-        drop = drops,
-    })
+    if not too_many_items then
+        minetest.override_item(wherein, {
+            drop = drops,
+        })
+    else
+        local old_after_dig_node = wherein_def.after_dig_node
+        if old_after_dig_node == nil then
+            old_after_dig_node = function (pos, oldnode, oldmetadata, digger)
+            end
+        end
+
+        minetest.override_item(wherein, {
+            after_dig_node = function (pos, oldnode, oldmetadata, digger)
+                old_after_dig_node(pos, oldnode, oldmetadata, digger)
+
+                for _, item in ipairs(drops.items) do
+                    if math.random(item.rarity) == 1 then
+                        local inv = digger:get_inventory()
+                        if inv:room_for_item("main", item.items[1]) then
+                            inv:add_item("main", item.items[1])
+                        else
+                            minetest.add_item(pos, item.items[1])
+                        end
+                        break
+                    end
+                end
+            end
+        })
+    end
     return true
 end
 --}}}
