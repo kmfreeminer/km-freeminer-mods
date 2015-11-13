@@ -351,4 +351,5 @@ function default.strip_modname (name)
     else
         return name:sub(name:find(":", 2) + 1)
     end
+end
 --}}}

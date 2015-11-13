@@ -57,43 +57,19 @@ for quartz, description in pairs(gems.quartz) do
     minetest.register_craftitem("gems:" .. quartz, {
         description = description,
         groups = {quartz = 1, gem = 1},
-        inventory_image = "gems_quartz.png[colorize:" .. gems.color[quartz],
+        inventory_image = "gems_quartz.png^[colorize:" .. gems.color[quartz] .. ":130",
     })
 
-    minetest.register_node("gems:" .. quartz .. "_in_stone", {
+    ores.register_ore(":ores:" .. quartz, {
         description = description .. " (руда)",
         tiles = {
             "default_stone.png^" .. 
-            "(gems_quartz_ore.png[colorize:" .. gems.color[quartz] ..")"
-        },
-        groups = {
-            cracky = 3,
-            drop_on_dig  =1,
-            ore = 1,
-            dropping_like_stone = 1
+            "(gems_quartz_ore.png^[colorize:" .. gems.color[quartz] ..")"
         },
         drop = "gems:" .. quartz,
-        sounds = default.node_sound_stone_defaults()
-    })
-
-    minetest.register_ore({
-        ore_type = "scatter",
-        ore = "gems:" .. quartz .. "_in_stone",
-        wherein = "default:stone",
-        clust_scarcity = 8*8*8,
-        clust_num_ores = 3,
         clust_size = 2,
         y_max = 0,
         y_min = -1000,
-        noise_threshhold = 1.2,
-        noise_params = {
-            offset = 0,
-            scale = 1,
-            spread = {x = 100, y = 100, z = 100},
-            octaves = 3,
-            persist = 0.70,
-            seed = minetest.get_mapgen_params().seed
-        },
     })
 end
 --}}}
@@ -186,7 +162,7 @@ gems.register_drop("default:stone", {
     diamond = gems.very_rare,
 })
 
-gems.register_drop("ores:iron_ore_in_stone", {
+gems.register_drop("ores:iron_ore", {
     ruby = gems.rare,
     opal = gems.rare,
     sapphire = gems.rare,
@@ -194,31 +170,31 @@ gems.register_drop("ores:iron_ore_in_stone", {
     emerald = gems.very_rare,
 })
 
-gems.register_drop("ores:cassiterite_in_stone", {
+gems.register_drop("ores:cassiterite", {
     topaz = gems.very_rare,
 })
 
-gems.register_drop("ores:native_copper_in_stone", {
+gems.register_drop("ores:native_copper", {
     emerald = gems.very_rare,
 })
 
-gems.register_drop("ores:anthracite_in_stone", {
+gems.register_drop("ores:anthracite", {
     diamond = gems.very_rare,
 })
 
-gems.register_drop("ores:bituminous_coal_in_stone", {
+gems.register_drop("ores:bituminous_coal", {
     diamond = gems.very_rare,
 })
 
 for quartz,_ in pairs(gems.quartz) do
-    gems.register_drop("gems:" .. quartz .. "_in_stone", {
+    gems.register_drop("gems:" .. quartz, {
         ruby = gems.rare,
         amethyst = gems.rare,
         sapphire = gems.very_rare,
     })
 end
 
-gems.register_drop("ГРАНИТ", {
+gems.register_drop("ores:granite", {
     topaz = gems.rare,
     emerald = gems.very_rare,
     aquamarine = gems.very_rare,

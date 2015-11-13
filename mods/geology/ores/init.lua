@@ -18,7 +18,6 @@ ores.manual_reg = {
 
 --{{{ Functions
 function ores.register_ore(name, oredef)
-    local name_ = name:gsub(":","_")
     local wherein_name = oredef.wherein or "default:stone"
 
     -- Generate textures
@@ -28,6 +27,7 @@ function ores.register_ore(name, oredef)
     else
         tiles = {}
 
+        local name_ = name:gsub(":","_")
         local wherein = minetest.registered_nodes[wherein_name]
         if wherein.tiles then
             for _, texture in ipairs(wherein.tiles) do
@@ -53,7 +53,11 @@ function ores.register_ore(name, oredef)
     })
 
     -- Register ore
-    oredef.ore = name
+    if oredef.ore_num_ores ~= nil and oredef.ore_num_ores > 32767 then
+        minetest.log("ERROR",
+            name .. " has too high ore_num_ores (max is 32767)"
+        )
+    end
     minetest.register_ore({
         ore_type = oredef.ore_type or "scatter",
         ore = name,
@@ -110,7 +114,7 @@ ores.register_ore("ores:granite", {
     
     ore_type = "sheet",
     --ore_scarcity or 3*3*3*2,
-    ore_num_ores = 500000,
+    ore_num_ores = 32767,
     ore_clust_size = 100,
 })
 
