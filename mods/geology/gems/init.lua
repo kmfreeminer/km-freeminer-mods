@@ -74,6 +74,116 @@ for quartz, description in pairs(gems.quartz) do
 end
 --}}}
 
+--{{{ Cr-r-rystals
+--{{{ Nodes
+minetest.register_node("gems:glowcrystal_small", {
+    description = "Crystal-Ann",
+    groups = {
+        crystal = 1, gem = 1,
+    },
+    tiles = { "gems_glowcrystal_small.png^[colorize:#60606060" },
+    use_texture_alpha = true,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,
+    light_source = 1,
+    node_box = {
+        type = "fixed",
+        fixed = {
+            -- {x1, y1, z1, x2, y2, z2},
+            { 0, -0.5, 0, 4/16, 0, 4/16},
+        }
+    },
+})
+
+minetest.register_node("gems:glowcrystal_normal", {
+    description = "Xayc",
+})
+
+minetest.register_node("gems:glowcrystal_normal_top", {
+})
+
+minetest.register_node("gems:glowcrystal_large_vside", {
+})
+
+minetest.register_node("gems:glowcrystal_large_slope", {
+})
+--}}}
+
+--{{{ Decorations
+minetest.register_decoration({
+    deco_type = "simple", -- See "Decoration types"
+    place_on = "default:stone",
+    sidelen = 8,
+    fill_ratio = 0.02,
+    noise_params = {
+        offset = 0,
+        scale = .45,
+        spread = {x=100, y=100, z=100},
+        seed = 354,
+        octaves = 3,
+        persist = 0.7
+    },
+    biomes = nil,
+    y_min = -31000
+    y_max = 31000
+    
+    ----- Simple-type parameters
+    decoration = {"gems:glowcrystal_small"},
+    height = 1,
+    spawn_by = "gems:glowcrystal_normal",
+    num_spawn_by = -1,
+})
+    
+minetest.register_decoration({
+    deco_type = "schematic", -- See "Decoration types"
+    place_on = "default:stone",
+    sidelen = 8,
+    fill_ratio = 0.02,
+    noise_params = {
+        offset = 0,
+        scale = .45,
+        spread = {x=100, y=100, z=100},
+        seed = 354,
+        octaves = 3,
+        persist = 0.7
+    },
+    biomes = nil,
+    y_min = -31000
+    y_max = 31000
+
+    ----- Schematic-type parameters
+    schematic = "foobar.mts",
+    --  ^ If schematic is a string, it is the filepath relative to the current working directory of the
+    --  ^ specified Minetest schematic file.
+    --  ^  - OR -, could be the ID of a previously registered schematic
+    --  ^  - OR -, could instead be a table containing two mandatory fields, size and data,
+    --  ^ and an optional table yslice_prob:
+    schematic = {
+        size = {x=4, y=6, z=4},
+        data = {
+            {name="default:cobble", param1=255, param2=0},
+            {name="default:dirt_with_grass", param1=255, param2=0},
+            {name="ignore", param1=255, param2=0},
+            {name="air", param1=255, param2=0},
+            ...
+        },
+        yslice_prob = {
+            {ypos=2, prob=128},
+            {ypos=5, prob=64},
+            ...
+        },
+    },
+    --  ^ See 'Schematic specifier' for details.
+    replacements = {["oldname"] = "convert_to", ...},
+    flags = "place_center_x, place_center_y, place_center_z, force_placement",
+    --  ^ Flags for schematic decorations.  See 'Schematic attributes'.
+    rotation = "90" -- rotate schematic 90 degrees on placement
+    --  ^ Rotation can be "0", "90", "180", "270", or "random".
+})
+--}}}
+--}}}
+
 --{{{ Register function
 gems.register_drop = function(wherein, gems)
     if not ItemStack(wherein):is_known() then
