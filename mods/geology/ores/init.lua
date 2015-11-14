@@ -92,16 +92,33 @@ for ore, ore_desc in pairs(minerals.list) do
     end
 end
 
-for _, ore in pairs({"marble", "limestone"}) do
-    ores.register_ore("ores:" .. ore, {
-        description = ores.list[ore],
-        drop = "ores:" .. ore,
-        groups = {
-            cracky = 3,
-            ore = 1, flux = 1,
-        },
-    }) 
-end
+ores.register_ore("ores:limestone", {
+    description = ores.list.limestone,
+    tiles = {"ores_limestone.png"},
+    drop = "ores:limestone",
+    groups = {
+        cracky = 3,
+        ore = 1, flux = 1,
+    },
+    ore_type = "sheet",
+    --ore_scarcity or 3*3*3*2,
+    ore_num_ores = 32767,
+    ore_clust_size = 32,
+}) 
+
+ores.register_ore("ores:marble", {
+    description = ores.list.marble,
+    tiles = {"ores_marble.png"},
+    drop = "ores:marble",
+    groups = {
+        cracky = 1,
+        ore = 1, flux = 1,
+    },
+    ore_type = "sheet",
+    --ore_scarcity or 3*3*3*2,
+    ore_num_ores = 32767,
+    ore_clust_size = 32,
+}) 
 
 ores.register_ore("ores:granite", {
     description = ores.list.granite,
@@ -115,21 +132,20 @@ ores.register_ore("ores:granite", {
     ore_type = "sheet",
     --ore_scarcity or 3*3*3*2,
     ore_num_ores = 32767,
-    ore_clust_size = 100,
+    ore_clust_size = 50,
 })
 
 ores.register_ore("ores:bituminous_coal", {
-    description = minerals.list["bituminous_coal"],
-    y_max = -3000,
-    y_min = -6000,
+    description = minerals.list.bituminous_coal,
+    y_max = 0,
+    y_min = -265,
     ore_num_ores = 15,
     ore_scarcity = 3*3*3,
 })
 
 ores.register_ore("ores:anthracite", {
-    description = minerals.list["anthracite"],
-    y_max = -6000,
-    y_min = -8000,
+    description = minerals.list.anthracite,
+    y_max = -235,
     ore_num_ores = 15,
     ore_scarcity = 3*3*3,
 })
@@ -151,7 +167,7 @@ ores.register_ore("ores:sulfur", {
     ore_scarcity = 8*8*8,
     ore_num_ores = 5,
     ore_clust_size = 3,
-    y_min = -1000,
-    y_max = -5000,
+    y_min = -50,
+    y_max = -200,
 })
 --}}}
