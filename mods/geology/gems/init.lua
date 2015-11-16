@@ -23,7 +23,7 @@ gems.color = {
     morion       = "black", --dimgray??
 }
 
-gems.crystal_light = 3
+gems.crystal_light = 4
 
 --{{{ Gems definitions
 gems.list = {
@@ -97,10 +97,11 @@ minetest.register_craftitem("gems:glowcrystal", {
 minetest.register_node("gems:glowcrystal_small", {
     description = "An",
     groups = {
+        attached_node = 1,
         snappy = 2, cracky = 5, oddly_breakable_by_hand = 2,
         crystal = 1, gem = 1,
     },
-    tiles = { "gems_glowcrystal_node.png" },
+    tiles = { "gems_glowcrystal_node.png" }, --TODO
     use_texture_alpha = true,
     drawtype = "nodebox",
     paramtype = "light",
@@ -124,10 +125,11 @@ minetest.register_node("gems:glowcrystal_small", {
 minetest.register_node("gems:glowcrystal_normal", {
     description = "Xayc",
     groups = {
+        falling_node = 1,
         snappy = 1, cracky = 3, oddly_breakable_by_hand = 1,
         crystal = 1, gem = 1,
     },
-    tiles = { "gems_glowcrystal_node.png" },
+    tiles = { "gems_glowcrystal_node.png" }, --TODO
     use_texture_alpha = true,
     drawtype = "glasslike",
     paramtype = "light",
@@ -138,6 +140,7 @@ minetest.register_node("gems:glowcrystal_normal", {
 minetest.register_node("gems:glowcrystal_normal_top", {
     description = "Xayc",
     groups = {
+        falling_node = 1,
         snappy = 1, cracky = 3, oddly_breakable_by_hand = 1,
         crystal = 1, gem = 1,
     },
@@ -151,6 +154,7 @@ minetest.register_node("gems:glowcrystal_normal_top", {
         type = "fixed",
         fixed = {
             -- {x1, y1, z1, x2, y2, z2},
+            -- TODO
             { -8/16, -8/16, -8/16, 8/16, -7/16, 8/16},
             { -7/16, -7/16, -7/16, 7/16, -6/16, 7/16},
             { -6/16, -6/16, -6/16, 6/16, -5/16, 6/16},
@@ -163,38 +167,61 @@ minetest.register_node("gems:glowcrystal_normal_top", {
     },
 })
 
-minetest.register_node("gems:glowcrystal_large_vside", {
+minetest.register_node("gems:glowcrystal_large_inside", {
+    description = "Crystal-Ann",
+    groups = {
+        cracky = 2,
+        crystal = 1, gem = 1,
+    },
+    tiles = { "gems_glowcrystal_node.png" }, --TODO
+    use_texture_alpha = true,
+    drawtype = "glasslike",
+    paramtype = "light",
+    sunlight_propagates = true,
+    light_source = gems.crystal_light * 4,
 })
 
-minetest.register_node("gems:glowcrystal_large_slope", {
-})
---}}}
-
---{{{ Drop
-gems.register_drop("gems:glowcrystal_small", {
-    glowcrystal = 4,
-})
-gems.register_drop("gems:glowcrystal_small", {
-    ["glowcrystal_shard 3"] = 2,
-    ["glowcrystal_shard 2"] = 4,
-    ["glowcrystal_shard 4"] = 4,
-})
-
-gems.register_drop("gems:glowcrystal_normal", {
-    ["glowcrystal 3"] = 4,
-    ["glowcrystal 4"] = 2,
-    ["glowcrystal 5"] = 4,
-})
-gems.register_drop("gems:glowcrystal_normal", {
-    ["glowcrystal_shard 4"] = 2,
-    ["glowcrystal_shard 3"] = 4,
-    ["glowcrystal_shard 5"] = 4,
+minetest.register_node("gems:glowcrystal_large_vcorner", {
+    description = "Crystal-Ann",
+    groups = {
+        cracky = 2,
+        crystal = 1, gem = 1,
+    },
+    tiles = { "gems_glowcrystal_node.png" }, --TODO
+    use_texture_alpha = true,
+    drawtype = "node_box",
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,
+    light_source = gems.crystal_light * 3.5,
+    node_box = {
+        type = "fixed",
+        fixed = {
+            -- { x1,   y1,    z1,   x2,   y2,   z2},
+            { -8/16, -0.5, -8/16,    0,  0.5,    0},
+        }
+    },
 })
 
-gems.register_drop("gems:glowcrystal_top", {
-    ["glowcrystal_shard 4"] = 2,
-    ["glowcrystal_shard 3"] = 4,
-    ["glowcrystal_shard 5"] = 4,
+minetest.register_node("gems:glowcrystal_large_hdcorner", {
+    description = "Crystal-Ann",
+    groups = {
+        cracky = 2,
+        crystal = 1, gem = 1,
+    },
+    tiles = { "gems_glowcrystal_node.png" },
+    use_texture_alpha = true,
+    drawtype = "node_box",
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,
+    light_source = gems.crystal_light * 3.5,
+    node_box = {
+        type = "fixed",
+        fixed = {
+            -- {x1,   y1,    z1,   x2,   y2,   z2},
+        }
+    },
 })
 --}}}
 
@@ -531,5 +558,31 @@ gems.register_drop("ores:granite", {
     aquamarine = gems.very_rare,
     amethyst = gems.very_rare,
     diamond = gems.very_rare,
+})
+
+gems.register_drop("gems:glowcrystal_small", {
+    glowcrystal = 4,
+})
+gems.register_drop("gems:glowcrystal_small", {
+    ["glowcrystal_shard 3"] = 2,
+    ["glowcrystal_shard 2"] = 4,
+    ["glowcrystal_shard 4"] = 4,
+})
+
+gems.register_drop("gems:glowcrystal_normal", {
+    ["glowcrystal 3"] = 4,
+    ["glowcrystal 4"] = 2,
+    ["glowcrystal 5"] = 4,
+})
+gems.register_drop("gems:glowcrystal_normal", {
+    ["glowcrystal_shard 4"] = 2,
+    ["glowcrystal_shard 3"] = 4,
+    ["glowcrystal_shard 5"] = 4,
+})
+
+gems.register_drop("gems:glowcrystal_top", {
+    ["glowcrystal_shard 4"] = 2,
+    ["glowcrystal_shard 3"] = 4,
+    ["glowcrystal_shard 5"] = 4,
 })
 --}}}
