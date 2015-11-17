@@ -137,6 +137,11 @@ minetest.register_node("gems:glowcrystal_normal", {
     light_source = gems.crystal_light * 3,
 })
 
+local pyramid = {}
+for i = -8, -7 do
+    table.insert(pyramid, {i/16, i/16, i/16, -i/16, (i+1)/16, -i/16})
+end
+
 minetest.register_node("gems:glowcrystal_normal_top", {
     description = "Xayc",
     groups = {
@@ -149,21 +154,10 @@ minetest.register_node("gems:glowcrystal_normal_top", {
     sunlight_propagates = true,
     drawtype = "nodebox",
     paramtype = "light",
-    light_source = gems.crystal_light * 3 - 1,
+    light_source = gems.crystal_light * 2.5,
     node_box = {
         type = "fixed",
-        fixed = {
-            -- {x1, y1, z1, x2, y2, z2},
-            -- TODO
-            { -8/16, -8/16, -8/16, 8/16, -7/16, 8/16},
-            { -7/16, -7/16, -7/16, 7/16, -6/16, 7/16},
-            { -6/16, -6/16, -6/16, 6/16, -5/16, 6/16},
-            { -5/16, -5/16, -5/16, 5/16, -4/16, 5/16},
-            { -4/16, -4/16, -4/16, 4/16, -3/16, 4/16},
-            { -3/16, -3/16, -3/16, 3/16, -2/16, 3/16},
-            { -2/16, -2/16, -2/16, 2/16, -1/16, 2/16},
-            { -1/16, -1/16, -1/16, 1/16,  0/16, 1/16},
-        }
+        fixed = pyramid,
     },
 })
 
@@ -181,6 +175,36 @@ minetest.register_node("gems:glowcrystal_large_inside", {
     light_source = gems.crystal_light * 4,
 })
 
+local function corner (nodebox, coord1, coord2, side, perm_coord_num)
+    if perm_coord_num == 1 then
+        table.insert(nodebox, {
+            -0.5, coord1/16, coord2/16,
+             0.5, (coord1 + side)/16, (coord2 + side)/16
+         })
+    elseif perm_coord_num == 2 then
+        table.insert(nodebox, {
+            coord1/16, -0.5, coord2/16,
+            (coord1 + side)/16,  0.5, (coord2 + side)/16
+         })
+    elseif perm_coord_num == 3 then
+        table.insert(nodebox, {
+            coord1/16, coord2/16, -0.5, 
+            (coord1 + side)/16, (coord2 + side)/16, 0.5, 
+         })
+    else
+        return
+    end
+
+    local newside = side/2
+    if math.abs(newside) >= 1 then
+        corner(nodebox, coord1 + side, coord2, newside, perm_coord_num)
+        corner(nodebox, coord1, coord2 + side, newside, perm_coord_num)
+    end
+end
+
+local vcorner = {}
+corner(vcorner, -8, -8, 8, 2)
+
 minetest.register_node("gems:glowcrystal_large_vcorner", {
     description = "Crystal-Ann",
     groups = {
@@ -196,12 +220,12 @@ minetest.register_node("gems:glowcrystal_large_vcorner", {
     light_source = gems.crystal_light * 3.5,
     node_box = {
         type = "fixed",
-        fixed = {
-            -- { x1,   y1,    z1,   x2,   y2,   z2},
-            { -8/16, -0.5, -8/16,    0,  0.5,    0},
-        }
+        fixed = vcorner
     },
 })
+
+local hdcorner = {}
+corner(hdcorner, 8, 8, -8, 1)
 
 minetest.register_node("gems:glowcrystal_large_hdcorner", {
     description = "Crystal-Ann",
@@ -216,12 +240,26 @@ minetest.register_node("gems:glowcrystal_large_hdcorner", {
     paramtype2 = "facedir",
     sunlight_propagates = true,
     light_source = gems.crystal_light * 3.5,
-    node_box = {
-        type = "fixed",
-        fixed = {
-            -- {x1,   y1,    z1,   x2,   y2,   z2},
-        }
+    node_box = hdcorner,
+})
+
+local htcorner = {}
+corner(htcorner, -8, -8, 8, 1)
+
+minetest.register_node("gems:glowcrystal_large_hdcorner", {
+    description = "Crystal-Ann",
+    groups = {
+        cracky = 2,
+        crystal = 1, gem = 1,
     },
+    tiles = { "gems_glowcrystal_node.png" },
+    use_texture_alpha = true,
+    drawtype = "node_box",
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,
+    light_source = gems.crystal_light * 3.5,
+    node_box = htcorner,
 })
 --}}}
 
@@ -229,10 +267,10 @@ minetest.register_node("gems:glowcrystal_large_hdcorner", {
 
 --{{{ schematics
 local normal_crystal = minetest.register_schematic({
-    size = {x=5, y=5, z=5},
+    size = {x = 5, y = 5, z = 5},
     yslice_prob = {
-        {ypos = 2, prob = 60},
-        {ypos = 3, prob = 60},
+        {ypos = 2, prob = 255 * 0.6},
+        {ypos = 3, prob = 255 * 0.6},
     },
     data = {
         {name="gems:glowcrystal_small", param1=32, param2=0},
@@ -382,54 +420,6 @@ minetest.register_decoration({
     flags = "place_center_x, place_center_z",
     rotation = "random"
 })
-
-minetest.register_decoration({
-    deco_type = "schematic", -- See "Decoration types"
-    place_on = "default:stone",
-    sidelen = 8,
-    fill_ratio = 0.02,
-    noise_params = {
-        offset = 0,
-        scale = .45,
-        spread = {x=100, y=100, z=100},
-        seed = 354,
-        octaves = 3,
-        persist = 0.7
-    },
-    biomes = nil,
-    y_min = -31000,
-    y_max = 31000,
-
-    ----- Schematic-type parameters
-    schematic = "foobar.mts",
-    --  ^ If schematic is a string, it is the filepath relative to the current working directory of the
-    --  ^ specified Minetest schematic file.
-    --  ^  - OR -, could be the ID of a previously registered schematic
-    --  ^  - OR -, could instead be a table containing two mandatory fields, size and data,
-    --  ^ and an optional table yslice_prob:
-    schematic = {
-        size = {x=4, y=6, z=4},
-        data = {
-            {name="default:cobble", param1=255, param2=0},
-            {name="default:dirt_with_grass", param1=255, param2=0},
-            {name="ignore", param1=255, param2=0},
-            {name="air", param1=255, param2=0},
-            ...
-        },
-        yslice_prob = {
-            {ypos=2, prob=128},
-            {ypos=5, prob=64},
-            ...
-        },
-    },
-    --  ^ See 'Schematic specifier' for details.
-    replacements = {["oldname"] = "convert_to", ...},
-    flags = "place_center_x, place_center_y, place_center_z, force_placement",
-    --  ^ Flags for schematic decorations.  See 'Schematic attributes'.
-    rotation = "90" -- rotate schematic 90 degrees on placement
-    --  ^ Rotation can be "0", "90", "180", "270", or "random".
-})
---}}}
 --}}}
 
 --{{{ Register function
@@ -580,7 +570,7 @@ gems.register_drop("gems:glowcrystal_normal", {
     ["glowcrystal_shard 5"] = 4,
 })
 
-gems.register_drop("gems:glowcrystal_top", {
+gems.register_drop("gems:glowcrystal_normal_top", {
     ["glowcrystal_shard 4"] = 2,
     ["glowcrystal_shard 3"] = 4,
     ["glowcrystal_shard 5"] = 4,
