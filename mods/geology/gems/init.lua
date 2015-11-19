@@ -6,7 +6,7 @@ gems.rare = 255
 gems.very_rare = 1024
 
 -- ColorString, "#RRGGBBAA", named colors supported
-gems.color = {
+gems.color = { --TODO
     ruby       = "",
     opal       = "",
     topaz      = "",
@@ -23,7 +23,7 @@ gems.color = {
     morion       = "black", --dimgray??
 }
 
-gems.crystal_light = 4
+gems.crystal_light = 3
 
 --{{{ Gems definitions
 gems.list = {
@@ -94,7 +94,7 @@ minetest.register_craftitem("gems:glowcrystal", {
 --}}}
 
 --{{{ Nodes
-minetest.register_node("gems:glowcrystal_small", {
+minetest.register_node("gems:glowcrystal_normal", {
     description = "An",
     groups = {
         attached_node = 1,
@@ -122,7 +122,7 @@ minetest.register_node("gems:glowcrystal_small", {
     },
 })
 
-minetest.register_node("gems:glowcrystal_normal", {
+minetest.register_node("gems:glowcrystal_large", {
     description = "Xayc",
     groups = {
         falling_node = 1,
@@ -138,11 +138,13 @@ minetest.register_node("gems:glowcrystal_normal", {
 })
 
 local pyramid = {}
-for i = -8, -7 do
-    table.insert(pyramid, {i/16, i/16, i/16, -i/16, (i+1)/16, -i/16})
+local y = -8
+for i = -7, -1 do
+    table.insert(pyramid, {i/16, y/16, i/16, -i/16, (y + 2)/16, -i/16})
+    y = y + 2
 end
 
-minetest.register_node("gems:glowcrystal_normal_top", {
+minetest.register_node("gems:glowcrystal_spike", {
     description = "Xayc",
     groups = {
         falling_node = 1,
@@ -161,247 +163,123 @@ minetest.register_node("gems:glowcrystal_normal_top", {
     },
 })
 
-minetest.register_node("gems:glowcrystal_large_inside", {
-    description = "Crystal-Ann",
-    groups = {
-        cracky = 2,
-        crystal = 1, gem = 1,
-    },
-    tiles = { "gems_glowcrystal_node.png" }, --TODO
-    use_texture_alpha = true,
-    drawtype = "glasslike",
-    paramtype = "light",
-    sunlight_propagates = true,
-    light_source = gems.crystal_light * 4,
-})
-
-local function corner (nodebox, coord1, coord2, side, perm_coord_num)
-    if perm_coord_num == 1 then
-        table.insert(nodebox, {
-            -0.5, coord1/16, coord2/16,
-             0.5, (coord1 + side)/16, (coord2 + side)/16
-         })
-    elseif perm_coord_num == 2 then
-        table.insert(nodebox, {
-            coord1/16, -0.5, coord2/16,
-            (coord1 + side)/16,  0.5, (coord2 + side)/16
-         })
-    elseif perm_coord_num == 3 then
-        table.insert(nodebox, {
-            coord1/16, coord2/16, -0.5, 
-            (coord1 + side)/16, (coord2 + side)/16, 0.5, 
-         })
-    else
-        return
-    end
-
-    local newside = side/2
-    if math.abs(newside) >= 1 then
-        corner(nodebox, coord1 + side, coord2, newside, perm_coord_num)
-        corner(nodebox, coord1, coord2 + side, newside, perm_coord_num)
-    end
+pyramid = {}
+y = 8
+for i = -7, -1 do
+    table.insert(pyramid, {i/16, y/16, i/16, -i/16, (y - 2)/16, -i/16})
+    y = y - 2
 end
 
-local vcorner = {}
-corner(vcorner, -8, -8, 8, 2)
-
-minetest.register_node("gems:glowcrystal_large_vcorner", {
-    description = "Crystal-Ann",
+minetest.register_node("gems:glowcrystal_spike_down", {
+    description = "Xayc",
     groups = {
-        cracky = 2,
+        falling_node = 1,
+        snappy = 1, cracky = 3, oddly_breakable_by_hand = 1,
         crystal = 1, gem = 1,
     },
-    tiles = { "gems_glowcrystal_node.png" }, --TODO
+    tiles = { "gems_glowcrystal_node.png" },
     use_texture_alpha = true,
-    drawtype = "node_box",
-    paramtype = "light",
-    paramtype2 = "facedir",
     sunlight_propagates = true,
-    light_source = gems.crystal_light * 3.5,
+    drawtype = "nodebox",
+    paramtype = "light",
+    light_source = gems.crystal_light * 2.5,
     node_box = {
         type = "fixed",
-        fixed = vcorner
+        fixed = pyramid,
     },
-})
-
-local hdcorner = {}
-corner(hdcorner, 8, 8, -8, 1)
-
-minetest.register_node("gems:glowcrystal_large_hdcorner", {
-    description = "Crystal-Ann",
-    groups = {
-        cracky = 2,
-        crystal = 1, gem = 1,
-    },
-    tiles = { "gems_glowcrystal_node.png" },
-    use_texture_alpha = true,
-    drawtype = "node_box",
-    paramtype = "light",
-    paramtype2 = "facedir",
-    sunlight_propagates = true,
-    light_source = gems.crystal_light * 3.5,
-    node_box = hdcorner,
-})
-
-local htcorner = {}
-corner(htcorner, -8, -8, 8, 1)
-
-minetest.register_node("gems:glowcrystal_large_hdcorner", {
-    description = "Crystal-Ann",
-    groups = {
-        cracky = 2,
-        crystal = 1, gem = 1,
-    },
-    tiles = { "gems_glowcrystal_node.png" },
-    use_texture_alpha = true,
-    drawtype = "node_box",
-    paramtype = "light",
-    paramtype2 = "facedir",
-    sunlight_propagates = true,
-    light_source = gems.crystal_light * 3.5,
-    node_box = htcorner,
 })
 --}}}
 
 --{{{ Decorations
-
 --{{{ schematics
-local normal_crystal = minetest.register_schematic({
+local xz = minetest.dir_to_facedir({x = -1, y = 0, z = 0})
+local xZ = minetest.dir_to_facedir({x =  1, y = 0, z = 0})
+local Xz = minetest.dir_to_facedir({x = 0, y = 0, z = -1})
+local XZ = minetest.dir_to_facedir({x = 0, y = 0, z =  1})
+
+local cr_schem_data = {}
+for i = 1, 125 do
+    cr_schem_data[i] = {name="air", param1=255, param2=0}
+end
+
+-- y == 0
+cr_schem_data[1] = {name="gems:glowcrystal_normal", param1=32, param2=math.random(4)-1}
+cr_schem_data[2] = {name="gems:glowcrystal_normal", param1=96, param2=math.random(4)-1}
+cr_schem_data[3] = {name="gems:glowcrystal_normal", param1=160, param2=math.random(4)-1}
+cr_schem_data[4] = {name="gems:glowcrystal_normal", param1=96, param2=math.random(4)-1}
+cr_schem_data[5] = {name="gems:glowcrystal_normal", param1=32, param2=math.random(4)-1}
+
+cr_schem_data[25 + 1] = {name="gems:glowcrystal_normal", param1=96, param2=math.random(4)-1}
+cr_schem_data[25 + 2] = {name="default:stone", param1=255, param2=0}
+cr_schem_data[25 + 3] = {name="default:stone", param1=255, param2=0}
+cr_schem_data[25 + 4] = {name="default:stone", param1=255, param2=0}
+cr_schem_data[25 + 5] = {name="gems:glowcrystal_normal", param1=96, param2=math.random(4)-1}
+
+cr_schem_data[50 + 1] = {name="gems:glowcrystal_normal", param1=160, param2=math.random(4)-1}
+cr_schem_data[50 + 2] = {name="default:stone", param1=255, param2=0}
+cr_schem_data[50 + 3] = {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true}
+cr_schem_data[50 + 4] = {name="default:stone", param1=255, param2=0}
+cr_schem_data[50 + 5] = {name="gems:glowcrystal_normal", param1=160, param2=math.random(4)-1}
+
+cr_schem_data[75 + 1] = {name="gems:glowcrystal_normal", param1=96, param2=math.random(4)-1}
+cr_schem_data[75 + 2] = {name="default:stone", param1=255, param2=0}
+cr_schem_data[75 + 3] = {name="default:stone", param1=255, param2=0}
+cr_schem_data[75 + 4] = {name="default:stone", param1=255, param2=0}
+cr_schem_data[75 + 5] = {name="gems:glowcrystal_normal", param1=96, param2=math.random(4)-1}
+
+cr_schem_data[100 + 1] = {name="gems:glowcrystal_normal", param1=32, param2=math.random(4)-1}
+cr_schem_data[100 + 2] = {name="gems:glowcrystal_normal", param1=96, param2=math.random(4)-1}
+cr_schem_data[100 + 3] = {name="gems:glowcrystal_normal", param1=160, param2=math.random(4)-1}
+cr_schem_data[100 + 4] = {name="gems:glowcrystal_normal", param1=96, param2=math.random(4)-1}
+cr_schem_data[100 + 5] = {name="gems:glowcrystal_normal", param1=32, param2=math.random(4)-1}
+
+-- y == 1
+cr_schem_data[30 + 2] = {name="gems:glowcrystal_normal", param1=192, param2=math.random(4)-1}
+cr_schem_data[30 + 3] = {name="gems:glowcrystal_normal", param1=224, param2=math.random(4)-1}
+cr_schem_data[30 + 4] = {name="gems:glowcrystal_normal", param1=192, param2=math.random(4)-1}
+
+cr_schem_data[55 + 2] = {name="gems:glowcrystal_normal", param1=224, param2=math.random(4)-1}
+cr_schem_data[55 + 3] = {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true}
+cr_schem_data[55 + 4] = {name="gems:glowcrystal_normal", param1=224, param2=math.random(4)-1}
+
+cr_schem_data[80 + 2] = {name="gems:glowcrystal_normal", param1=192, param2=math.random(4)-1}
+cr_schem_data[80 + 3] = {name="gems:glowcrystal_normal", param1=224, param2=math.random(4)-1}
+cr_schem_data[80 + 4] = {name="gems:glowcrystal_normal", param1=192, param2=math.random(4)-1}
+
+-- y == 2
+cr_schem_data[50 + 10 + 3] = {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true}
+
+-- y == 3
+cr_schem_data[50 + 15 + 3] = {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true}
+
+-- y == 4
+cr_schem_data[50 + 20 + 3] = {name="gems:glowcrystal_spike", param1=255, param2=0}
+
+gems.crystal_decoration = minetest.register_schematic({
     size = {x = 5, y = 5, z = 5},
     yslice_prob = {
         {ypos = 2, prob = 255 * 0.6},
         {ypos = 3, prob = 255 * 0.6},
     },
+    data = cr_schem_data,
+})
+
+gems.crystal_large = minetest.register_schematic({
+    size = {x = 1, y = 7, z = 1},
+    yslice_prob = {
+        {ypos = 2, prob = 255 * 0.5},
+        {ypos = 3, prob = 255 * 0.5},
+        {ypos = 4, prob = 255 * 0.5},
+        {ypos = 5, prob = 255 * 0.5},
+    },
     data = {
-        {name="gems:glowcrystal_small", param1=32, param2=0},
-        {name="gems:glowcrystal_small", param1=96, param2=0},
-        {name="gems:glowcrystal_small", param1=160, param2=0},
-        {name="gems:glowcrystal_small", param1=96, param2=0},
-        {name="gems:glowcrystal_small", param1=32, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        --
-        {name="gems:glowcrystal_small", param1=96, param2=0},
-        {name="default:stone", param1=255, param2=0},
-        {name="default:stone", param1=255, param2=0},
-        {name="default:stone", param1=255, param2=0},
-        {name="gems:glowcrystal_small", param1=96, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="gems:glowcrystal_small", param1=192, param2=0},
-        {name="gems:glowcrystal_small", param1=224, param2=0},
-        {name="gems:glowcrystal_small", param1=192, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        --
-        {name="gems:glowcrystal_small", param1=160, param2=0},
-        {name="default:stone", param1=255, param2=0},
-        {name="gems:glowcrystal_normal", param1=255, param2=0, force_place = true},
-        {name="default:stone", param1=255, param2=0},
-        {name="gems:glowcrystal_small", param1=160, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="gems:glowcrystal_small", param1=224, param2=0},
-        {name="gems:glowcrystal_normal", param1=255, param2=0, force_place = true},
-        {name="gems:glowcrystal_small", param1=224, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="gems:glowcrystal_normal", param1=255, param2=0, force_place = true},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="gems:glowcrystal_normal", param1=255, param2=0, force_place = true},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="gems:glowcrystal_normal_top", param1=255, param2=0, force_place = true},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        --
-        {name="gems:glowcrystal_small", param1=96, param2=0},
-        {name="default:stone", param1=255, param2=0},
-        {name="default:stone", param1=255, param2=0},
-        {name="default:stone", param1=255, param2=0},
-        {name="gems:glowcrystal_small", param1=96, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="gems:glowcrystal_small", param1=192, param2=0},
-        {name="gems:glowcrystal_small", param1=224, param2=0},
-        {name="gems:glowcrystal_small", param1=192, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        --
-        {name="gems:glowcrystal_small", param1=32, param2=0},
-        {name="gems:glowcrystal_small", param1=96, param2=0},
-        {name="gems:glowcrystal_small", param1=160, param2=0},
-        {name="gems:glowcrystal_small", param1=96, param2=0},
-        {name="gems:glowcrystal_small", param1=32, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
-        {name="air", param1=255, param2=0},
+        {name="gems:glowcrystal_spike_down", param1=255, param2=0, force_place = true},
+        {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true},
+        {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true},
+        {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true},
+        {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true},
+        {name="gems:glowcrystal_large", param1=255, param2=0, force_place = true},
+        {name="gems:glowcrystal_spike", param1=255, param2=0, force_place = true},
     },
 })
 --}}}
@@ -410,16 +288,17 @@ minetest.register_decoration({
     deco_type = "schematic", -- See "Decoration types"
     place_on = "default:dirt_with_grass",
     sidelen = 8,
-    fill_ratio = 0.02,
+    fill_ratio = 0.02, --TODO
     biomes = nil,
     y_min = -31000,
     y_max = 31000,
     
     ----- Schematic-type parameters
-    schematic = normal_crystal,
+    schematic = gems.crystal_decoration,
     flags = "place_center_x, place_center_z",
     rotation = "random"
 })
+--}}}
 --}}}
 
 --{{{ Register function
@@ -550,27 +429,33 @@ gems.register_drop("ores:granite", {
     diamond = gems.very_rare,
 })
 
-gems.register_drop("gems:glowcrystal_small", {
+gems.register_drop("gems:glowcrystal_normal", {
     glowcrystal = 4,
 })
-gems.register_drop("gems:glowcrystal_small", {
+gems.register_drop("gems:glowcrystal_normal", {
     ["glowcrystal_shard 3"] = 2,
     ["glowcrystal_shard 2"] = 4,
     ["glowcrystal_shard 4"] = 4,
 })
 
-gems.register_drop("gems:glowcrystal_normal", {
+gems.register_drop("gems:glowcrystal_large", {
     ["glowcrystal 3"] = 4,
     ["glowcrystal 4"] = 2,
     ["glowcrystal 5"] = 4,
 })
-gems.register_drop("gems:glowcrystal_normal", {
+gems.register_drop("gems:glowcrystal_large", {
     ["glowcrystal_shard 4"] = 2,
     ["glowcrystal_shard 3"] = 4,
     ["glowcrystal_shard 5"] = 4,
 })
 
-gems.register_drop("gems:glowcrystal_normal_top", {
+gems.register_drop("gems:glowcrystal_spike", {
+    ["glowcrystal_shard 4"] = 2,
+    ["glowcrystal_shard 3"] = 4,
+    ["glowcrystal_shard 5"] = 4,
+})
+
+gems.register_drop("gems:glowcrystal_spike_down", {
     ["glowcrystal_shard 4"] = 2,
     ["glowcrystal_shard 3"] = 4,
     ["glowcrystal_shard 5"] = 4,
