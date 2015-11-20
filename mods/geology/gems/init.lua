@@ -5,28 +5,29 @@ gems = {}
 gems.rare = 255
 gems.very_rare = 1024
 
+local color_alpha = 140
 -- ColorString, "#RRGGBBAA", named colors supported
 gems.color = { --TODO
-    ruby       = "",
-    opal       = "",
-    topaz      = "",
-    emerald    = "",
+    ruby       = "red",
+    opal       = "orangered",
+    topaz      = "gold",
+    emerald    = "green",
     aquamarine = "aquamarine",
-    sapphire   = "",
-    amethyst   = "",
-    diamond    = "",
+    sapphire   = "royalblue",
+    amethyst   = "darkviolet",
+    diamond    = "azure",
     -----
     rock_crystal = "ghostwhite",
-    citrine      = "lemonchiffon",
-    chatoyance   = "lightpink",
-    smoky        = "lightgray",
-    morion       = "black", --dimgray??
+    citrine      = "yellow",
+    chatoyance   = "pink",
+    smoky        = "gray",
+    morion       = "black",
 }
 
 gems.crystal_light = 3
 
---{{{ Gems definitions
-gems.list = {
+--{{{ Jewels definitions
+gems.jewels = {
     ruby       = "Рубин",
     opal       = "Опал",
     topaz      = "Топаз",
@@ -37,11 +38,19 @@ gems.list = {
     diamond    = "Алмаз",
 }
 
-for gem, description in pairs(gems.list) do
+for gem, description in pairs(gems.jewels) do
     minetest.register_craftitem("gems:" .. gem, {
         description = description,
         groups = {jewel = 1, gem = 1},
-        inventory_image = "gems_" .. gem .. ".png",
+        inventory_image = "gems_jewel_raw.png" ..
+            "^[colorize:" .. gems.color[gem] .. ":" .. color_alpha,
+    })
+
+    minetest.register_craftitem("gems:" .. gem .. "_cut", {
+        description = description,
+        groups = {jewel = 1, gem = 1},
+        inventory_image = "gems_jewel_cut.png" ..
+            "^[colorize:" .. gems.color[gem] .. ":" .. color_alpha
     })
 end
 --}}}
@@ -59,14 +68,25 @@ for quartz, description in pairs(gems.quartz) do
     minetest.register_craftitem("gems:" .. quartz, {
         description = description,
         groups = {quartz = 1, gem = 1},
-        inventory_image = "gems_quartz.png^[colorize:" .. gems.color[quartz] .. ":130",
+        inventory_image = "gems_quartz_raw.png" ..
+            "^[colorize:" .. gems.color[quartz] .. ":" .. color_alpha
+    })
+
+    minetest.register_craftitem("gems:" .. quartz .. "_cut", {
+        description = description,
+        groups = {quartz = 1, gem = 1},
+        inventory_image = "gems_quartz_cut.png" ..
+            "^[colorize:" .. gems.color[quartz] .. ":" .. color_alpha,
+        inventory_image = "gems_quartz_cut.png" ..
+            "^[colorize:" .. gems.color[quartz] .. ":" .. color_alpha ..
+            "^[transformFX"
     })
 
     ores.register_ore(":ores:" .. quartz, {
         description = description .. " (руда)",
-        tiles = {
-            "default_stone.png^" .. 
-            "(gems_quartz_ore.png^[colorize:" .. gems.color[quartz] ..":0)"
+        tiles = { "default_stone.png^(gems_quartz_ore.png" ..
+            "^[colorize:" .. gems.color[quartz] ..":" ..color_alpha ..
+            ")"
         },
         drop = "gems:" .. quartz,
         clust_size = 2,
@@ -81,14 +101,14 @@ end
 minetest.register_craftitem("gems:glowcrystal_shard", {
     description = "Осколок кристалла",
     groups = { crystal = 1, gem = 1},
-    inventory_image = "gems_glowcrystal_shard.png",
+    inventory_image = "gems_glowcrystal_shard.png", --TODO
     wield_light = gems.crystal_light,
 })
 
 minetest.register_craftitem("gems:glowcrystal", {
     description = "Кристалл",
     groups = { crystal = 1, gem = 1},
-    inventory_image = "gems_glowcrystal.png",
+    inventory_image = "gems_glowcrystal.png", --TODO
     wield_light = gems.crystal_light * 2,
 })
 --}}}
@@ -101,18 +121,34 @@ minetest.register_node("gems:glowcrystal_normal", {
         snappy = 2, cracky = 5, oddly_breakable_by_hand = 2,
         crystal = 1, gem = 1,
     },
-    tiles = { "gems_glowcrystal_node.png" }, --TODO
+    tiles = {
+        "gems_glowcrystal_normal_top.png", "gems_glowcrystal_normal_top.png",
+        "gems_glowcrystal_normal_pos_xside.png",
+        "gems_glowcrystal_normal_neg_xside.png",
+        "gems_glowcrystal_normal_pos_zside.png",
+        "gems_glowcrystal_normal_neg_zside.png",
+    },
     use_texture_alpha = true,
     drawtype = "nodebox",
     paramtype = "light",
     paramtype2 = "facedir",
     sunlight_propagates = true,
     light_source = gems.crystal_light,
+    drop = {},
     node_box = {
         type = "fixed",
         fixed = {
             -- {x1,   y1,    z1,   x2,   y2,   z2},
-            {    0, -0.5,     0, 4/16, 4/16, 4/16},
+            {    0, -0.5,     0, 1/16, 3/16, 1/16},
+            {    0, -0.5,  3/16, 1/16, 3/16, 4/16},
+            { 3/16, -0.5,     0, 4/16, 3/16, 1/16},
+            { 3/16, -0.5,  3/16, 4/16, 3/16, 4/16},
+            { 1/16, -0.5,     0, 3/16, 4/16, 1/16},
+            { 1/16, -0.5,  3/16, 3/16, 4/16, 4/16},
+            {    0, -0.5,  1/16, 1/16, 4/16, 3/16},
+            { 3/16, -0.5,  1/16, 4/16, 4/16, 3/16},
+            { 1/16, 4/16,  1/16, 3/16, 5/16, 3/16},
+            --{    0, -0.5,     0, 4/16, 4/16, 4/16},
             {    0, -0.5, -4/16, 2/16, 2/16,-2/16},
             {-2/16, -0.5, -2/16,    0, 1/16,    0},
             {-6/16, -0.5, -4/16,-4/16,    0,-2/16},
@@ -129,17 +165,18 @@ minetest.register_node("gems:glowcrystal_large", {
         snappy = 1, cracky = 3, oddly_breakable_by_hand = 1,
         crystal = 1, gem = 1,
     },
-    tiles = { "gems_glowcrystal_node.png" }, --TODO
+    tiles = { "gems_glowcrystal_large_side.png" },
     use_texture_alpha = true,
     drawtype = "glasslike",
     paramtype = "light",
     sunlight_propagates = true,
     light_source = gems.crystal_light * 3,
+    drop = {},
 })
 
 local pyramid = {}
 local y = -8
-for i = -7, -1 do
+for i = -8, -1 do
     table.insert(pyramid, {i/16, y/16, i/16, -i/16, (y + 2)/16, -i/16})
     y = y + 2
 end
@@ -151,7 +188,11 @@ minetest.register_node("gems:glowcrystal_spike", {
         snappy = 1, cracky = 3, oddly_breakable_by_hand = 1,
         crystal = 1, gem = 1,
     },
-    tiles = { "gems_glowcrystal_node.png" },
+    tiles = {
+        "gems_glowcrystal_spike_top.png", "gems_glowcrystal_large_top.png",
+        "gems_glowcrystal_spike_side.png", "gems_glowcrystal_spike_side.png",
+        "gems_glowcrystal_spike_side.png", "gems_glowcrystal_spike_side.png",
+    },
     use_texture_alpha = true,
     sunlight_propagates = true,
     drawtype = "nodebox",
@@ -161,11 +202,12 @@ minetest.register_node("gems:glowcrystal_spike", {
         type = "fixed",
         fixed = pyramid,
     },
+    drop = {},
 })
 
 pyramid = {}
 y = 8
-for i = -7, -1 do
+for i = -8, -1 do
     table.insert(pyramid, {i/16, y/16, i/16, -i/16, (y - 2)/16, -i/16})
     y = y - 2
 end
@@ -177,7 +219,13 @@ minetest.register_node("gems:glowcrystal_spike_down", {
         snappy = 1, cracky = 3, oddly_breakable_by_hand = 1,
         crystal = 1, gem = 1,
     },
-    tiles = { "gems_glowcrystal_node.png" },
+    tiles = {
+        "gems_glowcrystal_large_top.png", "gems_glowcrystal_spike_top.png",
+        "gems_glowcrystal_spike_side.png^[transformFY",
+        "gems_glowcrystal_spike_side.png^[transformFY",
+        "gems_glowcrystal_spike_side.png^[transformFY",
+        "gems_glowcrystal_spike_side.png^[transformFY",
+    },
     use_texture_alpha = true,
     sunlight_propagates = true,
     drawtype = "nodebox",
@@ -187,10 +235,10 @@ minetest.register_node("gems:glowcrystal_spike_down", {
         type = "fixed",
         fixed = pyramid,
     },
+    drop = {},
 })
 --}}}
 
---{{{ Decorations
 --{{{ schematics
 local xz = minetest.dir_to_facedir({x = -1, y = 0, z = 0})
 local xZ = minetest.dir_to_facedir({x =  1, y = 0, z = 0})
@@ -284,6 +332,7 @@ gems.crystal_large = minetest.register_schematic({
 })
 --}}}
 
+--{{{ Decorations
 minetest.register_decoration({
     deco_type = "schematic", -- See "Decoration types"
     place_on = "default:dirt_with_grass",
