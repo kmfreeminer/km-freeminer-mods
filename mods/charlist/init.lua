@@ -1,9 +1,9 @@
 charlist = {}
 
 charlist.sex = {"male", "female"}
-charlist.table = { "alv", "mann", "khatsi", "cverg", "avoon", "holf" }
+charlist.races = { "alv", "mann", "khatsi", "cverg", "avoon", "holf" }
 
-for i, race in ipairs(charlist.table) do
+for i, race in ipairs(charlist.races) do
     for j, sex in ipairs(charlist.sex) do
         default.player_register_model(race.."_"..sex..".b3d", {
             animation_speed = 30,
@@ -20,7 +20,7 @@ for i, race in ipairs(charlist.table) do
     end
 end
 
-for i, race in ipairs(charlist.table) do
+for i, race in ipairs(charlist.races) do
     minetest.register_privilege("race_"..race, {
         give_to_singleplayer= false
     })
@@ -34,14 +34,21 @@ function charlist.parse_charlist(player)
     local playername = player:get_player_name()
     local path = minetest.get_modpath("charlist").."/charlists/"..playername
     local file = io.open(path, "r")
-    if file then
+    if file then      
         local line = file:read()
         local race, sex = string.match(line, "(.*) (.*)")
+        local privileges = minetest.get_player_privs(playername)
+
+        for i, v in ipairs(charlist.races) do
+            privileges["race_"..v] = nil
+        end
+        privileges["female"] = nil
         
-        local privileges = core.get_player_privs(playername)
-        --local privileges = {}
         privileges["race_"..race] = true
-        privileges["female"] = (sex=="female")
+        if sex=="female" then
+            privileges["female"] = true
+        end
+
         minetest.set_player_privs(playername, privileges)
         
         local Inventory = player:get_inventory();
@@ -58,25 +65,28 @@ function charlist.parse_charlist(player)
         os.remove(path)
     end
 end
+
 minetest.register_on_joinplayer(function(player)
     charlist.parse_charlist(player)
     local playername = player:get_player_name()
+    local privileges = minetest.get_player_privs(playername)
 
     local filename = "mann"
-    for i, race in ipairs(charlist.table) do
-        if minetest.check_player_privs(playername, {["race_"..race]=true}) then
+    for i, race in ipairs(charlist.races) do
+        if privileges["race_"..race] == true then
             filename = race
             break
         end
     end
-        
-    if minetest.check_player_privs(playername, {female=true}) then
+
+    if privileges["female"]==true then
         filename = filename .. "_" .. charlist.sex[2]
     else
         filename = filename .. "_" .. charlist.sex[1]
     end
     
     filename = filename .. ".b3d"
+    
     print(filename)
 	default.player_set_model(player, filename)
 end)
