@@ -335,12 +335,12 @@ gems.crystal_large = minetest.register_schematic({
 --{{{ Decorations
 minetest.register_decoration({
     deco_type = "schematic", -- See "Decoration types"
-    place_on = "default:dirt_with_grass",
+    place_on = "default:stone",
     sidelen = 8,
     fill_ratio = 0.02, --TODO
     biomes = nil,
     y_min = -31000,
-    y_max = 31000,
+    y_max = 0,
     
     ----- Schematic-type parameters
     schematic = gems.crystal_decoration,
