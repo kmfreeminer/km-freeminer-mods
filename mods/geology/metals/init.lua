@@ -25,19 +25,19 @@ metals.register_metal = function (metal, metal_desc)
     minetest.register_craftitem("metals:" .. metal .. "_unshaped", {
         description = metal_desc.description .. " (необработано)",
         inventory_image = "metals_" .. metal .. "_unshaped.png",
-        groups = {metal = 1, level = metal_desc.level},
+        groups = {metal = 1, unshaped = 1, level = metal_desc.level},
     })
     
     minetest.register_craftitem("metals:" .. metal .. "_ingot", {
         description = metal_desc.description .. " (слиток)",
         inventory_image = "metals_" .. metal .. "_ingot.png",
-        groups = {metal = 1, level = metal_desc.level},
+        groups = {metal = 1, ingot = 1, level = metal_desc.level},
     })
     
     minetest.register_craftitem("metals:" .. metal .. "_sheet", {
         description = metal_desc.description .. " (лист)",
         inventory_image = "metals_" .. metal .. "_sheet.png",
-        groups = {metal = 1, level = metal_desc.level - 1},
+        groups = {metal = 1, sheet = 1, level = metal_desc.level - 1},
     })
 
     -- Nodes
