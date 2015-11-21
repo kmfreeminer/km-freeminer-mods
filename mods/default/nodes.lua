@@ -1,62 +1,51 @@
--- mods/default/nodes.lua
-
---
--- Stone
---
-
+--{{{ Stone
 minetest.register_node("default:stone", {
 	description = "Stone",
 	tiles = {"default_stone.png"},
-	groups = {cracky=3, stone=1, melt = 3000},
-	drop = 'default:cobble',
+	groups = {cracky=3, stone=1},
+	drop = "default:cobble",
 	legacy_mineral = true,
 	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
 })
 
 minetest.register_node("default:cobble", {
 	description = "Cobblestone",
 	tiles = {"default_cobble.png"},
 	is_ground_content = false,
-	groups = {cracky = 3, stone = 2, melt = 3000},
+	groups = {cracky = 3, stone = 2},
 	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
 })
 
 minetest.register_node("default:stonebrick", {
 	description = "Stone Brick",
 	tiles = {"default_stone_brick.png"},
 	is_ground_content = false,
-	groups = {cracky = 2, stone = 1, melt = 3000},
+	groups = {cracky = 2, stone = 1},
 	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
 })
 
 minetest.register_node("default:mossycobble", {
 	description = "Mossy Cobblestone",
 	tiles = {"default_mossycobble.png"},
 	is_ground_content = false,
-	groups = {cracky = 3, stone = 1, melt = 3000},
+	groups = {cracky = 3, stone = 1},
 	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
 })
 
 
 minetest.register_node("default:sandstone", {
 	description = "Sandstone",
 	tiles = {"default_sandstone.png"},
-	groups = {crumbly=2,cracky=3, melt = 3000},
+	groups = {crumbly=2,cracky=3},
 	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
 })
 
 minetest.register_node("default:sandstonebrick", {
 	description = "Sandstone Brick",
 	tiles = {"default_sandstone_brick.png"},
 	is_ground_content = false,
-	groups = {cracky=2, melt = 3000},
+	groups = {cracky=2},
 	sounds = default.node_sound_stone_defaults(),
-	melt = "default:lava_source",
 })
 
 
@@ -64,23 +53,11 @@ minetest.register_node("default:obsidian", {
 	description = "Obsidian",
 	tiles = {"default_obsidian.png"},
 	sounds = default.node_sound_stone_defaults(),
-	groups = {cracky=1,level=2, melt = 5000},
-	melt = "default:lava_source",
+	groups = {cracky=1,level=2},
 })
+--}}}
 
-minetest.register_node("default:obsidianbrick", {
-	description = "Obsidian Brick",
-	tiles = {"default_obsidian_brick.png"},
-	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
-	groups = {cracky = 1, level = 2, melt = 5000},
-	melt = "default:lava_source",
-})
-
---
--- Soft / Non-Stone
---
-
+--{{{ Soft / Non-Stone
 local flowing_sand_type = "source"
 local flowing_sand_leveled = 1
 local flowing_sand_paramtype2 = "leveled"
@@ -291,11 +268,9 @@ minetest.register_node("default:ice", {
 	sounds = default.node_sound_glass_defaults(),
 	melt = "default:water_source",
 })
+--}}}
 
---
--- Trees
---
-
+--{{{ Trees
 minetest.register_node("default:tree", {
 	description = "Tree",
 	tiles = {"default_tree_top.png", "default_tree_top.png", "default_tree.png"},
@@ -573,11 +548,9 @@ minetest.register_node("default:acacia_sapling", {
 		attached_node = 1, sapling = 1},
 	sounds = default.node_sound_leaves_defaults(),
 })
+--}}}
 
---
--- Plantlife (non-cubic)
---
-
+--{{{ Plantlife (non-cubic)
 minetest.register_node("default:cactus", {
 	description = "Cactus",
 	tiles = {"default_cactus_top.png", "default_cactus_top.png",
@@ -761,11 +734,9 @@ for i = 2, 5 do
 		},
 	})
 end
+--}}}
 
---
--- Liquids
---
-
+--{{{ Liquids
 minetest.register_node("default:water_source", {
 	description = "Water Source",
 	inventory_image = minetest.inventorycube("default_water.png"),
@@ -1085,11 +1056,9 @@ minetest.register_node("default:lava_flowing", {
 	leveled = 4,
 	freeze = "default:stone",
 })
+--}}}
 
---
--- Tools / "Advanced" crafting / Non-"natural"
---
-
+--{{{ Tools / "Advanced" crafting / Non-"natural"
 minetest.register_node("default:torch", {
 	description = "Torch",
 	drawtype = "torchlike",
@@ -1366,11 +1335,9 @@ minetest.register_node("default:brick", {
 
 	melt = "default:lava_source",
 })
+--}}}
 
---
--- Misc
---
-
+--{{{ Misc
 minetest.register_node("default:cloud", {
 	description = "Cloud",
 	tiles = {"default_cloud.png"},
@@ -1378,3 +1345,4 @@ minetest.register_node("default:cloud", {
 	sounds = default.node_sound_defaults(),
 	groups = {not_in_creative_inventory = 1},
 })
+--}}}
