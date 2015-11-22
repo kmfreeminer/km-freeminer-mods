@@ -5,11 +5,12 @@ real_locks.formspec =
     default.gui_bg..
     default.gui_bg_img..
     default.gui_slots..
+    "field[0.3,0.3;2,1;keypass;Форма ключа;]" ..
     "list[current_name;src;2.5,0;1,1;]" ..
+    "image[3.5,0;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
     "list[current_name;dstl;4.5,0;1,1;]" ..
     "list[current_name;dstk;5.5,0;1,1;]" ..
-    "field[0,0;2,1;keypass;Форма ключа;]" ..
-    "button[7,0;1.5,1;craft;Создать]" ..
+    "button[7,0;2,1;craft;Создать]" ..
     inventory.main(0, 1.2) ..
     "listring[current_name;dstl]" ..
     "listring[current_player;main]" ..
@@ -22,7 +23,7 @@ real_locks.formspec =
 real_locks.can_open_locked = function (pos, wield)
     if minetest.get_item_group(wield, "key") > 0 then 
 		local lock_pass = minetest.get_meta(pos):get_string("keyform")
-		local key_pass = wield:get_metadata()
+		local key_pass = minetest.deserialize(wield:get_metadata()).keyform
 
 		return lock_pass == key_pass
     else
@@ -54,7 +55,6 @@ real_locks.craft = function(pos, keyform)
             metadata = minetest.serialize({keyform = keyform})
         })
 
-        print(inv:room_for_item("dstk", key)) --TODO: кажется, метадата не учитывается. а ещё, если положить один ключ на другой, оно, кажется, затирается
         if inv:room_for_item("dstk", key)
         and inv:room_for_item("dstl", lock)
         then
@@ -122,7 +122,7 @@ for metal, props in pairs(metals.registered) do
         description = "Ключ (" .. props.description .. ")",
         groups = {metal = 1, key = 1, level = props.level},
         inventory_image = "real_locks_key_" .. metal .. ".png",
-        stack_max = 16,
+        stack_max = 1,
         range = 2,
     })
 
@@ -131,7 +131,7 @@ for metal, props in pairs(metals.registered) do
         groups = {metal = 1, key = 1, level = props.level},
         inventory_image = "real_locks_lock_" .. metal .. ".png",
         wield_image = "real_locks_lock_" .. metal .. ".png",
-        stack_max = 16,
+        stack_max = 1,
         range = 2,
     })
 end
