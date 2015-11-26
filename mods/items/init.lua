@@ -42,6 +42,17 @@ for item, name in pairs(items.tools) do
                     "items_" .. item .. "_head.png" ..
                     "^[colorize:" .. metaldef.color ..
                 ")",
+            range = 2.0,
+
+            tool_capabilities = {
+                full_punch_interval = 1.0,
+                max_drop_level=0,
+                groupcaps={
+                    snappy={times={[2]=0.80, [3]=0.40}, maxwear=0.05, maxlevel=1},
+                    choppy={times={[3]=0.90}, maxwear=0.05, maxlevel=0}
+                },
+                damage_groups = {groupname=damage},
+            },
         })
     end
 end
