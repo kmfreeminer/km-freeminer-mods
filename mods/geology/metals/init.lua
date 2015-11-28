@@ -172,6 +172,7 @@ metals.register_metal("silver", {
 metals.register_metal("gold", {
     description = "Золото",
     level = 2,
+    uses_mod = 0.5,
     is_alloy = false,
     minerals = { "native_gold" },
 })
@@ -260,6 +261,7 @@ metals.register_metal("rose_gold", {
 metals.register_metal("steel", {
     description = "Сталь",
     level = 4,
+    uses_mod = 2,
     is_alloy = true,
     alloy = {
         ["metals:wrought_iron_unshaped"] = 2,
