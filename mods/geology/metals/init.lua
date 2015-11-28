@@ -142,6 +142,8 @@ end
 metals.register_metal("tin", {
     description = "Олово",
     level = 0,
+    uses_mod = 1,
+    color = "#ABB0B5:255",
     is_alloy = false,
     minerals = { "cassiterite" }
 })
@@ -150,6 +152,8 @@ metals.register_metal("tin", {
 metals.register_metal("copper", {
     description = "Медь",
     level = 1,
+    uses_mod = 1,
+    color = "#805144:255",
     is_alloy = false,
     minerals = { "malachite", "native_copper" }
 })
@@ -158,6 +162,8 @@ metals.register_metal("copper", {
 metals.register_metal("lead", {
     description = "Свинец",
     level = 2,
+    uses_mod = 1,
+    color = "#5B5E65:255",
     is_alloy = false,
     minerals = { "galena" }
 })
@@ -165,6 +171,8 @@ metals.register_metal("lead", {
 metals.register_metal("silver", {
     description = "Серебро",
     level = 2,
+    uses_mod = 1,
+    color = "#8C8C8C:255",
     is_alloy = false,
     minerals = { "native_silver" }
 })
@@ -172,7 +180,8 @@ metals.register_metal("silver", {
 metals.register_metal("gold", {
     description = "Золото",
     level = 2,
-    uses_mod = 0.5,
+    uses_mod = 1,
+    color = "#A59B37:255",
     is_alloy = false,
     minerals = { "native_gold" },
 })
@@ -181,6 +190,8 @@ metals.register_metal("gold", {
 metals.register_metal("sterling_silver", {
     description = "Кхатцкое серебро",
     level = 2,
+    uses_mod = 1,
+    color = "#8F837A:255",
     is_alloy = true,
     alloy = {
         ["metals:silver_unshaped"] = 3,
@@ -191,6 +202,8 @@ metals.register_metal("sterling_silver", {
 metals.register_metal("bronze", {
     description = "Бронза",
     level = 2,
+    uses_mod = 1,
+    color = "#60543A:255",
     is_alloy = true,
     alloy = {
         ["metals:copper_unshaped"] = 3,
@@ -201,6 +214,8 @@ metals.register_metal("bronze", {
 metals.register_metal("black_bronze", {
     description = "Тёмная бронза", -- изобретено ещё людьми, забыто
     level = 2,
+    uses_mod = 1,
+    color = "#35212E:255",
     is_alloy = true,
     alloy = {
         ["metals:copper_unshaped"] = 2,
@@ -212,6 +227,8 @@ metals.register_metal("black_bronze", {
 metals.register_metal("tumbaga", {
     description = "Тумбага", -- изобретено ещё людьми, забыто
     level = 2,
+    uses_mod = 1,
+    color = "#8B7225:255",
     is_alloy = true,
     alloy = {
         ["metals:copper_unshaped"] = 1,
@@ -223,6 +240,8 @@ metals.register_metal("tumbaga", {
 metals.register_metal("pig_iron", {
     description = "Чугун",
     level = 3,
+    uses_mod = 1,
+    color = "#605759:255",
     is_alloy = false,
     minerals = {"iron_ore"}
 })
@@ -231,6 +250,8 @@ metals.register_metal("pig_iron", {
 metals.register_metal("wrought_iron", {
     description = "Железо",
     level = 3,
+    uses_mod = 1,
+    color = "#767676:255",
     is_alloy = true,
     alloy = { ["metals:pig_iron_unshaped"] = 1 }
 })
@@ -239,6 +260,8 @@ metals.register_metal("wrought_iron", {
 metals.register_metal("brass", {
     description = "Латунь",
     level = 2,
+    uses_mod = 1,
+    color = "#645F3A:255",
     is_alloy = true,
     alloy = {
         ["metals:copper_unshaped"] = 2,
@@ -249,6 +272,8 @@ metals.register_metal("brass", {
 metals.register_metal("rose_gold", {
     description = "Розовое золото",
     level = 2,
+    uses_mod = 1,
+    color = "#A47453:255",
     is_alloy = true,
     alloy = {
         ["metals:gold_unshaped"] = 3,
@@ -261,7 +286,8 @@ metals.register_metal("rose_gold", {
 metals.register_metal("steel", {
     description = "Сталь",
     level = 4,
-    uses_mod = 2,
+    uses_mod = 1,
+    color = "#5B5E65:255",
     is_alloy = true,
     alloy = {
         ["metals:wrought_iron_unshaped"] = 2,

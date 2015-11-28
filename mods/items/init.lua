@@ -55,7 +55,7 @@ for item, itemdef in pairs(items.tools) do
         local damage = nil
         if itemdef[3] then damage = {fudge = itemdef[3]} end
 
-        if metaldef.color == nil then metaldef.color = "#606060:0" end
+        if metaldef.color == nil then metaldef.color = "#000000:0" end
 
         minetest.register_tool("items:" .. item .. "_" .. metal, {
             description = itemdef[1] ..
