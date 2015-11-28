@@ -119,7 +119,7 @@ minetest.register_node("real_locks:table", {
 --{{{Register keys and locks
 for metal, props in pairs(metals.registered) do
     minetest.register_craftitem("real_locks:key_" .. metal, {
-        description = "Ключ (" .. props.description .. ")",
+        description = "Ключ (" .. props.description:lower_cyr() .. ")",
         groups = {metal = 1, key = 1, level = props.level},
         inventory_image = "real_locks_key_" .. metal .. ".png",
         stack_max = 1,

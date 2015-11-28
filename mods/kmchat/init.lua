@@ -104,16 +104,6 @@ function word_to_number(word)
     return number
 end
 
-cyrillic_uppercase = {"А","Б","В","Г","Д","Е","Ё","Ж","З","И","Й","К","Л","М","Н","О","П","Р","С","Т","У","Ф","Х","Ц","Ч","Ш","Щ","Ъ","Ы","Ь","Э","Ю","Я"}
-cyrillic_lowercase = {"а","б","в","г","д","е","ё","ж","з","и","й","к","л","м","н","о","п","р","с","т","у","ф","х","ц","ч","ш","щ","ъ","ы","ь","э","ю","я"}
-
-function cyrillic_lower(phrase)
-    for i = 1, #cyrillic_uppercase do 
-        phrase = string.gsub(phrase, cyrillic_uppercase[i], cyrillic_lowercase[i])
-    end
-    return phrase
-end
-
 i_lang_parts = {"эль", "эль", "и", "ха", "ля", "ля", "р", "ая", "ма", "кю", "лют", "пил"}
 i_lang_max_size = 4
 
@@ -144,7 +134,7 @@ function lang_proc(name, pattern, range, color, priv, substr)
     local phrase = ""
     local original = string.gsub(substr[2], "#", "")
     print('test')
-    substr[2] = cyrillic_lower(substr[2])
+    substr[2] = substr[2]:lower_cyr()
     for word in string.gmatch(substr[2], "%S+") do
         local appendix  = ""
         local prefix = ""

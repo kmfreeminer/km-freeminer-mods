@@ -58,7 +58,8 @@ for item, itemdef in pairs(items.tools) do
         if metaldef.color == nil then metaldef.color = "#606060:0" end
 
         minetest.register_tool("items:" .. item .. "_" .. metal, {
-            description = itemdef[1] .. "(" .. metaldef.description .. ")",
+            description = itemdef[1] ..
+                "(" .. metaldef.description:lower_cyr() .. ")",
             inventory_image = "items_" .. item .. "_hand.png" ..
                 "^(" ..
                     "items_" .. item .. "_head.png" ..
