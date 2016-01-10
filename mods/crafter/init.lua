@@ -63,7 +63,7 @@ local function check_craft(data, w, c)
           --  end
           --end
           print("Craft found! "..c.output)
-          return {item=ItemStack(c.output),time=1}
+          return ItemStack(c.output)
         elseif data.items[p] ~= nil and data.items[p]:get_name() ~= "" then
           print("Invalid data item "..dump(data.items[p]:get_name()))
           return nil

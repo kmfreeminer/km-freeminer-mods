@@ -11,7 +11,7 @@ anvil.formspec =
     "list[current_name;hammer;1,1;1,1;]" ..
     "list[current_name;src;2.4,0;3,3;]" ..
     "image[5.7,1;1,1;gui_furnace_arrow_bg.png^[transformR270]" ..
-    "list[current_name;dst;7,0;1,1;3]" ..
+    "list[current_name;dst;7,0;1,1;2]" ..
     "list[current_name;dst;7,1;1,2;]" ..
     inventory.main(0, 3.2) ..
     "listring[current_name;dst]" ..
@@ -40,9 +40,8 @@ local function is_hammer(itemstack)
     local name = itemstack:get_name()
     local tool = minetest.registered_tools[name]
 
-    if tool ~= nil
-    and tool.tool_capabilities.groupcaps.anvil ~= nil
-    and tool.tool_capabilities.groupcaps.anvil > 0
+    if tool and tool.tool_capabilities.groupcaps.anvil and
+        tool.tool_capabilities.groupcaps.anvil.uses > 0
     then
         return true
     else
@@ -53,7 +52,7 @@ end
 local function get_uses(itemstack)
     local name = itemstack:get_name()
     local tool = minetest.registered_tools[name]
-    if tool then
+    if tool and is_hammer(itemstack) then
         return tool_capabilities.groupcaps.anvil.uses
     end
 end
@@ -61,28 +60,29 @@ end
 anvil.craft_predict = function(pos, player)
     local meta = minetest.get_meta(pos)
     local inv = meta:get_inventory()
-    local craftlist = inv:get_list("src")
-
-    -- Get recipes for anvil
-    local output = crafter.get_craft_result({
-        method = "anvil",
-        width = inv:get_width("src") or 3,
-        items = craftlist
-    })
-    print(dump(output))
-    if #output > 3 then
-        minetest.log("error",
-            "Too many craft recipes (" .. #output .. ") for craftlist " ..
-            craftlist
-        )
-        for i = 4, #output do
-            output[i] = nil
-        end
-    end
-
     local hammer = inv:get_stack("hammer", 1)
+
+    -- If hammer is present
     if hammer:get_name() ~= "" then
-        -- If hammer is present
+        local craftlist = inv:get_list("src")
+
+        -- Get recipes for anvil
+        local output = crafter.get_craft_result({
+            method = "anvil",
+            width = inv:get_width("src") or 3,
+            items = craftlist
+        })
+
+        if #output > 3 then
+            minetest.log("error",
+                "Too many craft recipes (" .. #output .. ") for craftlist " ..
+                craftlist
+            )
+            for i = 4, #output do
+                output[i] = nil
+            end
+        end
+
         inv:set_list("dst", output)
     else
         inv:set_list("dst", {})
@@ -132,17 +132,16 @@ anvil.register = function (material, anvil_def)
         or {oddly_breakable_by_hand = 2, falling_node = 1, dig_immediate = 1}
     groups.level = minetest.get_item_group(material, "level")
 
-    local material_tile = material_name
     if default.get_modname(material) == "metals" then
-        material_tile = material_tile:sub(1, material_name:find("_unshaped") - 1)
+        material_name = material_name:sub(1, material_name:find("_unshaped") - 1)
     end
 
     minetest.register_node("anvil:" .. material_name, {
         description = anvil_def.description or "Накавайня",
         tiles = anvil_def.tiles or {
-            "anvil_" .. material_tile .. "_top.png",
-            "anvil_" .. material_tile .. "_top.png",
-            "anvil_" .. material_tile .. "_side.png"
+            "anvil_" .. material_name .. "_top.png",
+            "anvil_" .. material_name .. "_top.png",
+            "anvil_" .. material_name .. "_side.png"
         },
         drawtype = "nodebox",
         paramtype = "light",
