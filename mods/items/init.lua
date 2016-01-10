@@ -1,5 +1,6 @@
 items = {}
 
+--{{{ Definitions
 items.weapons_groupcaps = {
     crumbly = {uses = 100, times = {10.0, 9.0, 8.0} },
     cracky = {uses = 10, times = {10.0, 9.0, 8.0} },
@@ -7,7 +8,7 @@ items.weapons_groupcaps = {
     choppy = {uses = 20, times = {2.0, 1.6, 1.2} },
 }
 
-items.tools = {
+items.tools_metal = {
     -- Tools
     pick   = {"Кирка", {cracky = {uses = 20, times = {1.60, 1.20, 0.80}} }},
     shovel = {"Лопата",{crumbly = {uses = 20, times = {1.60, 1.20, 0.80}} }},
@@ -18,14 +19,12 @@ items.tools = {
     }},
     hoe    = {"Мотыга",{crumbly = {uses = 20, times = {1.60, 1.20, 0.80}} }},
     scythe = {"Коса",  {snappy = {uses = 20, times = {1.60, 1.20, 0.80}} }},
-    -- Удочка
 
     -- Weapons
     dagger          = {"Кинжал",              items.weapons_groupcaps, 1},
     stiletto        = {"Стилет",              items.weapons_groupcaps, 1},
     throwing_knife  = {"Метательный нож",     items.weapons_groupcaps, 1},
     throwing_axe    = {"Метательный топорик", items.weapons_groupcaps, 1},
-    club            = {"Дубина",              items.weapons_groupcaps, 2},
     sword           = {"Короткий меч",        items.weapons_groupcaps, 3},
     scimitar        = {"Ятаган",              items.weapons_groupcaps, 3},
     saber           = {"Сабля",               items.weapons_groupcaps, 3},
@@ -35,15 +34,23 @@ items.tools = {
     trident         = {"Трезубец",            items.weapons_groupcaps, 4},
     spear           = {"Копьё",               items.weapons_groupcaps, 4},
     halberd         = {"Алебарда",            items.weapons_groupcaps, 4},
-    shortbow        = {"Короткий лук",        items.weapons_groupcaps, 2},
-    longbow         = {"Длинный лук",         items.weapons_groupcaps, 3},
-    crossbow        = {"Арбалет",             items.weapons_groupcaps, 3},
-    arrow           = {"Стрела",              items.weapons_groupcaps, 0},
     morning_star    = {"Моргенштерн",         items.weapons_groupcaps, 3},
     flail           = {"Цеп",                 items.weapons_groupcaps, 3},
 }
 
-for item, itemdef in pairs(items.tools) do
+items.tools = {
+
+    -- Weapons
+    club            = {"Дубина",              items.weapons_groupcaps, 2},
+    shortbow        = {"Короткий лук",        items.weapons_groupcaps, 2},
+    longbow         = {"Длинный лук",         items.weapons_groupcaps, 3},
+    crossbow        = {"Арбалет",             items.weapons_groupcaps, 3},
+    arrow           = {"Стрела",              items.weapons_groupcaps, 0},
+}
+--}}}
+
+--{{{ Tools registration
+for item, itemdef in pairs(items.tools_metal) do
     for metal, metaldef in pairs(metals.registered) do
         local groupcaps = table.copy(itemdef[2])
         for _, group in pairs(groupcaps) do
@@ -76,3 +83,329 @@ for item, itemdef in pairs(items.tools) do
         })
     end
 end
+
+for item, itemdef in pairs(items.tools) do
+    local groupcaps = table.copy(itemdef[2])
+
+    local damage = nil
+    if itemdef[3] then damage = {fudge = itemdef[3]} end
+
+    minetest.register_tool("items:" .. item, {
+        description = itemdef[1],
+        inventory_image = "items_" .. item,
+        range = 2.0,
+
+        tool_capabilities = {
+            full_punch_interval = 1.0,
+            max_drop_level = 0,
+            groupcaps = groupcaps,
+            damage_groups = damage,
+        },
+    })
+end
+--}}}
+
+--{{{ Craft recipes with metals
+for metal, metaldef in pairs(metals.registered) do
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:dagger_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+            {"default:stick"}
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:stiletto_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+            {"default:stick"}
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:throwing_knife_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+            {"default:stick"}
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:axe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet", "metals:" .. metal .. "_sheet"},
+            {"metals:" .. metal .. "_sheet", "default:stick"},
+            {                  "", "default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:axe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet", "metals:" .. metal .. "_sheet"},
+            {"default:stick",      "metals:" .. metal .. "_sheet"},
+            {"default:stick",      ""},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:throwing_axe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet", "metals:" .. metal .. "_sheet"},
+            {"metals:" .. metal .. "_sheet", "default:stick"},
+            {                  "", "default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:throwing_axe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet", "metals:" .. metal .. "_sheet"},
+            {"default:stick",      "metals:" .. metal .. "_sheet"},
+            {"default:stick",      ""},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:battle_axe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet", "metals:" .. metal .. "_sheet"},
+            {"metals:" .. metal .. "_sheet", "default:stick"},
+            {                  "", "default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:battle_axe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet", "metals:" .. metal .. "_sheet"},
+            {"default:stick",      "metals:" .. metal .. "_sheet"},
+            {"default:stick",      ""},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:sword_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot"},
+            {"metals:" .. metal .. "_ingot"},
+            {"default:stick"},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:scimitar_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+            {"metals:" .. metal .. "_sheet"},
+            {"default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:saber_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+            {"metals:" .. metal .. "_sheet"},
+            {"default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:smallsword_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+            {"metals:" .. metal .. "_sheet"},
+            {"default:stick"},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:saber_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot"},
+            {"metals:" .. metal .. "_ingot"},
+            {"metals:" .. metal .. "_ingot"},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:trident_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot"},
+            {"default:stick"},
+            {"default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:spear_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot"},
+            {"default:stick"},
+            {"default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:halberd_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot"},
+            {"default:stick"},
+            {"default:stick"},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:pick_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
+            {                  "",      "default:stick",                   ""},
+            {                  "",      "default:stick",                   ""},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:shovel_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+            {"default:stick"},
+            {"default:stick"},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:hammer_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
+            {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
+            {                  "",      "default:stick",                   ""},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:hoe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
+            {                  "",      "default:stick"},
+            {                  "",      "default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:hoe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
+            {     "default:stick",                   ""},
+            {     "default:stick",                   ""},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:scythe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
+            {                  "",      "default:stick"},
+            {                  "",      "default:stick"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:scythe_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
+            {     "default:stick",                   ""},
+            {     "default:stick",                   ""},
+        }
+    })
+end
+--}}}
+
+--{{{ Regular craft recipes
+minetest.register_craft({
+    output = "items:club",
+    recipe = {
+        {"default:stick"},
+        {"default:stick"},
+    }
+})
+
+-- TODO:ARCHERY?
+minetest.register_craft({
+    output = "items:shortbow",
+    recipe = {
+        {"default:stick", "default:string"},
+        {"default:stick", "default:string"},
+    }
+})
+
+minetest.register_craft({
+    output = "items:longbow",
+    recipe = {
+        {             "", "default:stick", "default:string"},
+        {"default:stick",              "", "default:string"},
+        {             "", "default:stick", "default:string"},
+    }
+})
+
+minetest.register_craft({
+    output = "items:longbow",
+    recipe = {
+        {"default:string", "default:stick",              ""},
+        {"default:string",              "", "default:stick"},
+        {"default:string", "default:stick",              ""},
+    }
+})
+
+minetest.register_craft({
+    output = "items:crossbow",
+    recipe = {
+        { "default:stick",  "default:stick",  "default:stick"},
+        {"default:string", "default:string", "default:string"},
+        {              "",  "default:stick",               ""},
+    }
+})
+--}}}
