@@ -3,7 +3,8 @@ metals.registered = {}
 
 -- How many wire crafts from metal sheet.
 -- If this is >4 then it's not possible to melt wire into ingot in smelter,
--- so choose carefully
+-- so choose carefully.
+-- Also used in anvil mod (craft recipes). Check before changing this value.
 metals.WIRECOUNT = 4
 
 -- Function that check if inventory list contains metal items.

@@ -406,3 +406,34 @@ anvil.register("metals:steel_unshaped", {
     },
 })
 --}}}
+
+--{{{ Craft recipes
+for metal, metaldef in pairs(metals.registered) do
+    crafter.register_craft({
+        type = "anvil",
+        output = "metals:" .. metal .. "_ingot",
+        recipe = { {"metals:" .. metal .. "_unshaped"} }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "metals:" .. metal .. "_sheet",
+        recipe = { {"metals:" .. metal .. "_unshaped"} }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "metals:" .. metal .. "_sheet",
+        recipe = { {"metals:" .. metal .. "_ingot"} }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "metals:" .. metal .. "_sheet",
+        recipe = {
+            {"metals:" .. metal .. "_wire", "metals:" .. metal .. "_wire"},
+            {"metals:" .. metal .. "_wire", "metals:" .. metal .. "_wire"}
+        }
+    })
+end
+--}}}
