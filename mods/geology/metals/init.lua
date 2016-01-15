@@ -1,6 +1,11 @@
 metals = {}
 metals.registered = {}
 
+-- How many wire crafts from metal sheet.
+-- If this is >4 then it's not possible to melt wire into ingot in smelter,
+-- so choose carefully
+metals.WIRECOUNT = 4
+
 -- Function that check if inventory list contains metal items.
 -- Use for cheking if craft is possible
 metals.contains_metals = function (invlist)
@@ -38,6 +43,12 @@ metals.register_metal = function (metal, metal_desc)
         description = metal_desc.description .. " (лист)",
         inventory_image = "metals_" .. metal .. "_sheet.png",
         groups = {metal = 1, sheet = 1, level = metal_desc.level - 1},
+    })
+
+    minetest.register_craftitem("metals:" .. metal .. "_wire", {
+        description = metal_desc.description .. " (проволока)",
+        inventory_image = "metals_" .. metal .. "_wire.png",
+        groups = {metal = 1, wire = 1, level = metal_desc.level - 1},
     })
 
     -- Nodes
@@ -83,6 +94,12 @@ metals.register_metal = function (metal, metal_desc)
         type = "shapeless",
         output = "metals:" .. metal .. "_sheet",
         recipe = { "metals:" .. metal .. "_ingot" },
+    })
+
+    minetest.register_craft({
+        type = "shapeless",
+        output = "metals:" .. metal .. "_wire" .. metals.WIRECOUNT,
+        recipe = { "metals:" .. metal .. "_sheet" },
     })
 
     --[[ нужно или нет?
@@ -132,6 +149,10 @@ metals.register_metal = function (metal, metal_desc)
     })
     smelter.register_craft("metals:"..metal.."_unshaped", {
         items = { ["metals:" ..metal.. "_sheet"] = 1 },
+        time = 5,
+    })
+    smelter.register_craft("metals:"..metal.."_unshaped", {
+        items = { ["metals:" ..metal.. "_wire"] = metals.WIRECOUNT },
         time = 5,
     })
 end
