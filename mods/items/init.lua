@@ -288,6 +288,28 @@ for metal, metaldef in pairs(metals.registered) do
 
     crafter.register_craft({
         type = "anvil",
+        output = "items:morning_star_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot"},
+            {"metals:" .. metal .. "_wire"},
+            {"default:stick"},
+        }
+    })
+    
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:flail_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_ingot"},
+            {"metals:" .. metal .. "_wire"},
+            {"default:stick"},
+        }
+    })
+
+    --
+
+    crafter.register_craft({
+        type = "anvil",
         output = "items:pick_" .. metal,
         recipe = {
             {"metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot", "metals:" .. metal .. "_ingot"},
@@ -373,12 +395,19 @@ minetest.register_craft({
     }
 })
 
--- TODO:ARCHERY?
 minetest.register_craft({
     output = "items:shortbow",
     recipe = {
         {"default:stick", "default:string"},
         {"default:stick", "default:string"},
+    }
+})
+
+minetest.register_craft({
+    output = "items:shortbow",
+    recipe = {
+        {"default:string", "default:stick"},
+        {"default:string", "default:stick"},
     }
 })
 
@@ -403,9 +432,9 @@ minetest.register_craft({
 minetest.register_craft({
     output = "items:crossbow",
     recipe = {
-        { "default:stick",  "default:stick",  "default:stick"},
-        {"default:string", "default:string", "default:string"},
-        {              "",  "default:stick",               ""},
+        { "default:stick",    "group:ingot", "default:stick"},
+        {    "group:wire", "default:string",    "group:wire"},
+        {              "",  "default:stick",              ""},
     }
 })
 --}}}
