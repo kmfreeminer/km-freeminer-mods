@@ -10,15 +10,29 @@ items.weapons_groupcaps = {
 
 items.tools_metal = {
     -- Tools
-    pick   = {"Кирка", {cracky = {uses = 20, times = {1.60, 1.20, 0.80}} }},
-    shovel = {"Лопата",{crumbly = {uses = 20, times = {1.60, 1.20, 0.80}} }},
-    axe    = {"Топор", {choppy = {uses = 20, times = {1.60, 1.20, 0.80}} }},
-    hammer = {"Молот", {
-        cracky = {uses = 20, times = {1.60, 1.20, 0.80}},
-        anvil = {uses = 100},
+    pick   = {"Кирка", {cracky = {uses = 20, times = {1.60, 1.20, 0.80}} }, 2},
+    shovel = {"Лопата",{crumbly = {uses = 20, times = {1.60, 1.20, 0.80}} }, 2},
+    axe    = {"Топор", {choppy = {uses = 20, times = {1.60, 1.20, 0.80}} }, 2},
+    hammer = {"Молот",
+        {
+            cracky = {uses = 20, times = {1.60, 1.20, 0.80}},
+            anvil = {uses = 100},
+        },
+        2
+    },
+    hoe    = {"Мотыга",{crumbly = {uses = 20, times = {1.60, 1.20, 0.80}} }, 1},
+    scythe = {"Коса",  {snappy = {uses = 20, times = {1.60, 1.20, 0.80}} }, 3},
+
+    -- Kitchen tools
+    fork  = {"Вилка", {
+        crumbly = {uses = 10, times = {10.0, 9.0, 8.0} },
+        cracky  = {uses = 10, times = {10.0, 9.0, 8.0} },
     }},
-    hoe    = {"Мотыга",{crumbly = {uses = 20, times = {1.60, 1.20, 0.80}} }},
-    scythe = {"Коса",  {snappy = {uses = 20, times = {1.60, 1.20, 0.80}} }},
+    spoon = {"Ложка", {
+        crumbly = {uses = 10, times = {10.0, 9.0, 8.0} },
+        cracky  = {uses = 10, times = {10.0, 9.0, 8.0} },
+    }},
+    knife = {"Нож", items.weapons_groupcaps, 1},
 
     -- Weapons
     dagger          = {"Кинжал",              items.weapons_groupcaps, 1},
@@ -45,7 +59,7 @@ items.tools = {
     shortbow        = {"Короткий лук",        items.weapons_groupcaps, 2},
     longbow         = {"Длинный лук",         items.weapons_groupcaps, 3},
     crossbow        = {"Арбалет",             items.weapons_groupcaps, 3},
-    arrow           = {"Стрела",              items.weapons_groupcaps, 0},
+    arrow           = {"Стрела",              items.weapons_groupcaps},
 }
 --}}}
 
@@ -105,8 +119,47 @@ for item, itemdef in pairs(items.tools) do
 end
 --}}}
 
+--{{{ Craftitems registration
+minetest.register_craftitem("items:fishing_rod", {
+    description = "Удочка",
+    inventory_image = "items_fishing_rod.png",
+    liquids_pointable = true,
+})
+
+minetest.register_craftitem("items:smoking_pipe", {
+    description = "Курительная трубка",
+    inventory_image = "items_smoking_pipe.png",
+})
+--}}}
+
 --{{{ Craft recipes with metals
 for metal, metaldef in pairs(metals.registered) do
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:fork_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:spoon_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+        }
+    })
+
+    crafter.register_craft({
+        type = "anvil",
+        output = "items:knife_" .. metal,
+        recipe = {
+            {"metals:" .. metal .. "_sheet"},
+        }
+    })
+
+    --
+
     crafter.register_craft({
         type = "anvil",
         output = "items:dagger_" .. metal,
@@ -387,6 +440,18 @@ end
 --}}}
 
 --{{{ Regular craft recipes
+
+-- Tools
+crafter.register_craft({
+    output = "items:hammer_stone",
+    recipe = {
+        {"default:cobble", "default:cobble", "default:cobble"},
+        {"default:cobble", "default:cobble", "default:cobble"},
+        {              "",  "default:stick",               ""},
+    }
+})
+
+-- Weapons
 minetest.register_craft({
     output = "items:club",
     recipe = {
@@ -435,6 +500,50 @@ minetest.register_craft({
         { "default:stick",    "group:ingot", "default:stick"},
         {    "group:wire", "default:string",    "group:wire"},
         {              "",  "default:stick",              ""},
+    }
+})
+
+minetest.register_craft({
+    output = "items:arrow",
+    recipe = {
+        {"group:ingot"},
+        {"default:stick"},
+        {"default:feather"}
+    }
+})
+
+-- Craftitems
+minetest.register_craft({
+    output = "items:fishing_rod",
+    recipe = {
+        { "default:stick",              "", ""},
+        {"default:string", "default:stick", ""},
+        {"default:string", "", "default:stick"}
+    }
+})
+
+minetest.register_craft({
+    output = "items:fishing_rod",
+    recipe = {
+        {"",              "",  "default:stick"},
+        {"", "default:stick", "default:string"},
+        {"default:stick", "", "default:string"}
+    }
+})
+
+minetest.register_craft({
+    output = "items:smoking_pipe",
+    recipe = {
+        {"", "default:stick"},
+        {"default:stick", ""}
+    }
+})
+
+minetest.register_craft({
+    output = "items:smoking_pipe",
+    recipe = {
+        {"default:stick", ""}
+        {"", "default:stick"},
     }
 })
 --}}}
