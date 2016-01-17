@@ -22,17 +22,17 @@ anvil.formspec =
     "listring[current_player;main]"
 
 --{{{ Craft protection
-minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv)
-    if metals.contains_metals(old_craft_grid)
-    and itemstack:get_modname() ~= "anvil"
-    then
-        minetest.chat_send_player(player:get_player_name(),
-            "Этот предмет нельзя создать голыми руками."
-        )
-        craft_inv:set_list("craft", old_craft_grid)
-        return ItemStack("")
-    end
-end)
+--minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv)
+--    if metals.contains_metals(old_craft_grid)
+--    and itemstack:get_modname() ~= "anvil"
+--    then
+--        minetest.chat_send_player(player:get_player_name(),
+--            "Этот предмет нельзя создать голыми руками."
+--        )
+--        craft_inv:set_list("craft", old_craft_grid)
+--        return ItemStack("")
+--    end
+--end)
 --}}}
 
 --{{{ Functions

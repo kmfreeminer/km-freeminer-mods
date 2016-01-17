@@ -117,6 +117,22 @@ for item, itemdef in pairs(items.tools) do
         },
     })
 end
+
+minetest.register_tool("items:hammer_stone", {
+    description = "Каменный молот",
+    inventory_image = "items_hammer_hand.png^items_hammer_head.png",
+    range = 2.0,
+
+    tool_capabilities = {
+        full_punch_interval = 1.0,
+        max_drop_level = 0,
+        groupcaps = {
+            cracky = {uses = 10, times = {1.60, 1.20, 0.80}},
+            anvil = {uses = 50},
+        },
+        damage_groups = {fudge = 2},
+    },
+})
 --}}}
 
 --{{{ Craftitems registration
