@@ -458,7 +458,7 @@ end
 --{{{ Regular craft recipes
 
 -- Tools
-crafter.register_craft({
+minetest.register_craft({
     output = "items:hammer_stone",
     recipe = {
         {"default:cobble", "default:cobble", "default:cobble"},
@@ -558,8 +558,8 @@ minetest.register_craft({
 minetest.register_craft({
     output = "items:smoking_pipe",
     recipe = {
-        {"default:stick", ""}
-        {"", "default:stick"},
+        {"default:stick", ""},
+        {"", "default:stick"}
     }
 })
 --}}}

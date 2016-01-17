@@ -43,6 +43,7 @@ local function is_hammer(itemstack)
     if tool and tool.tool_capabilities.groupcaps.anvil and
         tool.tool_capabilities.groupcaps.anvil.uses > 0
     then
+        print(name, tool.tool_capabilities.groupcaps.anvil.uses)
         return true
     else
         return false
@@ -53,7 +54,7 @@ local function get_uses(itemstack)
     local name = itemstack:get_name()
     local tool = minetest.registered_tools[name]
     if tool and is_hammer(itemstack) then
-        return tool_capabilities.groupcaps.anvil.uses
+        return tool.tool_capabilities.groupcaps.anvil.uses
     end
 end
 
@@ -89,15 +90,16 @@ anvil.craft_predict = function(pos, player)
     end
 end
 
-anvil.craft = function (pos, player)
+anvil.craft = function (pos, player, index)
     local meta = minetest.get_meta(pos)
     local inv = meta:get_inventory()
     local craftlist = inv:get_list("src")
-
+    local output = inv:get_stack("dst", index)
     local hammer = inv:get_stack("hammer", 1)
+
     if hammer:get_name() ~= "" then
         local hammer_level = minetest.get_item_group(hammer, "level")
-        local output_level = minetest.get_item_group(output.item, "level")
+        local output_level = minetest.get_item_group(output, "level")
         local uses = get_uses(hammer)
 
         local leveldiff = hammer_level - output_level
@@ -121,7 +123,7 @@ anvil.craft = function (pos, player)
 
     minetest.log("action",
         "player " .. player:get_player_name() ..
-        " crafts " .. output.item:get_name() ..
+        " crafts " .. output:get_name() ..
         " on an " .. minetest.get_node(pos).name
     )
 end
@@ -207,11 +209,12 @@ anvil.register = function (material, anvil_def)
                 if to_list == "dst" then
                     return 0
                 elseif from_list == "dst" then
-                    anvil.craft(pos, player)
-                    return stack:get_count()
+                    anvil.craft(pos, player, from_index)
+                    return count
                 elseif to_list == "hammer" then
-                    if is_hammer(stack)
-                    then return stack:get_count()
+                    local inv = minetest.get_meta(pos):get_inventory()
+                    if is_hammer(inv:get_stack(from_list, from_index))
+                    then return count
                     else return 0
                     end
                 else
@@ -232,7 +235,7 @@ anvil.register = function (material, anvil_def)
                 if listname == "src" then
                     anvil.craft_predict(pos, player)
                 elseif listname == "dst" then
-                    anvil.craft(pos, player)
+                    anvil.craft(pos, player, index)
                 end
             end,
     })
