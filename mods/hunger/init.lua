@@ -82,9 +82,7 @@ minetest.register_globalstep(function(dtime)
     end
 end)
 
-minetest.register_craftitem("hunger:counter", {
-    stack_max = hunger.MAX,
-})
+minetest.register_craftitem("hunger:counter", {})
 
 minetest.register_privilege("don't starve", {
     description = "Не снижать значение сытости игрока",
