@@ -1,31 +1,91 @@
 hunger = {}
 
-hunger.MAX = 5000
+hunger.MAX = 8*60*60*100
 hunger.conf = {
-    [1] = {1000, 60, "Вы очень голодны."},
-    [2] = {3000, 600, "Вы немного голодны."},
-    [3] = {4000, -1, "Вы сыты."}
+    -- Order is important
+    [1] = {bound = 1*60*60*100, timer_limit = 5*60*100, text = "Вы очень голодны."},
+    [2] = {bound = 3*60*60*100, timer_limit = 20*60*100, text = "Вы немного голодны."},
+    [3] = {bound = 7*60*60*100, timer_limit = -1, text = "Вы сыты."},
+    [4] = {bound = 8*60*60*100, timer_limit = -1, text = "Вы очень сыты."},
 }
+hunger.timers = {}
 
-function hunger.need_to_take(player)
-    return true
+function hunger.need_to_take(playername)
+    if minetest.check_player_privs(playername, {["don't starve"] = true}) then
+        return false
+    else
+        return true
+    end
+end
+
+function hunger.set(player, count)
+    local inv = player:get_inventory()
+    inv:set_stack("hunger", 1,
+        ItemStack({
+            name = "hunger:counter",
+            count = 1,
+            metadata = count
+        })
+    )
+    return inv:get_stack("hunger", 1):get_metadata()
 end
 
 function hunger.get(player)
     local inv = player:get_inventory()
-    local hunger = inv:get_stack("hunger", 1)
+    local counter = inv:get_stack("hunger", 1)
 
-    if not hunger.name then
+    if not counter:get_name() then
         inv:set_size("hunger", 1)
-        inv:set_stack("hunger", 1, ItemStack("hunger:count " .. hunger.MAX))
-        return inv:get_stack("hunger", 1).count
+        hunger.set(player, hunger.MAX)
+        return inv:get_stack("hunger", 1):get_metadata()
     end
 
-    return hunger.count
+    return counter:get_metadata()
+end
+
+function hunger.take(player)
+    local inv = player:get_inventory()
+    local count = tonumber(inv:get_stack("hunger", 1):get_metadata())
+    count = count - 1
+    return hunger.set(player, count)
+end
+
+function hunger.state(count)
+    for index, state in  ipairs(hunger.conf) do
+        if count > state.bound then
+            return state
+        end
+    end
 end
 
 minetest.register_globalstep(function(dtime)
     for k, player in pairs(minetest.get_connected_players()) do
-        print(hunger.get(player))
+        local name = player:get_player_name()
+        if hunger.need_to_take(name) then
+            local count = hunger.take(player)
+            local state = hunger.state(count)
+
+            if state then
+                local timer = hunger.timers[name] - 1
+                if timer < 0 then
+                    hunger.timers[name] = state.timer_limit
+                elseif timer == 0 then
+                    hunger.timers[name] = state.timer_limit
+                    minetest.chat_send_player(name, state.text)
+                    if state.callback then state.callback() end
+                else
+                    hunger.timers[name] = timer
+                end
+            end
+
+        end
     end
 end)
+
+minetest.register_craftitem("hunger:counter", {
+    stack_max = hunger.MAX,
+})
+
+minetest.register_privilege("don't starve", {
+    description = "Не снижать значение сытости игрока",
+})
