@@ -32,7 +32,7 @@ function dices_proc(name, pattern, range, color, priv, substr)
     local dice = substr[1]
     if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
         local dice_result = math.random(dice)
-        local pattern_result = string.format(pattern, "%s", dice, "%s")
+        local pattern_result = string.format(pattern, "%s", "%s", dice, "%s")
         --return pattern_result, dice_result
         return name, pattern_result, range, color, priv, dice_result
     else
@@ -70,7 +70,7 @@ function fudge_proc(name, pattern, range, color, priv, substr)
                 end
             end
             
-            local pattern_result = string.format(pattern, "%s", signs, fudge_level, "%s")
+            local pattern_result = string.format(pattern, "%s", "%s", signs, fudge_level, "%s")
 
             fudge_level_key = fudge_level_key+diff
             
