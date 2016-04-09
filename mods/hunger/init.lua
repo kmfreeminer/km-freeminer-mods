@@ -87,3 +87,10 @@ minetest.register_craftitem("hunger:counter", {})
 minetest.register_privilege("don't starve", {
     description = "Не снижать значение сытости игрока",
 })
+
+minetest.register_on_joinplayer(function(player)
+    if not player:get_inventory():get_list("hunger") then
+        inv:set_size("hunger", 1)
+        hunger.set(player, hunger.MAX)
+    end
+end)
