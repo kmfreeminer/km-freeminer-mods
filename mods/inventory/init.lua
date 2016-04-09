@@ -29,7 +29,7 @@ minetest.register_on_joinplayer(function(player)
         invref:set_size("clothes", inventory.width * inventory.clothes_height)
     end
 
-	if not minetest.setting_getbool("creative_mode") then
+	if not minetest.check_player_privs(player:get_player_name(), {creative = true}) then
 		player:set_inventory_formspec(inventory.craft)
 	end
     
