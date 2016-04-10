@@ -106,7 +106,7 @@ for item, itemdef in pairs(items.tools) do
 
     minetest.register_tool("items:" .. item, {
         description = itemdef[1],
-        inventory_image = "items_" .. item,
+        inventory_image = "items_" .. item .. ".png",
         range = 2.0,
 
         tool_capabilities = {
@@ -563,3 +563,11 @@ minetest.register_craft({
     }
 })
 --}}}
+
+
+
+minetest.register_tool("items:mage_staff", {
+    description = "Посох алого пламени",
+    inventory_image = "items_mage_staff.png",
+    range = 2.0,
+})
