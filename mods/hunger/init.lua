@@ -27,7 +27,7 @@ function hunger.set(player, count)
             metadata = count
         })
     )
-    return inv:get_stack("hunger", 1):get_metadata()
+    return tonumber(inv:get_stack("hunger", 1):get_metadata())
 end
 
 function hunger.get(player)
@@ -66,7 +66,8 @@ minetest.register_globalstep(function(dtime)
             local state = hunger.state(count)
 
             if state then
-                local timer = hunger.timers[name] - 1
+                local timer = hunger.timers[name] or 0
+                timer = timer - 1
                 if timer < 0 then
                     hunger.timers[name] = state.timer_limit
                 elseif timer == 0 then
@@ -89,7 +90,8 @@ minetest.register_privilege("don't starve", {
 })
 
 minetest.register_on_joinplayer(function(player)
-    if not player:get_inventory():get_list("hunger") then
+    local inv = player:get_inventory()
+    if not inv:get_list("hunger") then
         inv:set_size("hunger", 1)
         hunger.set(player, hunger.MAX)
     end
