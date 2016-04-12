@@ -6,10 +6,6 @@ function kmchat.register_chat_pattern(definition)
     table.insert(kmchat.patterns, definition)
 end
 
-function kmchat.overdrive_default_process_function(process_function)
-    kmchat.default.process_function = process_function
-end
-
 function kmchat.get_prefixed_username(player)
     player_name = player:get_player_name();
     
