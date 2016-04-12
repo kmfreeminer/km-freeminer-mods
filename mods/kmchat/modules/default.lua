@@ -1,46 +1,34 @@
--- Out of character
-function ooc_process_function(player, substrings, range)
-    return string.format("%s%s (OOC): (( %s ))", kmchat.get_prefixed_username(player), kmchat.config.default_ranges["ranges"][range][2], substrings[1])
+local function get_range_index(range_delta)
+    local range_index = kmchat.config.speak_ranges.default + range_delta
+    
+    if range_index < 1 then
+        range_index =  1
+    elseif range_index > #kmchat.config.speak_ranges["ranges"] then
+        range_index = #kmchat.config.speak_ranges["ranges"]
+    end
+    
+    return range_index
 end
 
-kmchat.register_chat_pattern({
-        regexp = "^_(.+)",
-        process_function = ooc_process_function
-})
+kmchat.overdrive_default_process_function(
+    function(event)
+        local sender   = event.sender;
+        local reciever = event.reciever;
+        
+        local range_index = get_range_index(event.range_delta)
+        
+        local range = kmchat.config.speak_ranges["ranges"][range_index][1]
+        local range_label = kmchat.config.speak_ranges["ranges"][range_index][2]
 
-kmchat.register_chat_pattern({
-        regexp = "^%(%((.+)%)%)",
-        process_function = ooc_process_function
-})
-
--- Global out of character
-kmchat.register_chat_pattern({
-        regexp = "^?%s?(.+)",
-        process_function = function(sender, substrings, range)
-            return string.format("%s%s (OOC): (( %s ))", kmchat.get_prefixed_username(player), " (на весь мир)", substrings[1])
-        end,
+        local generated_string = string.format("%s%s: %s", kmchat.get_prefixed_username(sender), range_label, event.message)
         
-        privilege_to_see_function = function(event)
-            return true
-        end,
-        
-        colorize_function = function(event)
-        
+        if (vector.distance(sender:getpos(), reciever:getpos())>range) then
+            if minetest.check_player_privs(reciever:get_player_name(), {["gm"]=true,}) then
+                return kmchat.colorize_string(generated_string, kmchat.config.gm_color)
+            end
+            return nil 
         end
-})
-
--- Action
-kmchat.register_chat_pattern({
-        regexp = "^*%s?(.+)",
-        process_function = function(player, substrings, range)
-            return string.format("* %s%s %s", kmchat.get_prefixed_username(player), kmchat.config.default_ranges["ranges"][range][2], substrings[1])
-        end
-})
-
--- Event
-kmchat.register_chat_pattern({
-        regexp = "^#%s?(.+)",
-        process_function = function(player, substrings, range)
-            return string.format("*** %s%s: %s ***", kmchat.get_prefixed_username(player), kmchat.config.default_ranges["ranges"][range][2], substrings[1])
-        end,
-})
+        
+        return kmchat.colorize_string(generated_string, kmchat.config.default_color)
+    end
+)
