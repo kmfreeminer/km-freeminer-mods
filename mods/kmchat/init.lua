@@ -49,11 +49,17 @@ fudge_levels = {"-","ужасно--","ужасно-","ужасно", "плохо
 --function fudge_proc(pattern, substr, name)
 function fudge_proc(name, pattern, range, color, priv, substr)
     local fudge_dice_tmp = substr[1]
+    
+    local words = {}
+    for word in string.gmatch(fudge_dice_tmp, "%S+") do
+        table.insert(words, word)
+    end
+    
     for key, val in pairs(fudge_levels) do
-        local fudge_level = string.match(fudge_dice_tmp, "^("..val..".*)")
-        local fudge_level_key = key
-        
-        if fudge_level~=nil then
+        if val == words[1] then
+            local fudge_level = words[1]
+            local fudge_level_key = key
+            
             local diff = 0
             local signs = ""
             
@@ -81,7 +87,7 @@ function fudge_proc(name, pattern, range, color, priv, substr)
             end
             
             local dice_result = fudge_levels[fudge_level_key]
-            --return pattern_result, dice_result
+
             return name, pattern_result, range, color, priv, dice_result
         end
     end
