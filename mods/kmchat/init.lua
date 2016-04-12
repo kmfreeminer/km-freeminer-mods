@@ -94,98 +94,6 @@ function fudge_proc(name, pattern, range, color, priv, substr)
     return name, "%s: %s", range, color, priv, nil
 end
 
--- language
-minetest.register_privilege("i_lang", "")
-minetest.register_privilege("c_lang", "")
-minetest.register_privilege("a_lang", "")
-
-function word_to_number(word)
-    local number = 0
-
-    for i = 1, #word do
-        local char = string.sub(word, i, i)
-            number = number * (256) + string.byte(char)
-    end
-
-    return number
-end
-
-i_lang_parts = {"эль", "эль", "и", "ха", "ля", "ля", "р", "ая", "ма", "кю", "лют", "пил"}
-i_lang_max_size = 4
-
-lang_translate = {
-["i"] = function(word)
-    math.randomseed(word_to_number(word))
-    
-    local size = math.random(i_lang_max_size)
-    local translated_word = ""
-    for i = 1, size do 
-        local tmp = math.random(#i_lang_parts)
-        translated_word = translated_word .. i_lang_parts[tmp]
-    end
-    
-    return translated_word
-end,
-["c"] = function(word)
-    return word
-end,
-["a"] = function(word)    
-    return word
-end,
-}
-
-
---function lang_proc(pattern, substr, name)
-function lang_proc(name, pattern, range, color, priv, substr)
-    local phrase = ""
-    local original = string.gsub(substr[2], "#", "")
-    print('test')
-    substr[2] = substr[2]:lower_cyr()
-    for word in string.gmatch(substr[2], "%S+") do
-        local appendix  = ""
-        local prefix = ""
-        
-        loop = true
-        while loop do
-            tmp_char = string.sub(word, 0, 1)
-            loop = string.match(tmp_char, '%p')
-            if loop then
-                prefix = prefix .. tmp_char
-                word = string.sub(word, 2)
-            end
-        end
-        
-        local loop = true
-        while loop do
-            tmp_char = string.sub(word, -1)
-            loop = string.match(tmp_char, '%p')
-            if loop then
-                appendix = tmp_char .. appendix
-                word = string.sub(word, 0, -2)
-            end
-        end
-        
-        if string.match(prefix, "#") or word == "" then
-            prefix = string.gsub(prefix, "#", "")
-            phrase =  phrase .. prefix ..word .. appendix .. " "
-        else
-            translated_word = lang_translate[substr[1]](word)
-            phrase = phrase .. prefix .. translated_word .. appendix .. " " 
-        end    
-    end
-    
-    local range_delta = range - DEFAULT_RANGE
-    if range_delta     > 0 then
-        phrase = string.rep("!", range_delta)..phrase
-    elseif range_delta < 0 then
-        range_delta = -range_delta
-        phrase = string.rep("=", range_delta)..phrase
-    end
-    print(phrase)
-    proc_message(name, phrase)
-    -- return pattern, original
-    return name, pattern, range, color, priv, original 
-end
 
 -- config zone {{{
 DEFAULT_FORMAT     = "%s%s: %s" 
@@ -213,9 +121,6 @@ formats = {
    ["^d(%d+).*"]        = {"*** %s%s кидает d%s и выкидывает %s ***",                DICE_COLOR,  nil,      nil,      dices_proc },
    ["^4d[Ff] (.*)$"]    = {"*** %s%s кидает 4df (%s) от %s и выкидывает %s ***",     DICE_COLOR,  nil,      nil,      fudge_proc },
    ["^%%%%%% (.*)$"]    = {"*** %s%s кидает 4df (%s) от %s и выкидывает %s ***",     DICE_COLOR,  nil,      nil,      fudge_proc },
-   ["^%+(i)%+%s?(.*)$"] = {"%s%s (альвийский): %s",                                  "BBBBBB",   "i_lang", "i_lang",  lang_proc  },
-   ["^%+(c)%+%s?(.*)$"] = {"%s%s (цвергийский): %s",                                 "BBBBBB",   "c_lang", "c_lang",  lang_proc  },
-   ["^%+(a)%+%s?(.*)$"] = {"%s%s (авоонский): %s",                                   "BBBBBB",   "a_lang", "a_lang",  lang_proc  },
 }
 
 -- config zone }}}
