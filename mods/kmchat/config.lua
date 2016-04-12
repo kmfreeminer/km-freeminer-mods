@@ -1,31 +1,24 @@
-kmchat.config = {}
+DEFAULT_FORMAT     = "%s%s: %s" 
+DEFAULT_RANGE      = 3
+DEFAULT_COLOR      = "EEF3EE"
 
-kmchat.config.default_range = 3
-kmchat.config.default_color = "EEF3EE"
+DICE_COLOR         = "FFFF00"
 
-kmchat.config.dice_color = "FFFF00"
+GM_COLOR        = "666666"
+GM_PREFIX          = "[GM] "
 
-kmchat.config.gm_prefix = "[GM]"
-kmchat.config.gm_color  = "666666"
-
-kmchat.config.speak_ranges = {
-    ["default"] = 3,
-    ["ranges"] = {
-        {3,  " (шепчет)"        }, 
-        {8,  " (почти шепчет)"  }, 
-        {14, ""                 }, 
-        {24, " (громко говорит)"}, 
-        {65, " (кричит)"        }
-    }
+RANGES = {
+    {3,  " (скрытно)"    }, 
+    {8,  " (тихо)"       }, 
+    {14, ""              }, 
+    {24, " (громко)"     }, 
+    {65, " (громогласно)"}
 }
 
-kmchat.config.default_ranges = {
-    ["default"] = 3,
-    ["ranges"] = {
-        {3,  " (скрытно)"    }, 
-        {8,  " (тихо)"       }, 
-        {14, ""              }, 
-        {24, " (громко)"     }, 
-        {65, " (громогласно)"}
-    }
+DEFAULT_RANGES = {
+    {3,  " (шепчет)"}, 
+    {8,  " (почти шепчет)"  }, 
+    {14, ""        }, 
+    {24, " (громко говорит)"}, 
+    {65, " (кричит)"}
 }

@@ -5,7 +5,8 @@ kmchat.register_chat_pattern({
             local dice = substrings[1]
             if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
                 local dice_result = math.random(dice)
-                return string.format("*** %s%s кидает d%s и выкидывает %s ***", kmchat.get_prefixed_username(player), kmchat.config.default_ranges["ranges"][range][2], dice, dice_result)
+                local generated_string = string.format("*** %s%s кидает d%s и выкидывает %s ***", kmchat.get_prefixed_username(player), RANGES[range][2], dice, dice_result)
+                return kmchat.colorize_string(generated_string, DICE_COLOR)
             else
                 return nil
             end
@@ -49,7 +50,8 @@ function fudge_process(player, substrings, range)
                     
                     local dice_result = fudge_levels[fudge_level_key]
                     
-                    return string.format("*** %s%s кидает 4df (%s) от %s и выкидывает %s ***", kmchat.get_prefixed_username(player), kmchat.config.default_ranges["ranges"][range][2], "хуй", fudge_level, dice_result)
+                    local generated_string = string.format("*** %s%s кидает 4df (%s) от %s и выкидывает %s ***", kmchat.get_prefixed_username(player), RANGES[range][2], "хуй", fudge_level, dice_result)
+                    return kmchat.colorize_string(generated_string, DICE_COLOR)
                 end
             end
             return nil
