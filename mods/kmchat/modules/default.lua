@@ -21,12 +21,12 @@ default_definition.process_per_player_function =
         
         local range = kmchat.config.ranges.getRange(event.range_delta)
                         
-        if (vector.distance(sender:getpos(), reciever:getpos()) > range) then
+        if (vector.distance(sender:getpos(), reciever:getpos()) <= range) then
             return kmchat.colorize_string(event.message_result, event.color)
         end
         
         if (minetest.check_player_privs(reciever:get_player_name(), {["gm"]=true,})) then
-            return kmchat.colorize_string(event.message_result, event.color)
+            return kmchat.colorize_string(event.message_result, kmchat.config.gm_color)
         end
                 
         return nil
