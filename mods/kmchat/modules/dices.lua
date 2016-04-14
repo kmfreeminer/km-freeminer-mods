@@ -28,16 +28,17 @@ local function fudge_process(event)
               
     local range_label = kmchat.config.ranges.getLabel(event.range_delta)
     
-    local fudge_dice_tmp = event.substrings[1]
-    
-    local words = {}
-    for word in string.gmatch(fudge_dice_tmp, "%S+") do
-        table.insert(words, word)
+    local fudge_dice_string = event.substrings[1]
+
+    local first_word = nil
+    for word in string.gmatch(string.gsub(fudge_dice_string, "%p", " "), "[%S]+") do
+        first_word = word
+        break
     end
     
     for key, val in pairs(fudge_levels) do
-        if val == words[1] then
-            local fudge_level = words[1]
+        if val == first_word then
+            local fudge_level = first_word
             local fudge_level_key = key
             
             local diff = 0
@@ -66,7 +67,7 @@ local function fudge_process(event)
             
             local dice_result = fudge_levels[fudge_level_key]
 
-            return string.format("*** %s%s кидает 4df (%s) от %s и выкидывает %s ***", kmchat.get_prefixed_username(sender), range_label, signs, fudge_level, dice_result)
+            return string.format("*** %s%s кидает 4df (%s) от %s и выкидывает %s ***", kmchat.get_prefixed_username(sender), range_label, signs, fudge_dice_string, dice_result)
         end
     end
     return nil
