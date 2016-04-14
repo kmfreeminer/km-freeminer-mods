@@ -7,7 +7,7 @@ function kmchat.register_chat_pattern(definition)
 end
 
 function kmchat.log(message)
-    --jabber.send(message)
+    jabber.send(message)
     print(message)
 end
 
