@@ -19,10 +19,10 @@ local verse = require "verse".init("client");
 
 jabber = {}
 
-local JID, PASSWORD = "sullome@jabbim.com/freeminer", "green lamp";
+local JID, PASSWORD = "sullome@jabbim.com/freeminer", "";
 local ROOM = {
     name = "kmrp-elite@conference.jabber.ru",
-    password = "NoYdaaHere",
+    password = "",
     nick = "freeminer-bot"
 }
 
@@ -42,7 +42,7 @@ c:hook("authentication-success", function () print("Logged in!"); end);
 c:hook("authentication-failure", function (err) print("Failed to log in! Error: "..tostring(err.condition)); end);
 
 -- Print a message and exit when disconnected
-c:hook("disconnected", function () print("Disconnected!"); os.exit(); end);
+c:hook("disconnected", function () print("Disconnected!") end);
 
 -- Catch the "ready" event to know when the stream is ready to use
 c:hook("ready", function ()
