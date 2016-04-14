@@ -19,7 +19,7 @@ default_definition.process_per_player_function =
         local sender   = event.sender;
         local reciever = event.reciever;
         
-        local range = kmchat.config.ranges.getRange(event.range_delta)
+        local range = kmchat.config.ranges.getRange(event.range_delta, "speak")
                         
         if (vector.distance(sender:getpos(), reciever:getpos()) <= range) then
             return kmchat.colorize_string(event.message_result, event.color)
