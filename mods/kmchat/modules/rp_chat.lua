@@ -1,22 +1,9 @@
-local function get_range_index(range_delta)
-    local range_index = kmchat.config.default_ranges.default + range_delta
-    
-    if range_index < 1 then
-        range_index =  1
-    elseif range_index > #kmchat.config.default_ranges["ranges"] then
-        range_index = #kmchat.config.default_ranges["ranges"]
-    end
-    
-    return range_index
-end
-
 -- Out of character
 local function ooc_init_process_function(event)
     local sender   = event.sender;
     
-    local range_index = get_range_index(event.range_delta)
-    local range_label = kmchat.config.default_ranges["ranges"][range_index][2]
-
+    local range_label = kmchat.config.ranges.getLabel(event.range_delta)
+    
     return string.format("%s%s (OOC): (( %s ))", kmchat.get_prefixed_username(sender), range_label, event.substrings[1])
 end
 
@@ -57,9 +44,8 @@ kmchat.register_chat_pattern({
         init_process_function = function(event)
             local sender = event.sender;              
               
-            local range_index = get_range_index(event.range_delta)
-            local range_label = kmchat.config.default_ranges["ranges"][range_index][2]
-
+            local range_label = kmchat.config.ranges.getLabel(event.range_delta)
+            
             return string.format("* %s%s %s", kmchat.get_prefixed_username(sender), range_label, event.substrings[1])
         end,
         
@@ -73,8 +59,7 @@ kmchat.register_chat_pattern({
         init_process_function = function(event)
             local sender = event.sender;              
               
-            local range_index = get_range_index(event.range_delta)
-            local range_label = kmchat.config.default_ranges["ranges"][range_index][2]
+            local range_label = kmchat.config.ranges.getLabel(event.range_delta)          
             
             if(not minetest.check_player_privs(sender:get_player_name(), {gm=true})) then return nil end
             

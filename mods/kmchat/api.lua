@@ -21,7 +21,7 @@ function kmchat.overdrive_default_functions(definition)
     end
     
     if(definition["сolor"]) then
-        kmchat.default.color = definition["process_per_player"]
+        kmchat.default.color = definition["сolor"]
     end
 end
 

@@ -1,15 +1,3 @@
-local function get_range_index(range_delta)
-    local range_index = kmchat.config.default_ranges.default + range_delta
-    
-    if range_index < 1 then
-        range_index =  1
-    elseif range_index > #kmchat.config.default_ranges["ranges"] then
-        range_index = #kmchat.config.default_ranges["ranges"]
-    end
-    
-    return range_index
-end
-
 -- d4, d10 and etc.
 kmchat.register_chat_pattern({
         regexp = "^d(%d+).*",
@@ -17,8 +5,7 @@ kmchat.register_chat_pattern({
         init_process_function = function(event)
             local sender = event.sender;              
               
-            local range_index = get_range_index(event.range_delta)
-            local range_label = kmchat.config.default_ranges["ranges"][range_index][2]
+            local range_label = kmchat.config.ranges.getLabel(event.range_delta)
             
             local dice = event.substrings[1]
             if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
@@ -39,8 +26,7 @@ local fudge_levels = {"-","ужасно--","ужасно-","ужасно", "пл
 local function fudge_process(event)
     local sender = event.sender;              
               
-    local range_index = get_range_index(event.range_delta)
-    local range_label = kmchat.config.default_ranges["ranges"][range_index][2]
+    local range_label = kmchat.config.ranges.getLabel(event.range_delta)
     
     local fudge_dice_tmp = event.substrings[1]
     
