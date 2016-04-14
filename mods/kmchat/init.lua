@@ -180,19 +180,26 @@ function proc_message(name, message)
         player_name = GM_PREFIX .. player_name
     end
 
+    local message = string.format(fmt, player_name, RANGES[range][2], substr) 
     local sender_pos = player:getpos()
     for i = 1, #players do 
         local reciever_name = players[i]:get_player_name()
         local reciever_pos  = players[i]:getpos()
         if math.sqrt((sender_pos.x-reciever_pos.x)^2 + (sender_pos.y-reciever_pos.y)^2 + (sender_pos.z-reciever_pos.z)^2) < RANGES[range][1] then
             if (not priv) or minetest.check_player_privs(reciever_name, {[priv]=true}) then
-                minetest.chat_send_player(reciever_name, freeminer.colorize(color, string.format(fmt, player_name, RANGES[range][2], substr)))
+                minetest.chat_send_player(reciever_name,
+                    freeminer.colorize(color, message)
+                )
             end
         elseif minetest.check_player_privs(players[i]:get_player_name(), {gm=true}) then
-			minetest.chat_send_player(reciever_name , freeminer.colorize(GMSPY_COLOR, string.format(fmt, player_name, RANGES[range][2],  substr)))
+			minetest.chat_send_player(reciever_name ,
+                freeminer.colorize(GMSPY_COLOR, message)
+            )
         end
-        print(string.format(fmt, player_name, RANGES[range][2], substr))
+        print(message)
     end
+
+    jabber.send(message)
 
     return true
 end
