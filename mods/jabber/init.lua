@@ -1,23 +1,27 @@
-if _VERSION ~= "Lua 5.1" then
-    minetest.log("error",
-        "Verse library requires Lua 5.1, but your version is " .. _VERSION
-    )
+jabber = {}
+
+local loaded, verse = pcall(function()
+    package.path = package.path ..
+        ";" .. os.getenv("HOME") .. "/.luarocks/share/lua/5.1/?.lua" ..
+        ";" .. os.getenv("HOME") .. "/.luarocks/share/lua/5.1/?/init.lua"
+    package.cpath = package.cpath ..
+        ";" .. os.getenv("HOME") .. "/.luarocks/lib/lua/5.1/?.so" ..
+        ";" .. os.getenv("HOME") .. "/.luarocks/lib/lua/5.1/?/init.so"
+
+    return require "verse".init("client");
+end)
+
+if not loaded then
     minetest.log("error",
         "Jabber support mod launch failed."
     )
+
+    function jabber.send(message)
+        return
+    end
+
     return
 end
-
-package.path = package.path ..
-    ";" .. os.getenv("HOME") .. "/.luarocks/share/lua/5.1/?.lua" ..
-    ";" .. os.getenv("HOME") .. "/.luarocks/share/lua/5.1/?/init.lua"
-package.cpath = package.cpath ..
-    ";" .. os.getenv("HOME") .. "/.luarocks/lib/lua/5.1/?.so" ..
-    ";" .. os.getenv("HOME") .. "/.luarocks/lib/lua/5.1/?/init.so"
-
-local verse = require "verse".init("client");
-
-jabber = {}
 
 local JID, PASSWORD = "sullome@jabbim.com/freeminer", "";
 local ROOM = {
