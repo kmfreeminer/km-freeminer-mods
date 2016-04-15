@@ -1,6 +1,9 @@
 jabber = {}
 
-local loaded, verse = pcall(function()
+--{{{ Initialization
+local verse, c
+
+local function init ()
     package.path = package.path ..
         ";" .. os.getenv("HOME") .. "/.luarocks/share/lua/5.1/?.lua" ..
         ";" .. os.getenv("HOME") .. "/.luarocks/share/lua/5.1/?/init.lua"
@@ -8,65 +11,75 @@ local loaded, verse = pcall(function()
         ";" .. os.getenv("HOME") .. "/.luarocks/lib/lua/5.1/?.so" ..
         ";" .. os.getenv("HOME") .. "/.luarocks/lib/lua/5.1/?/init.so"
 
-    return require "verse".init("client");
-end)
+    verse = require "verse".init("client")
+    c = verse.new()
+    c:add_plugin("groupchat")
 
-if not loaded then
+    jabber.jid = minetest.setting_get("jabber-jid")
+    jabber.password = minetest.setting_get("jabber-password")
+    jabber.room_name = minetest.setting_get("jabber-room-name")
+    jabber.room_pass = minetest.setting_get("jabber-room-password")
+    jabber.room_nick = "gamechat"
+
+    if jabber.jid == nil
+    or jabber.password == nil
+    or jabber.room_name == nil
+    or jabber.room_pass == nil
+    then
+        error("Jabber configuration not found.")
+    end
+end
+
+local function init_error_handle (err)
     minetest.log("error",
-        "Jabber support mod launch failed."
+        "Jabber support mod launch failed." ..
+        "Reason: " .. err
     )
 
     function jabber.send(message)
         return
     end
-
-    return
 end
 
-local JID, PASSWORD = "sullome@jabbim.com/freeminer", "";
-local ROOM = {
-    name = "kmrp-elite@conference.jabber.ru",
-    password = "",
-    nick = "freeminer-bot"
-}
+if not xpcall(init, init_error_handle) then return end
+--}}}
 
-c = verse.new();
-c:add_plugin("groupchat")
+--{{{ Verse
 
--- Add some hooks for debugging
-c:hook("opened", function () print("Stream opened!") end);
-c:hook("closed", function () print("Stream closed!") end);
-c:hook("stanza", function (stanza) print("Stanza:", stanza) end);
+-- Status logging
+local function log (message)
+    minetest.log("verbose", "Jabber: " .. message)
+end
 
--- This one prints all received data
-c:hook("incoming-raw", print, 1000);
-
--- Print a message after authentication
-c:hook("authentication-success", function () print("Logged in!"); end);
-c:hook("authentication-failure", function (err) print("Failed to log in! Error: "..tostring(err.condition)); end);
-
--- Print a message and exit when disconnected
-c:hook("disconnected", function () print("Disconnected!") end);
+c:hook("opened", log("Stream opened!"))
+c:hook("closed", log("Stream closed!"))
+c:hook("stanza", log("Stanza:", stanza))
+c:hook("authentication-success", log("Logged in!"))
+c:hook("authentication-failure", function (err)
+    log("Failed to log in!\nError: " .. tostring(err.condition))
+end)
+c:hook("disconnected", log("Disconnected!"))
 
 -- Catch the "ready" event to know when the stream is ready to use
 c:hook("ready", function ()
-	print("Stream ready!");
-    ROOM.verse = c:join_room(ROOM.name, ROOM.nick, {password = ROOM.password})
-end);
+	log("Stream ready!")
+    jabber.room = c:join_room(
+        jabber.room_name,
+        jabber.room_nick,
+        {password = jabber.room_pass}
+    )
+end)
+--}}}
 
+--{{{ Minetest
 minetest.register_globalstep(function(dtime)
     verse.step()
 end)
 
 function jabber.send(message)
-    ROOM.verse:send_message(message)
+    jabber.room:send_message(message)
 end
+--}}}
 
---minetest.register_on_shutdown(function()
---    ROOM.verse:leave("Freeminer server shut down")
---    c:close()
---    verse.quit()
---end)
-
--- Now, actually start the connection:
-c:connect_client(JID, PASSWORD);
+-- After all configuration, start actual connection
+c:connect_client(jabber.jid, jabber.password)
