@@ -32,3 +32,8 @@ dofile(minetest.get_modpath("default").."/mapgen.lua")
 dofile(minetest.get_modpath("default").."/player.lua")
 dofile(minetest.get_modpath("default").."/trees.lua")
 dofile(minetest.get_modpath("default").."/aliases.lua")
+
+-- Test Item for C-Ann
+minetest.register_craftitem("default:test", {
+    description = "Hello, C-Ann!",
+})
