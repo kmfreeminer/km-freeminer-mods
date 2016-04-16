@@ -31,12 +31,14 @@ local function fudge_process(event)
     local fudge_dice_string = event.substrings[1]
 
     local first_word = nil
-    for word in string.gmatch(string.gsub(fudge_dice_string, "%p", " "), "[%S]+") do
+    for word in string.gmatch(string.gsub(fudge_dice_string, "[,(]", " "), "[%S]+") do
         first_word = word
         break
     end
     
     for key, val in pairs(fudge_levels) do
+        print(val)
+        print(first_word)
         if val == first_word then
             local fudge_level = first_word
             local fudge_level_key = key
