@@ -37,8 +37,6 @@ local function fudge_process(event)
     end
     
     for key, val in pairs(fudge_levels) do
-        print(val)
-        print(first_word)
         if val == first_word then
             local fudge_level = first_word
             local fudge_level_key = key
