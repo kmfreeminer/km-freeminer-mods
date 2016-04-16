@@ -3,6 +3,10 @@ function kmchat.register_chat_pattern(definition)
         return nil 
     end
 
+    if not definition["process_per_player_function"] and definition["color"] then 
+        definition["process_per_player_function"] = kmchat.create_range_pp(definition["color"], msg_type)
+    end
+
     table.insert(kmchat.patterns, definition)
 end
 
@@ -39,6 +43,27 @@ function kmchat.colorize_string(given_string, color)
     return freeminer.colorize(color, given_string)
 end
 
+function kmchat.create_range_pp(color, msg_type)
+    if not msg_type then msg_type = "default" end
+    
+    return function(event)
+        local sender   = event.sender;
+        local reciever = event.reciever;
+        
+        local range = kmchat.config.ranges.getRange(event.range_delta, msg_type)
+                        
+        if (vector.distance(sender:getpos(), reciever:getpos()) <= range) then
+            return kmchat.colorize_string(event.message_result, color)
+        end
+        
+        if (minetest.check_player_privs(reciever:get_player_name(), {["gm"]=true,})) then
+            return kmchat.colorize_string(event.message_result, kmchat.config.gm_color)
+        end
+                
+        return nil
+    end
+    
+end
 
 -- ==== CONFIG API ====
 local function is_message_type_exist(message_type)

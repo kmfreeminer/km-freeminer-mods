@@ -39,3 +39,8 @@ dofile(minetest.get_modpath("kmchat").."/config.lua")
 dofile(minetest.get_modpath("kmchat").."/core.lua")
 dofile(minetest.get_modpath("kmchat").."/api.lua")
 dofile(minetest.get_modpath("kmchat").."/modules.lua")
+
+-- Load modules
+dofile(minetest.get_modpath("kmchat").."/modules/default.lua")
+dofile(minetest.get_modpath("kmchat").."/modules/rp_chat.lua")
+dofile(minetest.get_modpath("kmchat").."/modules/dices.lua")

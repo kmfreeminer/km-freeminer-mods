@@ -31,10 +31,8 @@ kmchat.register_chat_pattern({
         end,
         
         process_per_player_function = function(event)
-            return kmchat.colorize_string(event.message_result, event.color)
+            return kmchat.colorize_string(event.message_result, "20EEDD")
         end,
-        
-        color = "20EEDD"
 })
 
 -- Action

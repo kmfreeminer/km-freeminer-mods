@@ -65,16 +65,6 @@ function kmchat.process_messages(name, message)
         event.message_result = kmchat.default.init_process_function(event)
         message_definition = kmchat.default
     end
-        
-    -- set color, you don't need this, because you can process color in process_per_player, but if this is set you can use default "process_per_player"
-    -- that is colorize messages for [GM] if he is out of range
-    if message_definition.color then
-        event.color = message_definition.color
-    end
-    
-    if not event.color then
-        event.color = kmchat.default.color
-    end
     
     for i = 1, #players do 
         event.reciever = players[i]
