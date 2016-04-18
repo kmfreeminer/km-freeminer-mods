@@ -53,12 +53,11 @@ end
 
 c:hook("opened", function () log("Stream opened!") end)
 c:hook("closed", function () log("Stream closed!") end)
--- This one prints all received data
-c:hook("incoming-raw", print, 1000);
 c:hook("authentication-success", function () log("Logged in!") end)
 c:hook("authentication-failure", function (err)
     log("Failed to log in!\nError: " .. tostring(err.condition))
 end)
+c:hook("connected", function () log("Connected!") end)
 c:hook("disconnected", function () log("Disconnected!") end)
 
 -- Catch the "ready" event to know when the stream is ready to use
@@ -111,8 +110,6 @@ local function format_message(sender, message)
             message_definition = definition
         end
     end
-
-    event.color = message_definition.color
 
     event.message_result = message_definition.init_process_function(event)
     return message_definition.process_per_player_function(event)
