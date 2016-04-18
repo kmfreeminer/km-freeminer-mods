@@ -51,23 +51,40 @@ local function log (message)
     minetest.log("verbose", "Jabber: " .. message)
 end
 
-c:hook("opened", log("Stream opened!"))
-c:hook("closed", log("Stream closed!"))
-c:hook("stanza", log("Stanza:", stanza))
-c:hook("authentication-success", log("Logged in!"))
+c:hook("opened", function () log("Stream opened!") end)
+c:hook("closed", function () log("Stream closed!") end)
+-- This one prints all received data
+c:hook("incoming-raw", print, 1000);
+c:hook("authentication-success", function () log("Logged in!") end)
 c:hook("authentication-failure", function (err)
     log("Failed to log in!\nError: " .. tostring(err.condition))
 end)
-c:hook("disconnected", log("Disconnected!"))
+c:hook("disconnected", function () log("Disconnected!") end)
 
 -- Catch the "ready" event to know when the stream is ready to use
 c:hook("ready", function ()
-	log("Stream ready!")
+    log("Stream ready!")
     jabber.room = c:join_room(
         jabber.room_name,
         jabber.room_nick,
         {password = jabber.room_pass}
     )
+    jabber.room:hook("message", function (event)
+        local message = event.stanza:get_child_text("body")
+
+        -- Filter jabber server messages
+        local sender
+        if event.sender then
+            sender = event.sender.nick
+
+            -- Filter history and own messages
+            if (not event.stanza:child_with_name("delay")
+                and sender ~= jabber.room_nick)
+            then
+                jabber.on_message(message, sender)
+            end
+        end
+    end)
 end)
 --}}}
 
@@ -78,6 +95,52 @@ end)
 
 function jabber.send(message)
     jabber.room:send_message(message)
+end
+
+local function format_message(sender, message)
+    local player = minetest.get_player_by_name(sender)
+    if not player then return end
+
+    local event = {
+        sender = player,
+        substrings = {message},
+    }
+    local message_definition
+    for _, definition in pairs(kmchat.patterns) do
+        if definition.regexp == "^?%s?(.+)" then
+            message_definition = definition
+        end
+    end
+
+    event.color = message_definition.color
+
+    event.message_result = message_definition.init_process_function(event)
+    return message_definition.process_per_player_function(event)
+end
+
+function jabber.on_message(message, sender)
+    if not sender then return end
+
+    cmd = message:match("^#(%a+)")
+    if cmd then
+        -- There can be no params (like "#help"),
+        -- and because Lua doesn't support subpatterns,
+        -- we need to add some additional logic
+        local params = message:gsub("^#" .. cmd, "")
+        if params ~= "" then params:gsub("^ ", "") end
+
+        local status, answer = core.chatcommands[cmd].func(sender, params)
+        if status then
+            -- Some of the spave characters invokes an xml error,
+            -- so we replacing them with regular space.
+            -- And we need to somehow save newlines.
+            answer = answer:gsub("\n", "\\n"):gsub("%s", " "):gsub("\\n", "\n")
+            jabber.room:send_message(answer)
+        end
+    else
+        local formatted = format_message(sender, message)
+        if formatted then minetest.chat_send_all(formatted) end
+    end
 end
 --}}}
 
