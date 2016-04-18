@@ -5,11 +5,11 @@ local verse, c
 
 local function init ()
     package.path = package.path ..
-        ";" .. os.getenv("HOME") .. "/.luarocks/share/lua/5.1/?.lua" ..
-        ";" .. os.getenv("HOME") .. "/.luarocks/share/lua/5.1/?/init.lua"
+        ";" .. minetest.get_modpath("jabber") .. "/lib/?.lua" ..
+        ";" .. minetest.get_modpath("jabber") .. "/lib/?/init.lua"
     package.cpath = package.cpath ..
-        ";" .. os.getenv("HOME") .. "/.luarocks/lib/lua/5.1/?.so" ..
-        ";" .. os.getenv("HOME") .. "/.luarocks/lib/lua/5.1/?/init.so"
+        ";" .. minetest.get_modpath("jabber") .. "/lib/?.so" ..
+        ";" .. minetest.get_modpath("jabber") .. "/lib/?/init.so"
 
     verse = require "verse".init("client")
     c = verse.new()
@@ -32,7 +32,7 @@ end
 
 local function init_error_handle (err)
     minetest.log("error",
-        "Jabber support mod launch failed." ..
+        "Jabber support mod launch failed.\n" ..
         "Reason: " .. err
     )
 
@@ -50,6 +50,9 @@ if not xpcall(init, init_error_handle) then return end
 local function log (message)
     minetest.log("verbose", "Jabber: " .. message)
 end
+
+-- This one prints all received data
+--c:hook("incoming-raw", print, 1000);
 
 c:hook("opened", function () log("Stream opened!") end)
 c:hook("closed", function () log("Stream closed!") end)
