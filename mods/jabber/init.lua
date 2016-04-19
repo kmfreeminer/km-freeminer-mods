@@ -100,22 +100,8 @@ function jabber.send(message)
 end
 
 local function format_message(sender, message)
-    local player = minetest.get_player_by_name(sender)
-    if not player then return end
-
-    local event = {
-        sender = player,
-        substrings = {message},
-    }
-    local message_definition
-    for _, definition in pairs(kmchat.patterns) do
-        if definition.regexp == "^?%s?(.+)" then
-            message_definition = definition
-        end
-    end
-
-    event.message_result = message_definition.init_process_function(event)
-    return message_definition.process_per_player_function(event)
+    local result = "(( " .. sender .. ": " .. message .. "))"
+    return freeminer.colorize("#007F00", result)
 end
 
 function jabber.on_message(message, sender)
@@ -131,9 +117,9 @@ function jabber.on_message(message, sender)
 
         local status, answer = core.chatcommands[cmd].func(sender, params)
         if status then
-            -- Some of the spave characters invokes an xml error,
+            -- Some of the space characters invokes an xml error,
             -- so we replacing them with regular space.
-            -- And we need to somehow save newlines.
+            -- And we need to save newlines also.
             answer = answer:gsub("\n", "\\n"):gsub("%s", " "):gsub("\\n", "\n")
             jabber.room:send_message(answer)
         end
