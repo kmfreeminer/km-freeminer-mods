@@ -101,7 +101,7 @@ end
 
 local function format_message(sender, message)
     local result = "(( " .. sender .. ": " .. message .. "))"
-    return freeminer.colorize("#007F00", result)
+    return freeminer.colorize("007F00", result)
 end
 
 function jabber.on_message(message, sender)
@@ -115,6 +115,7 @@ function jabber.on_message(message, sender)
         local params = message:gsub("^#" .. cmd, "")
         if params ~= "" then params:gsub("^ ", "") end
 
+        if not minetest.get_player_by_name(sender) then sender = "admin" end
         local status, answer = core.chatcommands[cmd].func(sender, params)
         if status then
             -- Some of the space characters invokes an xml error,
