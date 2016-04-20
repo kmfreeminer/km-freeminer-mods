@@ -29,12 +29,12 @@ minetest.register_on_joinplayer(function(player)
         invref:set_size("clothes", inventory.width * inventory.clothes_height)
     end
 
-	if not minetest.check_player_privs(player:get_player_name(), {creative = true}) then
-		player:set_inventory_formspec(inventory.craft)
-	end
-    
-	player:hud_set_hotbar_image("gui_hotbar.png")
-	player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
+    if not minetest.check_player_privs(player:get_player_name(), {creative = true}) then
+        player:set_inventory_formspec(inventory.craft)
+    end
+
+    player:hud_set_hotbar_image("gui_hotbar.png")
+    player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
     player:hud_set_hotbar_itemcount(inventory.width)
 end)
 
@@ -62,7 +62,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     end
 end)
 
-inventory.base = 
+inventory.base =
     "size[" ..inventory.width.. "," ..(inventory.height + 4).. "]"..
     default.gui_bg..
     default.gui_bg_img..
@@ -87,14 +87,23 @@ inventory.craft =
     -- Left and right hand
     --"list[current_player;left_hand;0.25,1;1,1;]"..
     --"list[current_player;right_hand;7.75,1;1,1;]"..
-    
 
-inventory.clothes = 
+inventory.clothes =
     inventory.base..
     "list[current_player;clothes;0,0;"..
         inventory.width .. "," .. inventory.clothes_height .. ";]"..
     inventory.main(0,3.5)
 
-inventory.notes = 
+inventory.notes =
     inventory.base..
     "textarea[0.3,0;" .. inventory.width .. ",4.5;inv_notes;Quick notes;]"
+
+--{{{ Attachments
+-- Bones list:
+-- |- Body
+-- |   |- Head
+-- |   |- Arm_Left
+-- |   \- Arm_Right
+-- |- Leg_Right
+-- \- Leg_Left
+--}}}
