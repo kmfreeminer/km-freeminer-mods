@@ -1,8 +1,9 @@
 inventory = {}
 
-inventory.width = 9
-inventory.height = 1
-inventory.clothes_height = 3
+inventory.width = 10
+inventory.height = 3
+inventory.clothes_width = 2
+inventory.clothes_height = 5
 
 minetest.register_on_newplayer(function(player)
     local invref = player:get_inventory()
@@ -12,7 +13,7 @@ minetest.register_on_newplayer(function(player)
 
     -- Clothes list
     invref:set_list("clothes", {})
-    invref:set_size("clothes", inventory.width * inventory.clothes_height)
+    invref:set_size("clothes", inventory.clothes_width * inventory.clothes_height)
 
     -- Left and right hand (is this needed?)
     --invref:set_list("left_hand", {})
@@ -23,14 +24,29 @@ end)
 
 minetest.register_on_joinplayer(function(player)
     -- For already existing players
-    if not player:get_inventory():get_list("clothes") then
+    --if not player:get_inventory():get_list("head") then
         local invref = player:get_inventory()
         invref:set_list("clothes", {})
-        invref:set_size("clothes", inventory.width * inventory.clothes_height)
-    end
+        invref:set_size("clothes", inventory.clothes_width * inventory.clothes_height)
+
+        invref:set_list("head", {})
+        invref:set_size("head", 1)
+
+        invref:set_list("back", {})
+        invref:set_size("back", 3)
+
+        invref:set_list("chest", {})
+        invref:set_size("chest", 2)
+
+        invref:set_list("hands", {})
+        invref:set_size("hands", 2)
+
+        invref:set_list("belt", {})
+        invref:set_size("belt", 3)
+    --end
 
     if not minetest.check_player_privs(player:get_player_name(), {creative = true}) then
-        player:set_inventory_formspec(inventory.craft)
+        player:set_inventory_formspec(inventory.default)
     end
 
     player:hud_set_hotbar_image("gui_hotbar.png")
@@ -62,41 +78,52 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     end
 end)
 
-inventory.base =
-    "size[" ..inventory.width.. "," ..(inventory.height + 4).. "]"..
-    default.gui_bg..
-    default.gui_bg_img..
-    default.gui_slots..
-    "button[0.25,4.9;4.25,0.1;craft_inv;Craft]"..
-    "button[4.5,4.9;4.25,0.1;clothes_inv;Clothes]"--..
-    --"button[6.25,4.9;2.5,0.1;notes_inv;Notes]"
-
-inventory.main = function(x,y)
-    return "list[current_player;main;"..
-        x.. "," ..y.. ";"..
-        inventory.width.. "," ..inventory.height.. ";]"
+function inventory.main (x, y)
+    return "list[current_player;main;"
+            .. x .. "," .. y .. ";"
+            .. inventory.width .. "," .. inventory.height .. ";]"
 end
 
-inventory.craft =
-    inventory.base..
-    "list[current_player;craft;2,0;3,3;]"..
-    "image[5,1;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-    "list[current_player;craftpreview;6,1;1,1;]"..
-    inventory.main(0,3.5)
+function inventory.craft (x, y)
+    return "list[current_player;craft;".. x .. "," .. y ..";3,3;]"
+        .. "image["
+            .. (x + 1) .. "," .. (y + 3) .. ";"
+            .. "1,1;gui_furnace_arrow_bg.png^[transformR180]"
+        .. "list[current_player;craftpreview;"
+            .. (x + 1) .. "," .. (y + 4) .. ";"
+            .. "1,1;]"
+end
 
-    -- Left and right hand
-    --"list[current_player;left_hand;0.25,1;1,1;]"..
-    --"list[current_player;right_hand;7.75,1;1,1;]"..
+function inventory.character (x, y)
+    return "list[current_player;head;"
+            .. (x + 1) .. "," .. y .. ";1,1;]"
+        .. "list[current_player;back;"
+            .. x .. "," .. (y + 1) .. ";3,1;]"
+        .. "list[current_player;hands;"
+            .. (x - 0.5) .. "," .. (y + 2) .. ";1,1;]"
+        .. "list[current_player;hands;"
+            .. (x + 2.5) .. "," .. (y + 2) .. ";1,1;1]"
+        .. "list[current_player;chest;"
+            .. (x + 1) .. "," .. (y + 2) .. ";1,2;]"
+        .. "list[current_player;belt;"
+            .. x .. "," .. (y + 4) .. ";3,1;]"
+end
 
-inventory.clothes =
-    inventory.base..
-    "list[current_player;clothes;0,0;"..
-        inventory.width .. "," .. inventory.clothes_height .. ";]"..
-    inventory.main(0,3.5)
+function inventory.clothes (x, y)
+    return "list[current_player;clothes;"
+        .. x .. "," .. y .. ";"
+        .. inventory.clothes_width .. "," .. inventory.clothes_height .. ";]"
+end
 
-inventory.notes =
-    inventory.base..
-    "textarea[0.3,0;" .. inventory.width .. ",4.5;inv_notes;Quick notes;]"
+inventory.default =
+    "size[" ..inventory.width.. "," ..(inventory.height + 6).. "]"
+    .. default.gui_bg
+    .. default.gui_bg_img
+    .. default.gui_slots
+    .. inventory.craft(0, 0)
+    .. inventory.character(4, 0)
+    .. inventory.clothes(8, 0)
+    .. inventory.main(0, 6)
 
 --{{{ Attachments
 -- Bones list:
