@@ -83,13 +83,84 @@ function inventory.craft (x, y)
 end
 
 function inventory.character (x, y)
-    return "image_button["
+    local drawborder = "false"
+
+    local image_width = 2.25
+    local image_height = 4.5
+    local image_ratio = 2/150 -- or 4/300. Cells/Pixels
+
+    local parts = {
+        head = {
+            y = 0, x = 50,
+            y2 = 43, x2 = 85,
+            tooltip = "Голова"
+        },
+        body = {
+            y = nil, x = 38,
+            y2 = 131, x2  = 95,
+            tooltip = "Тело"
+        },
+        lhand = {
+            y = 48, x = 14,
+            y2 = 189, x2 = 34,
+            tooltip = "Левая рука"
+        },
+        rhand = {
+            y = 53, x = nil,
+            y2 = 179, x2 = 126,
+            tooltip = "Правая рука"
+        },
+        legs = {
+            y2 = 245, x2 = 95,
+            tooltip = "Ноги"
+        },
+        feet = {
+            y = nil, x = 26,
+            y2 = 300, x2 = 105,
+            tooltip = "Ступни"
+        },
+        --local back = {
+        --    y = , x = ,
+        --    height = , width =
+        --}
+    }
+    parts.body.y = parts.head.y2
+    parts.rhand.x = parts.body.x2
+    parts.legs.y = parts.body.y2
+    parts.legs.x = parts.lhand.x2
+    parts.feet.y = parts.legs.y2
+
+    local buttons = ""
+    local button_margin_y = 0.019
+    local button_margin_x = 0.09
+    local button_fix = 0.16
+    for part, coords in pairs(parts) do
+        local bx = coords.x * image_ratio - button_margin_x
+        local by = coords.y * image_ratio - button_margin_y
+        local width = coords.x2 * image_ratio - bx + button_fix
+        local height = coords.y2 * image_ratio - by + button_fix
+
+        buttons = buttons
+            .. "image_button["
+                .. (x + bx) .. "," .. (y + by) .. ";"
+                .. width .. "," .. height .. ";"
+                .. ";btn_" .. part .. ";;false;" .. drawborder .. ";"
+                .. "]"
+            .. "tooltip["
+                .. "btn_" .. part .. ";" .. coords.tooltip
+                .. "]"
+    end
+
+    return "image["
             .. x .. "," .. y .. ";"
-            .. "2,4;"
-            .. "character_puppet.png;"
-            .. "big_button;;false;false;]"
+            .. image_width .. "," .. image_height .. ";"
+            .. "character_puppet.png"
+            .. "]"
+        .. buttons
         .. "list[current_player;clothes;"
-            .. (x + 2.25) .. "," .. y .. ";2,4;]"
+            .. (x + image_width) .. "," .. y .. ";"
+            .. "2,4;"
+            .. "]"
 end
 
 inventory.default =
