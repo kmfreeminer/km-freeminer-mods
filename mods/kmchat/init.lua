@@ -13,6 +13,60 @@ function kmchat.get_prefixed_username(player)
     end
 end
 
+function get_message_type_and_text(message)
+    local substrings = nil
+
+    -- local OOC chat
+    substrings = { string.match(message, "^_(.+)") }
+    if not substrings[1] then
+        substrings = { string.match(message, "^%(%((.+)%)%)") }
+    end
+    if substrings[1] then
+        return kmchat.local_ooc, substrings[1]
+    end
+
+    -- global OOC chat
+    substrings = { string.match(message, "^?%s?(.+)") }
+    if substrings[1] then
+        return kmchat.global_ooc, substrings[1]
+    end
+
+    -- role-play action
+    substrings = { string.match(message, "^*%s?(.+)") }
+    if substrings[1] then
+        return kmchat.action, substrings[1]
+    end
+    
+    -- dice
+    substrings = { string.match(message, "^d(%d+)(.*)$") }
+    if substrings[1] then
+        return kmchat.dice, substrings[1]
+    end
+    
+    -- [4dF dice]
+    substrings = { string.match(message, "^4d[Ff] (.*)$") }
+    if not substrings[1] then
+        substrings = { string.match(message, "^%%%%%% (.*)$") }
+    end
+    if substrings[1] then
+        return kmchat.fudge_dice, substrings[1]
+    end
+    -- [/4dF dice]
+
+    -- event [gm-only]
+    if minetest.check_player_privs(player_name, {["gm"]=true,}) then
+        substrings = { string.match(message, "^#%s?(.+)") }
+        if substrings[1] then
+            return kmchat.event, substrings[1]
+        end
+    end
+    return kmchat.default, message
+end
+
+
+
+
+
 function kmchat.log(message)
     jabber.send(message)
     print(message)
@@ -20,167 +74,83 @@ end
 
 function kmchat.process_messages(name, message)
     local player  = minetest.get_player_by_name(name)
-    
+
     -- [Calculate range delta]
     local range_delta = 0
     range_delta = range_delta + #(string.match(string.gsub(message,"=",""), '!*'))
     range_delta = range_delta - #(string.match(string.gsub(message,"!",""), '=*'))
-    
+
     message = string.gsub(message, "^[!=]*", "")
-    
-    local is_global = false
+
+   local is_global = false
     -- [/Calculate range delta]
 
-    
-    -- [Default values]
-    local format_string = kmchat.default_format_string
-    
     local nick = kmchat.get_prefixed_username(player)
-    local text = message
-    
     local range       = kmchat.ranges.getRange(range_delta, "speak")
     local range_label = kmchat.ranges.getLabel(range_delta, "speak")
+    
+    -- TODO
+    local action_type = default
+    local action_type, text = get_message_type_and_text(message)
+    local format_string = action_type.format_string
+    local color = action_type._color
 
-    local color = kmchat.default_color
-    -- [/Default values]
-
-    repeat
-        local substrings = nil
-
-        -- local OOC chat
-        substrings = { string.match(message, "^_(.+)") }
-        
-        if not substrings[1] then
-            substrings = { string.match(message, "^%(%((.+)%)%)") }
+    if action_type == kmchat.global_ooc then
+        is_global = true
+    elseif action_type == kmchat.dice then
+        local dice = text
+        if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
+            local dice_result = math.random(dice)
+            format_string = string.gsub(format_string, "{{dice}}", dice)
+            format_string = string.gsub(format_string, "{{dice_result}}", dice_result)
+            range = kmchat.ranges.getRange(range_delta)
+            range_label = kmchat.ranges.getLabel(range_delta)
         end
-        
-        if substrings[1] then
-            format_string = kmchat.local_ooc_format_string
-            color = kmchat.local_ooc_color
-            
-            text = substrings[1]
+    elseif action_type == kmchat.fudge_dice then
+        local fudge_dice_string = text
+
+        local first_word = nil
+        for word in string.gmatch(string.gsub(fudge_dice_string, "[,(]", " "), "[%S]+") do
+            first_word = word
             break
         end
-        
-        -- global OOC chat
-        substrings = { string.match(message, "^?%s?(.+)") }
-        
-        if substrings[1] then
-            is_global = true
-            
-            format_string = kmchat.global_ooc_format_string
-            color = kmchat.global_ooc_color
-            
-            text = substrings[1]
-            break
-        end
-        
-        -- role-play action
-        substrings = { string.match(message, "^*%s?(.+)") }
-        
-        if substrings[1] then
-            format_string = kmchat.action_format_string
-            color = kmchat.action_color
-            
-            text = substrings[1]
-            break
-        end
-        
-        -- dice
-        substrings = { string.match(message, "^d(%d+)(.*)$") }
-        
-        if substrings[1] then
-            local dice = substrings[1]
-            if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
-                local dice_result = math.random(dice)
-                format_string = kmchat.dice_format_string
-                format_string = string.gsub(format_string, "{{dice}}", dice)
-                format_string = string.gsub(format_string, "{{dice_result}}", dice_result)
-                
-                color = kmchat.dice_color
-                
+
+        for key, val in pairs(kmchat.fudge_levels) do
+            if val == first_word then
+                local fudge_level_orignal = first_word
+                local fudge_level_key = key
+
+                local signs = ""
+
+                for i = 1, 4 do
+                    rand = math.random(3) - 2
+                    if rand == +1 then
+                        signs = signs.."+"
+                    elseif rand == -1 then
+                        signs = signs.."-"
+                    else
+                        signs = signs.."="
+                    end
+                    fudge_level_key = fudge_level_key+rand
+                end
+
+                if fudge_level_key<1 then
+                    fudge_level_key = 1
+                elseif fudge_level_key>#kmchat.fudge_levels then
+                    fudge_level_key = #kmchat.fudge_levels
+                end
+
+                local fudge_level_result = kmchat.fudge_levels[fudge_level_key]
+                format_string = string.gsub(format_string, "{{signs}}", signs)
+                format_string = string.gsub(format_string, "{{fudge_level_orignal}}", fudge_level_orignal)
+                format_string = string.gsub(format_string, "{{fudge_dice_string}}", fudge_dice_string)
+                format_string = string.gsub(format_string, "{{fudge_level_result}}", fudge_level_result)
                 range = kmchat.ranges.getRange(range_delta)
                 range_label = kmchat.ranges.getLabel(range_delta)
             end
-            break
         end
-        
-        -- [4dF dice]
-        substrings = { string.match(message, "^4d[Ff] (.*)$") }
-        
-        if not substrings[1] then
-            substrings = { string.match(message, "^%%%%%% (.*)$") }
-        end
-        
-        if substrings[1] then
-            local fudge_dice_string = substrings[1]
+    end
 
-            local first_word = nil
-            for word in string.gmatch(string.gsub(fudge_dice_string, "[,(]", " "), "[%S]+") do
-                first_word = word
-                break
-            end
-            
-            for key, val in pairs(kmchat.fudge_levels) do
-                if val == first_word then
-                    local fudge_level_orignal = first_word
-                    local fudge_level_key = key
-                    
-                    local diff = 0
-                    local signs = ""
-                    
-                    for i = 1, 4 do
-                        rand = math.random(3) - 2
-                        if rand == +1 then
-                            signs = signs.."+"
-                        elseif rand == -1 then
-                            signs = signs.."-"
-                        else
-                            signs = signs.."="
-                        end
-                        diff = diff - rand
-                    end
-                    
-                    fudge_level_key = fudge_level_key+diff
-                    
-                    if fudge_level_key<1 then
-                        fudge_level_key = 1
-                    elseif fudge_level_key>#kmchat.fudge_levels then
-                        fudge_level_key = #kmchat.fudge_levels
-                    end
-                    
-                    local fudge_level_result = kmchat.fudge_levels[fudge_level_key]
-                    
-                    format_string = kmchat.fudge_dice_format_string
-                    format_string = string.gsub(format_string, "{{signs}}", signs)
-                    format_string = string.gsub(format_string, "{{fudge_level_orignal}}", fudge_level_orignal)
-                    format_string = string.gsub(format_string, "{{fudge_dice_string}}", fudge_dice_string)
-                    format_string = string.gsub(format_string, "{{fudge_level_result}}", fudge_level_result)
-                    
-                    color = kmchat.dice_color
-                    
-                    range = kmchat.ranges.getRange(range_delta)
-                    range_label = kmchat.ranges.getLabel(range_delta)
-                end
-            end
-            break
-        end
-        -- [/4dF dice]
-
-        -- event [gm-only]
-        if minetest.check_player_privs(player_name, {["gm"]=true,}) then
-            substrings = { string.match(message, "^#%s?(.+)") }
-            
-            if substrings[1] then
-                format_string = kmchat.event_format_string
-                color = kmchat.event_color
-                
-                text = substrings[1]
-                break
-            end
-        end
-    until true
-    
     local players = minetest.get_connected_players()
     
     local result = format_string
