@@ -53,7 +53,6 @@ minetest.after(0, function()
         inv:add_item("main", ItemStack(itemstring))
     end
     creative.creative_inventory_size = #creative_list
-    --print("creative inventory size: "..dump(creative.creative_inventory_size))
 end)
 
 -- Create the trash field
@@ -73,76 +72,6 @@ local trash = minetest.create_detached_inventory("creative_trash", {
     end,
 })
 trash:set_size("main", 1)
-
-
-creative.set_creative_formspec = function(player, start_i, pagenum)
-    pagenum = math.floor(pagenum)
-    local pagemax = math.floor((creative.creative_inventory_size-1) / (6*4) + 1)
-    player:set_inventory_formspec(
-            "size[13,7.5]"..
-            --"image[6,0.6;1,2;player.png]"..
-            default.gui_bg..
-            default.gui_bg_img..
-            default.gui_slots..
-            "list[current_player;main;5,3.5;8,1;]"..
-            "list[current_player;main;5,4.75;8,3;8]"..
-            "list[current_player;craft;8,0;3,3;]"..
-            "list[current_player;craftpreview;12,1;1,1;]"..
-            "image[11,1;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-            "list[detached:creative;main;0.3,0.5;4,6;"..tostring(start_i).."]"..
-            "label[2.0,6.55;"..tostring(pagenum).."/"..tostring(pagemax).."]"..
-            "button[0.3,6.5;1.6,1;creative_prev;<<]"..
-            "button[2.7,6.5;1.6,1;creative_next;>>]"..
-            "listring[current_player;main]"..
-            "listring[current_player;craft]"..
-            "listring[current_player;main]"..
-            "listring[detached:creative;main]"..
-            "label[5,1.5;Trash:]"..
-            "list[detached:creative_trash;main;5,2;1,1;]"..
-            default.get_hotbar_bg(5,3.5)
-    )
-end
-
-minetest.register_on_joinplayer(function(player)
-    -- If in creative mode, modify player's inventory forms
-    local name = player:get_player_name()
-    if minetest.check_player_privs(name, {creative = true}) then
-        creative.set_creative_formspec(player, 0, 1)
-    end
-end)
-
-minetest.register_on_player_receive_fields(function(player, formname, fields)
-    local name = player:get_player_name()
-    if not minetest.check_player_privs(name, {creative = true}) then
-        return
-    end
-
-    -- Figure out current page from formspec
-    local current_page = 0
-    local formspec = player:get_inventory_formspec()
-    local start_i = string.match(formspec, "list%[detached:creative;main;[%d.]+,[%d.]+;[%d.]+,[%d.]+;(%d+)%]")
-    start_i = tonumber(start_i) or 0
-
-    if fields.creative_prev then
-        start_i = start_i - 4*6
-    end
-    if fields.creative_next then
-        start_i = start_i + 4*6
-    end
-
-    if start_i < 0 then
-        start_i = start_i + 4*6
-    end
-    if start_i >= creative.creative_inventory_size then
-        start_i = start_i - 4*6
-    end
-        
-    if start_i < 0 or start_i >= creative.creative_inventory_size then
-        start_i = 0
-    end
-
-    creative.set_creative_formspec(player, start_i, start_i / (6*4) + 1)
-end)
 --}}}
 
 minetest.register_on_punchnode(function (pos, node, puncher, pointed_thing)
@@ -158,44 +87,3 @@ minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack
     local name = placer:get_player_name()
     return minetest.check_player_privs(name, {creative = true})
 end)
-
---if minetest.setting_getbool("creative_mode") then
---    local digtime = 0.5
---    minetest.register_item(":", {
---        type = "none",
---        wield_image = "wieldhand.png",
---        wield_scale = {x=1,y=1,z=2.5},
---        range = 10,
---        tool_capabilities = {
---            full_punch_interval = 0.5,
---            max_drop_level = 3,
---            groupcaps = {
---                crumbly = {times={[1]=digtime, [2]=digtime, [3]=digtime}, uses=0, maxlevel=3},
---                cracky = {times={[1]=digtime, [2]=digtime, [3]=digtime}, uses=0, maxlevel=3},
---                snappy = {times={[1]=digtime, [2]=digtime, [3]=digtime}, uses=0, maxlevel=3},
---                choppy = {times={[1]=digtime, [2]=digtime, [3]=digtime}, uses=0, maxlevel=3},
---                oddly_breakable_by_hand = {times={[1]=digtime, [2]=digtime, [3]=digtime}, uses=0, maxlevel=3},
---            },
---            damage_groups = {fleshy = 10},
---        }
---    })
---    
---    minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack)
---        return true
---    end)
---    
---    function minetest.handle_node_drops(pos, drops, digger)
---        if not digger or not digger:is_player() then
---            return
---        end
---        local inv = digger:get_inventory()
---        if inv then
---            for _,item in ipairs(drops) do
---                item = ItemStack(item):get_name()
---                if not inv:contains_item("main", item) then
---                    inv:add_item("main", item)
---                end
---            end
---        end
---    end
---end
