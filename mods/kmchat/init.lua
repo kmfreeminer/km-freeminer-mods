@@ -15,14 +15,14 @@ end
 
 
 function get_message_type_and_text(message)
-    local rexps = {"^_(.+)" = "local_ooc",
-                   "^%(%((.+)%)%)" = "local_ooc",
-                   "^?%s?(.+)" = "global_ooc",
-                   "^*%s?(.+)" = "action",
-                   "^d(%d+)(.*)$" = "dice",
-                   "^4d[Ff] (.*)$" = "fudge_dice",
-                   "^%%%%%% (.*)$" = "fudge_dive",
-                   "^#%s?(.+)" = "event"}
+    local rexps = {["^_(.+)"] = "local_ooc",
+                   ["^%(%((.+)%)%)"] = "local_ooc",
+                   ["^?%s?(.+)"] = "global_ooc",
+                   ["^*%s?(.+)"] = "action",
+                   ["^d(%d+)(.*)$"] = "dice",
+                   ["^4d[Ff] (.*)$"] = "fudge_dice",
+                   ["^%%%%%% (.*)$"] = "fudge_dive",
+                   ["^#%s?(.+)"] = "event"}
 
     local substrings = nil
 
@@ -35,9 +35,6 @@ function get_message_type_and_text(message)
 
     return "default", message
 end
-
-
-
 
 
 function kmchat.log(message)
