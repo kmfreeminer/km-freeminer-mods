@@ -40,8 +40,7 @@ function kmchat.process_messages(name, message)
     local nick = kmchat.get_prefixed_username(player)
     local text = message
     
-    local range       = kmchat.ranges.getRange(range_delta, "speak")
-    local range_label = kmchat.ranges.getLabel(range_delta, "speak")
+    local range, range_label = kmchat.ranges.getRangeInfo(range_delta, "speak")
 
     local color = kmchat.default_color
     -- [/Default values]
@@ -101,8 +100,7 @@ function kmchat.process_messages(name, message)
                 
                 color = kmchat.dice_color
                 
-                range = kmchat.ranges.getRange(range_delta)
-                range_label = kmchat.ranges.getLabel(range_delta)
+                range, range_label = kmchat.ranges.getRangeInfo(range_delta)
             end
             break
         end
@@ -162,8 +160,7 @@ function kmchat.process_messages(name, message)
                     
                     color = kmchat.dice_color
                     
-                    range = kmchat.ranges.getRange(range_delta)
-                    range_label = kmchat.ranges.getLabel(range_delta)
+                    range, range_label = kmchat.ranges.getRangeInfo(range_delta)
                 end
             end
             break

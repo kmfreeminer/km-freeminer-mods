@@ -28,25 +28,13 @@ local function getRangeIndex(range_delta, message_type)
     return range_index
 end
 
--- Get range label
-function kmchat.ranges.getLabel(range_delta, message_type)
-    if not message_type then message_type = "default" end
-    
-    if isMessageTypeExist(message_type) then
-        local range_index = getRangeIndex(range_delta, message_type)
-        
-        return kmchat.ranges[message_type].range[range_index][2]
-    end
-    return ""
-end
-
--- Get range
-function kmchat.ranges.getRange(range_delta, message_type)
+-- Get range and range label
+function kmchat.ranges.getRangeInfo(range_delta, message_type)
     if not message_type then message_type = "default" end
 
     if isMessageTypeExist(message_type) then
         local range_index = getRangeIndex(range_delta, message_type)
-        return kmchat.ranges[message_type].range[range_index][1]
+        return kmchat.ranges[message_type].range[range_index][1], kmchat.ranges[message_type].range[range_index][2]
     end
     
     return nil
