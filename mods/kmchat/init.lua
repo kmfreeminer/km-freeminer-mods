@@ -89,11 +89,8 @@ function kmchat.process_messages(name, message)
             break
         end
 
-        for key, val in pairs(kmchat.fudge_levels) do
-            if val == first_word then
-                local fudge_level_orignal = first_word
-                local fudge_level_key = key
-
+        for fudge_level_key, fudge_level_orignal in pairs(kmchat.fudge_levels) do
+            if fudge_level_orignal == first_word then
                 local signs = ""
 
                 for i = 1, 4 do
