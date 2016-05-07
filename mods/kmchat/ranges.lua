@@ -1,5 +1,5 @@
 -- ==== CONFIG API ====
-local function is_message_type_exist(message_type)
+local function isMessageTypeExist(message_type)
     if kmchat.ranges[message_type]         and
        kmchat.ranges[message_type].default and
        kmchat.ranges[message_type].range
@@ -11,13 +11,13 @@ local function is_message_type_exist(message_type)
 end
 
 -- Default range index
-local function get_default_range_index(message_type)
+local function getDefaultRangeIndex(message_type)
     return kmchat.ranges[message_type].default
 end
 
 -- Validate range index
-local function get_range_index(range_delta, message_type)    
-    local range_default = get_default_range_index(message_type)
+local function getRangeIndex(range_delta, message_type)    
+    local range_default = getDefaultRangeIndex(message_type)
     local range_index = range_default + range_delta
     
     if range_index < 1 then
@@ -33,8 +33,8 @@ end
 function kmchat.ranges.getLabel(range_delta, message_type)
     if not message_type then message_type = "default" end
     
-    if is_message_type_exist(message_type) then
-        local range_index = get_range_index(range_delta, message_type)
+    if isMessageTypeExist(message_type) then
+        local range_index = getRangeIndex(range_delta, message_type)
         
         return kmchat.ranges[message_type].range[range_index][2]
     end
@@ -45,8 +45,8 @@ end
 function kmchat.ranges.getRange(range_delta, message_type)
     if not message_type then message_type = "default" end
 
-    if is_message_type_exist(message_type) then
-        local range_index = get_range_index(range_delta, message_type)
+    if isMessageTypeExist(message_type) then
+        local range_index = getRangeIndex(range_delta, message_type)
         return kmchat.ranges[message_type].range[range_index][1]
     end
     

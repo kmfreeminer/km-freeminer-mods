@@ -7,10 +7,10 @@ kmchat.default_color            = "FFFFFF"
 kmchat.default_format_string    = "{{nick}}{{range_label}}: {{text}}"
 
 kmchat.local_ooc_color          = "9966AA"
-kmchat.local_ooc_format_string  = "(( {{nick}}{{range_label}}: {{text}} ))"
+kmchat.local_ooc_format_string = "{{nick}} (OOC){{range_label}}: (( {{text}} ))"
 
 kmchat.global_ooc_color         = "20EEDD"
-kmchat.global_ooc_format_string = "(( {{nick}}(на весь мир): {{text}} ))"
+kmchat.global_ooc_format_string = "{{nick}} (OOC): (( {{text}} ))"
 
 kmchat.action_color             = "FFFF00"
 kmchat.action_format_string     = "* {{nick}}{{range_label}} {{text}} *"
