@@ -1,4 +1,3 @@
--- ==== CONFIG API ====
 local function isMessageTypeExist(message_type)
     if kmchat.ranges[message_type]         and
        kmchat.ranges[message_type].default and
@@ -41,7 +40,7 @@ function kmchat.ranges.getLabel(range_delta, message_type)
     return ""
 end
 
--- Get range by label
+-- Get range
 function kmchat.ranges.getRange(range_delta, message_type)
     if not message_type then message_type = "default" end
 
