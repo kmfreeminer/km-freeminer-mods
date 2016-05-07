@@ -15,14 +15,14 @@ end
 
 
 function get_message_type_and_text(message)
-    local rexps = {"^_(.+)" = "local_ooc",
-                   "^%(%((.+)%)%)" = "local_ooc",
-                   "^?%s?(.+)" = "global_ooc",
-                   "^*%s?(.+)" = "action",
-                   "^d(%d+)(.*)$" = "dice",
-                   "^4d[Ff] (.*)$" = "fudge_dice",
-                   "^%%%%%% (.*)$" = "fudge_dive",
-                   "^#%s?(.+)" = "event"}
+    local rexps = {["^_(.+)"]        = "local_ooc",
+                   ["^%(%((.+)%)%)"] = "local_ooc",
+                   ["^?%s?(.+)"]     = "global_ooc",
+                   ["^*%s?(.+)"]     = "action",
+                   ["^d(%d+)(.*)$"]  = "dice",
+                   ["^4d[Ff] (.*)$"] = "fudge_dice",
+                   ["^%%%%%% (.*)$"] = "fudge_dive",
+                   ["^#%s?(.+)"]     = "event"}
 
     local substrings = nil
 
@@ -35,10 +35,6 @@ function get_message_type_and_text(message)
 
     return "default", message
 end
-
-
-
-
 
 function kmchat.log(message)
     jabber.send(message)
@@ -59,8 +55,7 @@ function kmchat.process_messages(name, message)
     -- [/Calculate range delta]
 
     local nick = kmchat.get_prefixed_username(player)
-    local range       = kmchat.ranges.getRange(range_delta, "speak")
-    local range_label = kmchat.ranges.getLabel(range_delta, "speak")
+    local range, range_label = kmchat.ranges.getRangeInfo(range_delta, "speak")
 
     local action_type, text = get_message_type_and_text(message)
     if not minetest.check_player_privs(player_name, {["gm"]=true,}) and action_type == "event" then
@@ -77,8 +72,7 @@ function kmchat.process_messages(name, message)
             local dice_result = math.random(dice)
             format_string = string.gsub(format_string, "{{dice}}", dice)
             format_string = string.gsub(format_string, "{{dice_result}}", dice_result)
-            range = kmchat.ranges.getRange(range_delta)
-            range_label = kmchat.ranges.getLabel(range_delta)
+            range, range_label = kmchat.ranges.getRangeInfo(range_delta)
         end
     elseif action_type == "fudge_dice" then
         local fudge_dice_string = text
@@ -95,7 +89,7 @@ function kmchat.process_messages(name, message)
 
                 for i = 1, 4 do
                     rand = math.random(3) - 2
-                    if rand == +1 then
+                    if rand == 1 then
                         signs = signs.."+"
                     elseif rand == -1 then
                         signs = signs.."-"
@@ -116,8 +110,7 @@ function kmchat.process_messages(name, message)
                 format_string = string.gsub(format_string, "{{fudge_level_orignal}}", fudge_level_orignal)
                 format_string = string.gsub(format_string, "{{fudge_dice_string}}", fudge_dice_string)
                 format_string = string.gsub(format_string, "{{fudge_level_result}}", fudge_level_result)
-                range = kmchat.ranges.getRange(range_delta)
-                range_label = kmchat.ranges.getLabel(range_delta)
+                range, range_label = kmchat.ranges.getRangeInfo(range_delta)
             end
         end
     end

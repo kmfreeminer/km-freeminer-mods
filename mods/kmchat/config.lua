@@ -6,8 +6,8 @@ kmchat.fudge_levels = {"-","ужасно--","ужасно-","ужасно", "п�
 kmchat.default = {color = "FFFFFF",
                   format_string = "{{nick}}{{range_label}}: {{text}}"}
 
-kmchat.local = {color = "9966AA",
-                format_string = "{{nick}} (OOC){{range_label}}: (( {{text}} ))"}
+kmchat.local_ooc = {color = "9966AA",
+                 format_string = "{{nick}} (OOC){{range_label}}: (( {{text}} ))"}
 
 kmchat.global_ooc = {color = "20EEDD",
                      format_string = "{{nick}} (OOC): (( {{text}} ))"}
