@@ -88,8 +88,7 @@ function kmchat.process_messages(name, message)
     local nick = kmchat.get_prefixed_username(player)
     local range       = kmchat.ranges.getRange(range_delta, "speak")
     local range_label = kmchat.ranges.getLabel(range_delta, "speak")
-    
-    -- TODO
+
     local action_type = default
     local action_type, text = get_message_type_and_text(message)
     local format_string = action_type.format_string
