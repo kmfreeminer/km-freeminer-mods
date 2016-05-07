@@ -13,53 +13,26 @@ function kmchat.get_prefixed_username(player)
     end
 end
 
+
 function get_message_type_and_text(message)
+    local rexps = {"^_(.+)" = "local_ooc",
+                   "^%(%((.+)%)%)" = "local_ooc",
+                   "^?%s?(.+)" = "global_ooc",
+                   "^*%s?(.+)" = "action",
+                   "^d(%d+)(.*)$" = "dice",
+                   "^4d[Ff] (.*)$" = "fudge_dice",
+                   "^%%%%%% (.*)$" = "fudge_dive",
+                   "^#%s?(.+)" = "event"}
+
     local substrings = nil
 
-    -- local OOC chat
-    substrings = { string.match(message, "^_(.+)") }
-    if not substrings[1] then
-        substrings = { string.match(message, "^%(%((.+)%)%)") }
-    end
-    if substrings[1] then
-        return "local_ooc", substrings[1]
-    end
-
-    -- global OOC chat
-    substrings = { string.match(message, "^?%s?(.+)") }
-    if substrings[1] then
-        return "global_ooc", substrings[1]
-    end
-
-    -- role-play action
-    substrings = { string.match(message, "^*%s?(.+)") }
-    if substrings[1] then
-        return "action", substrings[1]
-    end
-    
-    -- dice
-    substrings = { string.match(message, "^d(%d+)(.*)$") }
-    if substrings[1] then
-        return "dice", substrings[1]
-    end
-    
-    -- [4dF dice]
-    substrings = { string.match(message, "^4d[Ff] (.*)$") }
-    if not substrings[1] then
-        substrings = { string.match(message, "^%%%%%% (.*)$") }
-    end
-    if substrings[1] then
-        return "fudge_dice", substrings[1]
-    end
-    -- [/4dF dice]
-
-    -- event [gm-only]
-    if minetest.check_player_privs(player_name, {["gm"]=true,}) then
-        substrings = { string.match(message, "^#%s?(.+)") }
+    for rexp, mtype in pairs(rexps) do
+        substrings = { string.match(message, rexp) }
         if substrings[1] then
-            return "event", substrings[1]
+            return mtype, substrings[1]
         end
     end
+
     return "default", message
 end
 
@@ -90,6 +63,9 @@ function kmchat.process_messages(name, message)
     local range_label = kmchat.ranges.getLabel(range_delta, "speak")
 
     local action_type, text = get_message_type_and_text(message)
+    if not minetest.check_player_privs(player_name, {["gm"]=true,}) and action_type == "event" then
+        action_type = "default"
+    end
     local format_string = kmchat[action_type].format_string
     local color = kmchat[action_type].color
 
