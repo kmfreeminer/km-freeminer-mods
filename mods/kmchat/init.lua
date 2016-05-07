@@ -18,8 +18,6 @@ function kmchat.log(message)
     print(message)
 end
 
-
-
 function kmchat.process_messages(name, message)
     local player  = minetest.get_player_by_name(name)
     
@@ -40,7 +38,8 @@ function kmchat.process_messages(name, message)
     local nick = kmchat.get_prefixed_username(player)
     local text = message
     
-    local range, range_label = kmchat.ranges.getRangeInfo(range_delta, "speak")
+    local range       = kmchat.ranges.getRange(range_delta, "speak")
+    local range_label = kmchat.ranges.getLabel(range_delta, "speak")
 
     local color = kmchat.default_color
     -- [/Default values]
@@ -100,7 +99,8 @@ function kmchat.process_messages(name, message)
                 
                 color = kmchat.dice_color
                 
-                range, range_label = kmchat.ranges.getRangeInfo(range_delta)
+                range = kmchat.ranges.getRange(range_delta)
+                range_label = kmchat.ranges.getLabel(range_delta)
             end
             break
         end
@@ -130,16 +130,15 @@ function kmchat.process_messages(name, message)
                     local signs = ""
                     
                     for i = 1, 4 do
-                        rand = math.random(3)
-                        if rand == 1 then
-                            diff=diff+1
+                        rand = math.random(3) - 2
+                        if rand == +1 then
                             signs = signs.."+"
-                        elseif rand == 2 then
-                            diff=diff-1
+                        elseif rand == -1 then
                             signs = signs.."-"
                         else
                             signs = signs.."="
                         end
+                        diff = diff - rand
                     end
                     
                     fudge_level_key = fudge_level_key+diff
@@ -160,7 +159,8 @@ function kmchat.process_messages(name, message)
                     
                     color = kmchat.dice_color
                     
-                    range, range_label = kmchat.ranges.getRangeInfo(range_delta)
+                    range = kmchat.ranges.getRange(range_delta)
+                    range_label = kmchat.ranges.getLabel(range_delta)
                 end
             end
             break
