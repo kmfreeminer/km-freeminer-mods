@@ -22,25 +22,25 @@ function get_message_type_and_text(message)
         substrings = { string.match(message, "^%(%((.+)%)%)") }
     end
     if substrings[1] then
-        return kmchat.local_ooc, substrings[1]
+        return "local_ooc", substrings[1]
     end
 
     -- global OOC chat
     substrings = { string.match(message, "^?%s?(.+)") }
     if substrings[1] then
-        return kmchat.global_ooc, substrings[1]
+        return "global_ooc", substrings[1]
     end
 
     -- role-play action
     substrings = { string.match(message, "^*%s?(.+)") }
     if substrings[1] then
-        return kmchat.action, substrings[1]
+        return "action", substrings[1]
     end
     
     -- dice
     substrings = { string.match(message, "^d(%d+)(.*)$") }
     if substrings[1] then
-        return kmchat.dice, substrings[1]
+        return "dice", substrings[1]
     end
     
     -- [4dF dice]
@@ -49,7 +49,7 @@ function get_message_type_and_text(message)
         substrings = { string.match(message, "^%%%%%% (.*)$") }
     end
     if substrings[1] then
-        return kmchat.fudge_dice, substrings[1]
+        return "fudge_dice", substrings[1]
     end
     -- [/4dF dice]
 
@@ -57,10 +57,10 @@ function get_message_type_and_text(message)
     if minetest.check_player_privs(player_name, {["gm"]=true,}) then
         substrings = { string.match(message, "^#%s?(.+)") }
         if substrings[1] then
-            return kmchat.event, substrings[1]
+            return "event", substrings[1]
         end
     end
-    return kmchat.default, message
+    return "default", message
 end
 
 
@@ -90,12 +90,12 @@ function kmchat.process_messages(name, message)
     local range_label = kmchat.ranges.getLabel(range_delta, "speak")
 
     local action_type, text = get_message_type_and_text(message)
-    local format_string = action_type.format_string
-    local color = action_type._color
+    local format_string = kmchat[action_type].format_string
+    local color = kmchat[action_type].color
 
-    if action_type == kmchat.global_ooc then
+    if action_type == "global_ooc" then
         is_global = true
-    elseif action_type == kmchat.dice then
+    elseif action_type == "dice" then
         local dice = text
         if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
             local dice_result = math.random(dice)
@@ -104,7 +104,7 @@ function kmchat.process_messages(name, message)
             range = kmchat.ranges.getRange(range_delta)
             range_label = kmchat.ranges.getLabel(range_delta)
         end
-    elseif action_type == kmchat.fudge_dice then
+    elseif action_type == "fudge_dice" then
         local fudge_dice_string = text
 
         local first_word = nil
