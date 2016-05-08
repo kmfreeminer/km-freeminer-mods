@@ -35,13 +35,13 @@ end
 function kmchat.process_messages(name, message)
     local player  = minetest.get_player_by_name(name)
 
-    -- [Calculate range delta]
+    -- {{{ Calculate range delta 
     local range_delta      =    #(string.match(string.gsub(message,"=",""), '!*')) 
     range_delta = range_delta - #(string.match(string.gsub(message,"!",""), '=*'))
 
     message = string.gsub(message, "^[!=]*", "")
     local is_global = false
-    -- [/Calculate range delta]
+    -- }}}
 
     local nick = kmchat.get_prefixed_username(player)
     local range, range_label = kmchat.ranges.getRangeInfo(range_delta, "speak")
