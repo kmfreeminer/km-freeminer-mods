@@ -35,7 +35,8 @@ end
 function kmchat.process_messages(name, message)
     local player  = minetest.get_player_by_name(name)
 
-    -- {{{ Calculate range delta 
+    -- Calculate range delta 
+    -- {{{
     local range_delta      =    #(string.match(string.gsub(message,"=",""), '!*')) 
     range_delta = range_delta - #(string.match(string.gsub(message,"!",""), '=*'))
 
