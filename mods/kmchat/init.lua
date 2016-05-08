@@ -5,7 +5,7 @@ dofile(minetest.get_modpath("kmchat").."/ranges.lua")
 
 function kmchat.get_prefixed_username(player)
     player_name = player:get_player_name();
-    
+
     if minetest.check_player_privs(player_name, {["gm"]=true,}) then
         return kmchat.gm_prefix .. player_name
     else
@@ -15,18 +15,9 @@ end
 
 
 function get_message_type_and_text(message)
-    local rexps = {["^_(.+)"] = "local_ooc",
-                   ["^%(%((.+)%)%)"] = "local_ooc",
-                   ["^?%s?(.+)"] = "global_ooc",
-                   ["^*%s?(.+)"] = "action",
-                   ["^d(%d+)(.*)$"] = "dice",
-                   ["^4d[Ff] (.*)$"] = "fudge_dice",
-                   ["^%%%%%% (.*)$"] = "fudge_dive",
-                   ["^#%s?(.+)"] = "event"}
-
     local substrings = nil
 
-    for rexp, mtype in pairs(rexps) do
+    for rexp, mtype in pairs(kmchat.rexps) do
         substrings = { string.match(message, rexp) }
         if substrings[1] then
             return mtype, substrings[1]
@@ -45,13 +36,9 @@ function kmchat.process_messages(name, message)
     local player  = minetest.get_player_by_name(name)
 
     -- [Calculate range delta]
-    local range_delta = 0
-    range_delta = range_delta + #(string.match(string.gsub(message,"=",""), '!*'))
-    range_delta = range_delta - #(string.match(string.gsub(message,"!",""), '=*'))
-
+    local range_delta = #(string.match(string.gsub(message,"=",""), '!*')) - #(string.match(string.gsub(message,"!",""), '=*'))
     message = string.gsub(message, "^[!=]*", "")
-
-   local is_global = false
+    local is_global = false
     -- [/Calculate range delta]
 
     local nick = kmchat.get_prefixed_username(player)
@@ -75,10 +62,8 @@ function kmchat.process_messages(name, message)
             range, range_label = kmchat.ranges.getRangeInfo(range_delta)
         end
     elseif action_type == "fudge_dice" then
-        local fudge_dice_string = text
-
         local first_word = nil
-        for word in string.gmatch(string.gsub(fudge_dice_string, "[,(]", " "), "[%S]+") do
+        for word in string.gmatch(string.gsub(text, "[,(]", " "), "[%S]+") do
             first_word = word
             break
         end
@@ -88,7 +73,7 @@ function kmchat.process_messages(name, message)
                 local signs = ""
 
                 for i = 1, 4 do
-                    rand = math.random(3) - 2
+                    rand = math.random(-1, 1)
                     if rand == 1 then
                         signs = signs.."+"
                     elseif rand == -1 then
@@ -108,7 +93,6 @@ function kmchat.process_messages(name, message)
                 local fudge_level_result = kmchat.fudge_levels[fudge_level_key]
                 format_string = string.gsub(format_string, "{{signs}}", signs)
                 format_string = string.gsub(format_string, "{{fudge_level_orignal}}", fudge_level_orignal)
-                format_string = string.gsub(format_string, "{{fudge_dice_string}}", fudge_dice_string)
                 format_string = string.gsub(format_string, "{{fudge_level_result}}", fudge_level_result)
                 range, range_label = kmchat.ranges.getRangeInfo(range_delta)
             end
@@ -116,24 +100,24 @@ function kmchat.process_messages(name, message)
     end
 
     local players = minetest.get_connected_players()
-    
+
     local result = format_string
     result = string.gsub(result, "{{nick}}", nick)
     result = string.gsub(result, "{{range_label}}", range_label)
     result = string.gsub(result, "{{text}}", text)
-    
+
     local sender_position = player:getpos()
-    for i = 1, #players do 
+    for i = 1, #players do
         local reciever_name      = players[i]:get_player_name()
         local reciever_position  = players[i]:getpos()
-        
+
         if is_global or vector.distance(sender_position, reciever_position) <= range then
             minetest.chat_send_player(reciever_name, freeminer.colorize(color, result))
         elseif minetest.check_player_privs(reciever_name, {gm=true}) then
             minetest.chat_send_player(reciever_name, freeminer.colorize(kmchat.gm_color, result))
         end
     end
-    
+
     kmchat.log(result)
     return true
 end

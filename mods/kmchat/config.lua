@@ -3,6 +3,15 @@ kmchat.gm_color = "666666"
 
 kmchat.fudge_levels = {"-","ужасно--","ужасно-","ужасно", "плохо", "посредственно", "нормально", "хорошо", "отлично", "супер", "легендарно", "легендарно+", "легендарно++","как Аллах"}
 
+kmchat.rexps = {["^_(.+)"] = "local_ooc",
+                ["^%(%((.+)%)%)"] = "local_ooc",
+                ["^?%s?(.+)"] = "global_ooc",
+                ["^*%s?(.+)"] = "action",
+                ["^d(%d+)(.*)$"] = "dice",
+                ["^4d[Ff] (.*)$"] = "fudge_dice",
+                ["^%%%%%% (.*)$"] = "fudge_dive",
+                ["^#%s?(.+)"] = "event"}
+
 kmchat.default = {color = "FFFFFF",
                   format_string = "{{nick}}{{range_label}}: {{text}}"}
 
@@ -20,8 +29,9 @@ kmchat.event = {color = "FFFF00",
 
 kmchat.dice = {color = "FFFF00",
                format_string = "*** {{nick}}{{range_label}} кидает d{{dice}} и выкидывает {{dice_result}} ***"}
+
 kmchat.fudge_dice = {color = "FFFF00",
-                     format_string = "*** {{nick}}{{range_label}} кидает 4df ({{signs}}) от {{fudge_dice_string}} и выкидывает {{fudge_level_result}} ***"}
+                     format_string = "*** {{nick}}{{range_label}} кидает 4df ({{signs}}) от {{text}} и выкидывает {{fudge_level_result}} ***"}
 
 kmchat.ranges = {
     ["default"] = {
