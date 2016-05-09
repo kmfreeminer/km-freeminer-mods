@@ -3,9 +3,8 @@ inventory = {}
 --{{{ Constants
 inventory.width = 10
 inventory.height = 1
-inventory.part_width = 2
-inventory.part_height = 4
-inventory.creative_width = 5
+inventory.part = { width = 2, height = 4 }
+inventory.creative = { width = 5 }
 
 inventory.parts = {
     head = {
@@ -116,9 +115,77 @@ function inventory.character (x, y, part)
         .. buttons
 end
 
-function inventory.default(part)
+function inventory.creative(x, y, w, h, start)
+    local start = start or 0
+    local page = h * (w - 1)
+    local pagemax = math.ceil(creative.creative_inventory_size / page)
+
+    -- Cycling
+    if start < 0 then
+        start = page * (pagemax - 1)
+    elseif start >= creative.creative_inventory_size then
+        start = 0
+    end
+
+    local pagenum = nil
+    if start > 0 then
+        for i = 1, pagemax do
+            local start_i = page * (i - 1)
+            if start >= start_i and start < page * i then
+                start = start_i
+                pagenum = i
+                break
+            end
+        end
+    else
+        pagenum = 1
+    end
+
+    return "list[detached:creative;main;"
+            .. x .. "," .. y .. ";"
+            .. (w - 1) .. "," .. h .. ";"
+            .. tostring(start)
+            .. "]"
+        .. "label["
+            .. (x + w - 0.75) .. "," .. y .. ";"
+            .. tostring(pagenum) .. "/" .. tostring(pagemax)
+            .. "]"
+        .. "button["
+            .. (x + w - 1) .. "," .. (y + 0.4) .. ";"
+            .. "1,1;creative_prev;<<"
+            .. "]"
+        .. "button["
+            .. (x + w - 1) .. "," .. (y + 1.1) .. ";"
+            .. "1,1;creative_next;>>"
+            .. "]"
+        .. "label["
+            .. (x + w - 1) .. "," .. (y + h - 1.5) .. ";"
+            .. "Trash:"
+            .. "]"
+        .. "list[detached:creative_trash;main;"
+            .. (x + w - 1) .. "," .. (y + h - 1) .. ";"
+            .. "1,1;"
+            .. "]"
+        .. "listring[current_player;main]"
+        .. "listring[current_player;craft]"
+        .. "listring[current_player;main]"
+        .. "listring[detached:creative;main]"
+end
+
+function inventory.default(part, creative, start)
+    local creative = creative or false
+    local width = inventory.width
+    local height = inventory.height + inventory.part.height
+
+    local creative_fc = ''
+    if creative then
+        local creative_width = 6
+        creative_fc = inventory.creative(width, 0, creative_width, height, start)
+        width = width + creative_width
+    end
+
     return "size["
-        .. inventory.width .. "," .. (inventory.height + inventory.part_height)
+        .. width .. "," .. height
         .. "]"
     .. default.gui_bg
     .. default.gui_bg_img
@@ -132,48 +199,15 @@ function inventory.default(part)
     .. inventory.character(1.20, 0, part)
     .. inventory.craft(5.80, 0)
     .. inventory.main(0, 4.25)
-end
-
-function inventory.creative(start_i, pagenum, part)
-    pagenum = math.floor(pagenum)
-    local height = inventory.height + inventory.part_height
-    local width = inventory.creative_width
-    local pagemax = math.floor(
-        (creative.creative_inventory_size - 1) / (height * width) + 1
-    )
-
-    local default = inventory.default(part)
-    default = default:gsub("size%[.-%]", "")
-
-    return "size["
-            .. (inventory.width + width + 1) .. "," .. height
-            .. "]"
-        .. default
-        .. "list[detached:creative;main;"
-            .. "0,0;5,".. height .. ";"
-            .. tostring(start_i)
-            .. "]"
-        .. "label["
-            .. "2," .. (height - 0.45) .. ";"
-            .. tostring(pagenum) .. "/" .. tostring(pagemax) .. "]"
-        .. "button["
-            .. "0.3," .. (height - 0.5) .. ";"
-            .. "1.6,1;creative_prev;<<"
-            .. "]"
-        .. "button["
-            .. "2.7," .. (height - 0.5) .. ";"
-            .. "1.6,1;creative_next;>>"
-            .. "]"
-        .. "listring[current_player;main]"
-        .. "listring[current_player;craft]"
-        .. "listring[current_player;main]"
-        .. "listring[detached:creative;main]"
-        .. "label[" .. width .. ",1.5;Trash:]"
-        .. "list[detached:creative_trash;main;" .. width .. ",2;1,1;]"
+    .. "button["
+        .. (inventory.width - 1) .. ",0;"
+        .. "1,1;creative_toggle;CR"
+        .. "]"
+    .. creative_fc
 end
 --}}}
 
---{{{ minetest.register
+--{{{ Functions
 local function create_inventory(invref)
     -- Main list
     invref:set_size("main", inventory.width * inventory.height)
@@ -181,7 +215,7 @@ local function create_inventory(invref)
     -- Bodypart list
     for part, _ in pairs(inventory.parts) do
         invref:set_list(part, {})
-        invref:set_size(part, inventory.part_width * inventory.part_height)
+        invref:set_size(part, inventory.part.width * inventory.part.height)
     end
 end
 
@@ -193,13 +227,27 @@ local function correct_inventory(invref)
         if invref:get_list(part) == nil then
             return false
         elseif invref:get_size(part) ~=
-            inventory.part_width * inventory.part_height then
+            inventory.part.width * inventory.part.height then
             return false
         end
     end
     return true
 end
 
+local function turn_creative_page(formspec, backward)
+    local backward = backward or false
+    local w, h, start = string.match(formspec,
+        "list%[detached:creative;main;[%d.]+,[%d.]+;([%d.]+),([%d.]+);(%d+)%]"
+    )
+    local page = w * h
+    if backward
+        then return start - page
+        else return start + page
+    end
+end
+--}}}
+
+--{{{ minetest.register
 minetest.register_on_newplayer(function(player)
     local invref = player:get_inventory()
     create_inventory(invref)
@@ -221,70 +269,36 @@ end)
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     print(dump(fields))
     if (formname == "" or formname:sub(0,9) == "inventory") then
+        local formspec = player:get_inventory_formspec()
+        local name = player:get_player_name()
+
         if fields.tabs == 1 then
-            minetest.show_formspec(
-                player:get_player_name(),
-                "",
-                inventory.default()
-            )
+            player:set_inventory_formspec(inventory.default())
         elseif fields.tabs == 2 then
-            minetest.show_formspec(
-                player:get_player_name(),
-                "inventory:stats",
-                inventory.stats
-            )
+            --player:set_inventory_formspec(inventory.stats())
         elseif fields.tabs == 3 then
-            minetest.show_formspec(
-                player:get_player_name(),
-                "inventory:quenta",
-                inventory.quenta
-            )
-        end
+            --player:set_inventory_formspec(inventory.quenta())
 
-        for part, _ in pairs(inventory.parts) do
-            if fields["btn_" .. part] ~= nil then
-                minetest.show_formspec(
-                    player:get_player_name(),
-                    "",
-                    inventory.default(part)
-                )
+        elseif fields.creative_toggle then
+            if string.find(formspec, "list%[detached:creative") then
+                player:set_inventory_formspec(inventory.default(part))
+            else
+                if minetest.check_player_privs(name, {creative = true}) then
+                    player:set_inventory_formspec(inventory.default(part,true))
+                end
             end
-        end
-
-        if minetest.check_player_privs(name, {creative = true}) then
-            local formspec = player:get_inventory_formspec()
-            local start_i = string.match(formspec, "list%[detached:creative;main;[%d.]+,[%d.]+;[%d.]+,[%d.]+;(%d+)%]")
-            start_i = tonumber(start_i) or 0
-
-            local h = inventory.height + inventory.part_height
-            local w = inventory.creative_width
-            local page = h*w
-
-            if fields.creative_prev then
-                start_i = start_i - page
+        elseif fields.creative_next then
+            local start = turn_creative_page(formspec)
+            player:set_inventory_formspec(inventory.default(part, true, start))
+        elseif fields.creative_prev then
+            local start = turn_creative_page(formspec, true)
+            player:set_inventory_formspec(inventory.default(part, true, start))
+        else
+            for part, _ in pairs(inventory.parts) do
+                if fields["btn_" .. part] then
+                    player:set_inventory_formspec(inventory.default(part))
+                end
             end
-            if fields.creative_next then
-                start_i = start_i + page
-            end
-
-            if start_i < 0 then
-                start_i = start_i + page
-            end
-            if start_i >= creative.creative_inventory_size then
-                start_i = start_i - page
-            end
-
-            if start_i < 0 or start_i >= creative.creative_inventory_size then
-                start_i = 0
-            end
-
-            local pagenum = start_i / page + 1
-
-            minetest.show_formspec(
-                player:get_player_name(),
-                "",
-                inventory.creative(player, start_i, pagenum)
-            )
         end
     end
 end)
