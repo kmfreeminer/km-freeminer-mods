@@ -208,6 +208,56 @@ end
 --}}}
 
 --{{{ Functions
+
+-- This function returns a list with all items, that can possibly be a weared
+-- It returns them in a correct order.
+-- After that, items needs to be checked if they actyally can be weared.
+-- As to the adding to the model, if an item cannot be weared, it just not be
+-- weared. And if it can be, it's OK.
+-- So this behaviour is correct.
+function inventory.get_clothes(player)
+    local invref = player:get_inventory()
+    local clothes = {}
+    local order = {
+        "legs",
+        "body",
+        "rhand",
+        "lhand",
+        "feet",
+        "back",
+        "head",
+    }
+    for i = 0,6 do
+        for _, part in ipairs(order) do
+            local item_copy = invref:get_stack(part, i)
+            table.insert(clothes, item_copy)
+        end
+    end
+    return clothes
+end
+
+function inventory.get_attachments(player)
+    local invref = player:get_inventory()
+
+    for part, _ in pairs(inventory.parts) do
+        local invlist = invref:get_list(part)
+        local last_item= nil
+        local not_wear_item = invlist[7]
+        for i = 0,6 do
+            if invlist[i] ~= "" then
+                last_item = invlist[i]
+            end
+        end
+        if clothes.get(last_item) then
+            return {not_wear_item}
+        else
+            return {last_item, not_wear_item}
+        end
+    end
+end
+
+
+-- Helper functions
 local function create_inventory(invref)
     -- Main list
     invref:set_size("main", inventory.width * inventory.height)
@@ -267,7 +317,6 @@ minetest.register_on_joinplayer(function(player)
 end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-    print(dump(fields))
     if (formname == "" or formname:sub(0,9) == "inventory") then
         local formspec = player:get_inventory_formspec()
         local name = player:get_player_name()
