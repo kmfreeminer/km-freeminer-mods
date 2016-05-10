@@ -238,22 +238,27 @@ end
 
 function inventory.get_attachments(player)
     local invref = player:get_inventory()
+    local attachments = {}
 
     for part, _ in pairs(inventory.parts) do
         local invlist = invref:get_list(part)
         local last_item= nil
         local not_wear_item = invlist[7]
+
         for i = 0,6 do
             if invlist[i] ~= "" then
                 last_item = invlist[i]
             end
         end
+
         if clothes.get(last_item) then
-            return {not_wear_item}
+            attachments[part] = {last_item, not_wear_item}
         else
-            return {last_item, not_wear_item}
+            attachments[part] = {not_wear_item}
         end
     end
+
+    return attachments
 end
 
 
