@@ -1,3 +1,8 @@
+minetest.register_privilege("gm", {
+	description = "ГМ'ская привелегия",
+	give_to_singleplayer= false,
+})
+
 charlist = {}
 
 charlist.sex = {"male", "female"}
