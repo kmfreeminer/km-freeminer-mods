@@ -20,6 +20,7 @@ function fudge.parse_level(unparsed_text)
 end
 
 function fudge.get_level(fudge_level_key)
+    fudge_level_key = math.floor(fudge_level_key)
     if fudge_level_key < 1 then
         fudge_level_key = 1
     elseif fudge_level_key > #fudge.levels then

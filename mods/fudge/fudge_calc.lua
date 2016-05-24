@@ -33,7 +33,7 @@ minetest.register_chatcommand("fudge", {
             local result_string = 
                 "Число: " .. result .. "\n" ..
                 "Валидный индекс: " .. fudge_key .. "\n" ..
-                "Fudge-уровень: " .. fudge_level
+                "Fudge-уровень: " .. fudge_level .. "\n"
                 
             return true, result_string
         else
