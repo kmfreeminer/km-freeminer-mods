@@ -2,7 +2,7 @@ local function escape_magic(str)
     return string.gsub(str, "[().%+-*?[^$]", "%%%1")
 end
 
-function fudge.calculate_fudge(fudge_string)
+function fudge.calculate(fudge_string)
     fudge_string = string.gsub(fudge_string, "%b\"\"", " %1 ")
 
     for fudge_level_key, fudge_level in pairs(fudge.levels) do
@@ -27,7 +27,7 @@ minetest.register_chatcommand("fudge", {
 	params = "<fudge_expression>",
 	description = "Позволяет сравнивать",
 	func = function(name, param)
-        local result = fudge.calculate_fudge(param)
+        local result = fudge.calculate(param)
         if result then 
             local fudge_key, fudge_level = fudge.get_level(result)
             local result_string = 
