@@ -4,7 +4,7 @@ end
 
 function fudge.calculate(fudge_string)
     fudge_string = string.gsub(fudge_string, "%b\"\"", " %1 ")
-
+    
     for fudge_level_key, fudge_level in pairs(fudge.levels) do
         fudge_string = string.gsub(fudge_string, escape_magic("\""..fudge_level.."\""), fudge_level_key)
     end

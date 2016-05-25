@@ -1,15 +1,11 @@
 fudge = {}
 
+fudge.default = "плохо"
 fudge.levels = {"-","ужасно--","ужасно-","ужасно", "плохо", "посредственно", "нормально", "хорошо", "отлично", "супер", "легендарно", "легендарно+", "легендарно++","как Аллах"}
 
 function fudge.parse_level(unparsed_text)
-    local first_word = nil
-        
-    for word in string.gmatch(string.gsub(unparsed_text, "[,(]", " "), "[%S]+") do
-        first_word = word
-        break
-    end
-    
+    local first_word = string.split(string.gsub(unparsed_text, "[,(]", " "), " ")[1]
+
     for fudge_level_key, fudge_level_orignal in pairs(fudge.levels) do
         if fudge_level_orignal == first_word then
             return fudge_level_key, fudge_level_orignal
