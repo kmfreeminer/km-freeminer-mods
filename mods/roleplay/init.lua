@@ -1,29 +1,34 @@
 roleplay = {}
 
-data_folder = minetest.get_modpath("roleplay").."/data/"
+local user_skill_get_url = "http://pastebin.com/raw/EsHgzJMu" -- testing url
 
-function roleplay.save(filename, data)
-    local storage = io.open(data_folder .. filename, "w")
-    storage:write(minetest.serialize(data))
-    storage:close()
-end
-
-function roleplay.load(filename)
-    local storage = io.open(data_folder ..filename, "r")
-    
-    if not storage then
-        return nil
-    end
-    
-    local result = minetest.deserialize(storage:read("*all"))
-    if type(result) ~= "table" then
-        return nil
-    end
-    
-    storage:close()
-    
-    return result
-end
+local data_folder = minetest.get_modpath("roleplay").."/data/"
+local httpenv = core.request_http_api()
 
 dofile(minetest.get_modpath("roleplay").."/skills.lua")
 dofile(minetest.get_modpath("roleplay").."/wounds.lua")
+
+function roleplay.skills.fetch_data(username, callback)
+    assert(type(callback) == "function")
+
+    local url = string.gsub(user_skill_get_url, "{{nick}}", username)
+
+    if httpenv then
+        httpenv.fetch({ url = url, timeout = 2 }, 
+            function(result)
+                local skills = {}
+                if result.succeeded then
+                    local skills_tmp = minetest.parse_json(result.data)
+                    
+                    if type(skills_tmp) == "table" then
+                        skills = skills_tmp
+                    end
+                end
+                
+                callback(skills)
+            end)
+    else
+        minetest.log("error", "Unable to get HTTPApiTable, maybe you should add secure.trusted_mods = roleplay or secure.http_mods = roleplay to your .conf file")
+        callback({})
+    end
+end

@@ -31,7 +31,7 @@ kmchat.dice = {color = "FFFF00",
                format_string = "*** {{nick}}{{range_label}} кидает d{{dice}} и выкидывает {{dice_result}} ***"}
 
 kmchat.fudge_dice = {color = "FFFF00",
-                     format_string = "*** {{nick}}{{range_label}} кидает 4df ({{signs}}) от {{text}} и выкидывает {{fudge_level_result}} ***"}
+                     format_string = "*** {{nick}}{{range_label}} кидает 4dF ({{signs}}) от {{text}} и выкидывает {{fudge_level_result}} ***"}
 
 kmchat.ranges = {
     ["default"] = {

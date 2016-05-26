@@ -65,33 +65,23 @@ function kmchat.process_messages(name, message)
             range, range_label = kmchat.ranges.getRangeInfo(range_delta)
         end
     elseif action_type == "fudge_dice" then
-        local fudge_level_key, fudge_level_orignal = fudge.parse_level(text)
-        
-        if not (fudge_level_key and fudge_level_orignal) then
-            fudge_level_key, fudge_level_orignal, text = roleplay.skills.get_level(name, text) 
+        local level_key = fudge.parse(text)
+            
+        if not level_key then
+            level_key = roleplay.skills.parse(name, text)
+
+            if level_key then
+                text = string.format("%s (%s)", fudge.to_string(level_key), text)
+            end
         end
         
-        if fudge_level_key and fudge_level_orignal then
-            local signs = ""
-
-            for i = 1, 4 do
-                rand = math.random(-1, 1)
-                if rand == 1 then
-                    signs = signs.."+"
-                elseif rand == -1 then
-                    signs = signs.."-"
-                else
-                    signs = signs.."="
-                end
-                fudge_level_key = fudge_level_key + rand
-            end
-
-            local fudge_level_result_key, fudge_level_result = fudge.get_level(fudge_level_key)
+        if level_key then
+            local result_key, signs = fudge.roll(level_key)
             
             format_string = string.gsub(format_string, "{{signs}}", signs)
-            format_string = string.gsub(format_string, "{{fudge_level_orignal}}", fudge_level_orignal)
-            format_string = string.gsub(format_string, "{{fudge_level_result}}", fudge_level_result)
-            range, range_label = kmchat.ranges.getRangeInfo(range_delta)
+            format_string = string.gsub(format_string, "{{fudge_level_orignal}}", fudge.to_string(level_key))
+            format_string = string.gsub(format_string, "{{fudge_level_result}}",  fudge.to_string(result_key))
+            range, range_label = kmchat.ranges.getRangeInfo(range_delta)       
         end
     end
 
