@@ -67,12 +67,10 @@ function kmchat.process_messages(name, message)
     elseif action_type == "fudge_dice" then
         local fudge_level_key, fudge_level_orignal = fudge.parse_level(text)
         
-        if not fudge_level_key and not fudge_level_orignal then
-            text = roleplay.skills.parse_and_get_level(name, text)
-            fudge_level_key, fudge_level_orignal = fudge.parse_level(text)
+        if not (fudge_level_key and fudge_level_orignal) then
+            fudge_level_key, fudge_level_orignal, text = roleplay.skills.get_level(name, text) 
         end
         
-
         if fudge_level_key and fudge_level_orignal then
             local signs = ""
 

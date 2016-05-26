@@ -2,17 +2,18 @@ roleplay.skills = {}
 
 roleplay.skills.data = {
     ["xunto"] = {
-        ["вязание узлов"]   = "посредственно",
-        ["владение шпагой"] = "ужасно"
+        ["вязание узлов"]   = fudge.parse_level("посредственно"),
+        ["владение шпагой"] = fudge.parse_level("ужасно")
     }
 }
 
-function roleplay.skills.parse(username, unparsed_text)
+-- Helpers
+-- {{
+local function parse(username, unparsed_text)
     assert(roleplay.skills.data[username])
 
     for skill, level in pairs(roleplay.skills.data[username]) do
         if string.match(unparsed_text, "^"..skill) then
-            print(skill)
             return skill
         end
     end
@@ -20,57 +21,53 @@ function roleplay.skills.parse(username, unparsed_text)
     return nil
 end
 
-function roleplay.skills.get_level(username, skill)
+local function get_level(username, skill)
     assert(roleplay.skills.data[username])
+    
+    local fudge_level_key = nil 
+    
     if roleplay.skills.data[username][skill] then
-        return roleplay.skills.data[username][skill]
-    else
-        return fudge.default
+        fudge_level_key = roleplay.skills.data[username][skill]
     end
+    
+    if not fudge_level_key or type(fudge_level_key) ~= "number" then
+        fudge_level_key = fudge.default
+    end
+    
+    return fudge.get_level(fudge_level_key)
+end
+--}}
+
+
+function roleplay.skills.parse(username, skill_unparsed)
+    return parse(username, skill_unparsed)
 end
 
-function roleplay.skills.parse_and_get_level(username, unparsed_text)
-    assert(roleplay.skills.data[username])
-    local skill = roleplay.skills.parse(username, unparsed_text)
-    print(skill)
-    return roleplay.skills.get_level(username, skill) .. "(" .. unparsed_text .. ")"
-end
-
-function roleplay.skills.set(username, skill, level)
+function roleplay.skills.set_level(username, skill, level)
     assert(roleplay.skills.data[username])
     
     local stored_skill = roleplay.skills.parse(username, skill)
     assert(not stored_skill or (exist_skill == skill), string.format("Пересечение названий \"%s\" и \"%s\", невозможно указать этот навык", tmp, skill))
 
-    roleplay.skills.data[username][skill] = level
+    roleplay.skills.data[username][skill] = fudge.parse_level(level)
     roleplay.skills.save()
 end
 
--- load and save functions
-function roleplay.skills.save()
-    roleplay.save("skills", roleplay.skills.data)
-end
-
-function roleplay.skills.load()
-    local data = roleplay.load("skills")
-    if data then
-        roleplay.skills.data = data
-    end
-end
-
--- Save data on shutdown
-minetest.register_on_shutdown(function()
-    roleplay.skills.save()
-end)
-
--- Load data on server start
-roleplay.skills.load()
-
-minetest.register_on_joinplayer(function(player)
-    local player_name = player:get_player_name()
+function roleplay.skills.get_level(username, skill_unparsed)
+    assert(roleplay.skills.data[username])
     
-    if not roleplay.skills.data[player_name] then
-        roleplay.skills.data[player_name] = {}
-    end
+    local skill = roleplay.skills.parse(username, skill_unparsed)
+    local fudge_level_key, fudge_level_orignal = get_level(username, skill)
+    
+    return fudge_level_key, fudge_level_orignal, fudge_level_orignal .. "(" .. skill_unparsed .. ")"
+end
+
+-- load skill data from server
+minetest.register_on_joinplayer(function(player)
+    
 end)
 
+-- clear user on leave
+minetest.register_on_leaveplayer(function(player)
+    
+end)
