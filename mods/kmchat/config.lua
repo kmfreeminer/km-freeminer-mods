@@ -13,25 +13,25 @@ kmchat.rexps = {["^_(.+)"] = "local_ooc",
                 ["^#%s?(.+)"] = "event"}
 
 kmchat.default = {color = "FFFFFF",
-                  format_string = "{{nick}}{{range_label}}: {{text}}"}
+                  format_string = "{{visible_name}}{{range_label}}: {{text}}"}
 
 kmchat.local_ooc = {color = "9966AA",
-                 format_string = "{{nick}} (OOC){{range_label}}: (( {{text}} ))"}
+                 format_string = "{{visible_name}} (OOC){{range_label}}: (( {{text}} ))"}
 
 kmchat.global_ooc = {color = "20EEDD",
-                     format_string = "{{nick}} (OOC): (( {{text}} ))"}
+                     format_string = "{{visible_name}} (OOC): (( {{text}} ))"}
 
 kmchat.action = {color = "FFFF00",
-                 format_string     = "* {{nick}}{{range_label}} {{text}} *"}
+                 format_string     = "* {{visible_name}}{{range_label}} {{text}} *"}
 
 kmchat.event = {color = "FFFF00",
-                format_string = "*** {{text}} ***"}
+                format_string = "*** {{visible_name}} ***"}
 
 kmchat.dice = {color = "FFFF00",
-               format_string = "*** {{nick}}{{range_label}} кидает d{{dice}} и выкидывает {{dice_result}} ***"}
+               format_string = "*** {{visible_name}}{{range_label}} кидает d{{dice}} и выкидывает {{dice_result}} ***"}
 
 kmchat.fudge_dice = {color = "FFFF00",
-                     format_string = "*** {{nick}}{{range_label}} кидает 4dF ({{signs}}) от {{text}} и выкидывает {{fudge_level_result}} ***"}
+                     format_string = "*** {{visible_name}}{{range_label}} кидает 4dF ({{signs}}) от {{text}} и выкидывает {{fudge_level_result}} ***"}
 
 kmchat.ranges = {
     ["default"] = {

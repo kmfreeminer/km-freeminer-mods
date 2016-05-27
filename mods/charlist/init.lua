@@ -1,97 +1,31 @@
-minetest.register_privilege("gm", {
-	description = "ГМ'ская привелегия",
-	give_to_singleplayer= false,
-})
-
 charlist = {}
 
-charlist.sex = {"male", "female"}
-charlist.races = { "alv", "mann", "khatsi", "cverg", "avoon", "holf" }
+-- CONFIG-ZONE
+-- {{
+charlist.user_get_url = "127.0.0.1/users/{{username}}"
+charlist.data_folder = minetest.get_modpath("charlist").."/data/"
+--}}
 
-for i, race in ipairs(charlist.races) do
-    for j, sex in ipairs(charlist.sex) do
-        default.player_register_model(race.."_"..sex..".b3d", {
-            animation_speed = 30,
-            textures = {"character.png", },
-            animations = {
-                stand     = { x=  0, y= 79, },
-                lay       = { x=162, y=166, },
-                walk      = { x=168, y=187, },
-                mine      = { x=189, y=198, },
-                walk_mine = { x=200, y=219, },
-                sit       = { x= 81, y=160, },
-            },
-        })
-    end
-end
+charlist.data = {}
 
-for i, race in ipairs(charlist.races) do
-    minetest.register_privilege("race_"..race, {
-        give_to_singleplayer= false
-    })
-end
+local httpenv = core.request_http_api()
 
-minetest.register_privilege("female", {
-	give_to_singleplayer= false
-})
+dofile(minetest.get_modpath("charlist").."/data.lua")
+dofile(minetest.get_modpath("charlist").."/api.lua")
 
-function charlist.parse_charlist(player)
-    local playername = player:get_player_name()
-    local path = minetest.get_modpath("charlist").."/charlists/"..playername
-    local file = io.open(path, "r")
-    if file then      
-        local line = file:read()
-        local race, sex = string.match(line, "(.*) (.*)")
-        local privileges = minetest.get_player_privs(playername)
+--dofile(minetest.get_modpath("charlist").."quenta.lua")
+--dofile(minetest.get_modpath("charlist").."skills.lua")
+--dofile(minetest.get_modpath("charlist").."wounds.lua")
 
-        for i, v in ipairs(charlist.races) do
-            privileges["race_"..v] = nil
-        end
-        privileges["female"] = nil
-        
-        privileges["race_"..race] = true
-        if sex=="female" then
-            privileges["female"] = true
-        end
-
-        minetest.set_player_privs(playername, privileges)
-        
-        local Inventory = player:get_inventory();
-        line = file:read()
-        while line~= nil do
-            local name, count, description = string.match(line, "(.*:.*) (%d) (.*)")
-            local ItemStack = { name=name, count=count, wear=0 } 
-            
-            Inventory:add_item("main", ItemStack)
-            line = file:read()
-        end
-
-        io.close(file)
-        os.remove(path)
-    end
-end
-
+-- Load data from server on join
 minetest.register_on_joinplayer(function(player)
-    charlist.parse_charlist(player)
-    local playername = player:get_player_name()
-    local privileges = minetest.get_player_privs(playername)
-
-    local filename = "mann"
-    for i, race in ipairs(charlist.races) do
-        if privileges["race_"..race] == true then
-            filename = race
-            break
-        end
-    end
-
-    if privileges["female"]==true then
-        filename = filename .. "_" .. charlist.sex[2]
-    else
-        filename = filename .. "_" .. charlist.sex[1]
-    end
-    
-    filename = filename .. ".b3d"
-    
-    print(filename)
-	default.player_set_model(player, filename)
+    local username = player:get_player_name()    
+    charlist.load_data(httpenv, username)
 end)
+
+-- Clear user on leave
+minetest.register_on_leaveplayer(function(player)
+    local username = player:get_player_name()
+    charlist.save_data(username, charlist.data[username])
+end)
+
