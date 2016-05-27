@@ -22,11 +22,6 @@ function charlist.get_visible_name(username)
     return charlist.data[username].visible_name
 end
 
-function charlist.get_visible_name(username)
-    assert(type(charlist.data[username]) == "table")
-    return charlist.data[username].visible_name
-end
-
 function charlist.get_real_name(username)
     assert(type(charlist.data[username]) == "table")
     return charlist.data[username].name
