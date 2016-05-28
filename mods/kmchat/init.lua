@@ -119,7 +119,7 @@ function kmchat.process_messages(username, message)
         local reciever_position  = players[i]:getpos()
         
         if is_global or vector.distance(sender_position, reciever_position) <= range then
-            minetest.chat_send_player(reciever_username, freeminer.colorize(color, tmp))
+            minetest.chat_send_player(reciever_username, freeminer.colorize(color, result))
         elseif minetest.check_player_privs(reciever_username, {gm=true}) then
             minetest.chat_send_player(reciever_username, freeminer.colorize(kmchat.gm_color, "(".. username .. ") " .. result))
         end
