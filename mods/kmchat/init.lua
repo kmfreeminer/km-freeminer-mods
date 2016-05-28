@@ -42,10 +42,10 @@ function kmchat.colorize_fix(message, default_color)
         end
     end
     
-    message = string.gsub(message, color_pattern, "\vnew")
+    message = string.gsub(message, color_pattern, "\vcolor_slot")
 
     for _,color in pairs(new_colors) do
-        message = string.gsub(message, "\vnew", color, 1)
+        message = string.gsub(message, "\vcolor_slot", color, 1)
     end
     return message
 end
