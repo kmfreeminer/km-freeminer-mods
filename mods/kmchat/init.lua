@@ -29,14 +29,12 @@ end
 local color_pattern = "(\v[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])"
 
 function kmchat.colorize_fix(message, default_color)
-    print(message)
     if not default_color then
         default_color = freeminer.color("ffffff")
     end
     
     local new_colors = {}
     for color in string.gfind(message, color_pattern) do
-        print(color, new_colors[#new_colors])
         if color == default_color and #new_colors ~= 0 then
             table.insert(new_colors, new_colors[#new_colors - 1])
         else
@@ -45,12 +43,10 @@ function kmchat.colorize_fix(message, default_color)
     end
     
     message = string.gsub(message, color_pattern, "\vnew")
-    print(minetest.serialize(new_colors))
 
     for _,color in pairs(new_colors) do
         message = string.gsub(message, "\vnew", color, 1)
     end
-    print(message)
     return message
 end
 
@@ -107,7 +103,6 @@ function kmchat.process_messages(username, message)
             
             if skill_name then
                 level = charlist.get_skill_level(username, skill_name)
-                print(level)
                 if fudge.is_valid(level)  then
                     text = string.format("%s (%s)", level, text)
                 end
