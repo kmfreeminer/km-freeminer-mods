@@ -9,6 +9,10 @@ charlist.data_folder = minetest.get_modpath("charlist").."/data/"
 charlist.data = {}
 local dataload = {}
 
+local function update_nametag(username)
+    local player = minetest.get_player_by_name(username)
+end
+
 -- Quenta
 -- {{
 function charlist.find_name_owners(name)
@@ -26,6 +30,7 @@ end
 function charlist.set_visible_name(username, visible_name)
     assert(type(charlist.data[username]) == "table")
     charlist.data[username].visible_name = visible_name
+    update_nametag()
 end
 
 function charlist.get_visible_name(username)
@@ -216,6 +221,11 @@ minetest.register_on_prejoinplayer(function(username, ip)
     
     charlist.data[username] = data
     charlist.data[username].color = get_random_color()
+end)
+
+minetest.register_on_joinplayer(function(player)  
+    local username = player:get_player_name()
+    update_nametag(username)
 end)
 
 -- Clear user on leave
