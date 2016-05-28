@@ -18,12 +18,9 @@ end
 
 local function find_skill_name(username, text_unparsed)
     local skill_table = charlist.get_skill_table(username)
-    
-    assert(skill_table)
-    
-    for skill, level in pairs(skill_table) do
-        if string.match(text_unparsed, "^"..skill) then
-            return skill
+    for skill_name, _ in pairs(skill_table) do
+        if string.match(text_unparsed, "^"..skill_name) then
+            return skill_name
         end
     end
     return nil
@@ -75,31 +72,30 @@ function kmchat.process_messages(username, message)
             range, range_label = kmchat.ranges.getRangeInfo(range_delta)
         end
     elseif action_type == "fudge_dice" then
-        local first_word = string.split(string.gsub(text, "[,(]", " "), " ")[1]
-        local level_key = fudge.to_number(first_word)
-            
-        if not level_key then
+        local level = string.split(string.gsub(text, "[,(]", " "), " ")[1]
+                    
+        if not fudge.is_valid(level) then
             local skill_name = find_skill_name(username, text)
             
             if skill_name then
-                level_key = charlist.get_skill_level(username, skill_name)
-                
-                if level_key then
-                    text = string.format("%s (%s)", fudge.to_string(level_key), text)
+                level = charlist.get_skill_level(username, skill_name)
+                print(level)
+                if fudge.is_valid(level)  then
+                    text = string.format("%s (%s)", level, text)
                 end
             end
         end
         
-        if level_key then
-            level_key = fudge.normalize(level_key)
+        if fudge.is_valid(level)  then
+            level = fudge.normalize(level)
             
             local dices = fudge.roll()
             local signs = fudge.dices_to_string(dices)
-            local result_key = fudge.calculate(level_key, dices)
+            local result_level = fudge.add_modifiers(level, dices)
             
             format_string = string.gsub(format_string, "{{signs}}", signs)
-            format_string = string.gsub(format_string, "{{fudge_level_orignal}}", fudge.to_string(level_key))
-            format_string = string.gsub(format_string, "{{fudge_level_result}}",  fudge.to_string(result_key))
+            format_string = string.gsub(format_string, "{{fudge_level_orignal}}", level)
+            format_string = string.gsub(format_string, "{{fudge_level_result}}",  result_level)
             range, range_label = kmchat.ranges.getRangeInfo(range_delta)            
         end
     end
