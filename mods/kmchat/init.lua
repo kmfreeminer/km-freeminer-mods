@@ -26,15 +26,43 @@ local function find_skill_name(username, text_unparsed)
     return nil
 end
 
+local color_pattern = "(\v[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])"
+
+function kmchat.colorize_fix(message, default_color)
+    print(message)
+    if not default_color then
+        default_color = freeminer.color("ffffff")
+    end
+    
+    local new_colors = {}
+    for color in string.gfind(message, color_pattern) do
+        print(color, new_colors[#new_colors])
+        if color == default_color and #new_colors ~= 0 then
+            table.insert(new_colors, new_colors[#new_colors - 1])
+        else
+            table.insert(new_colors, color)
+        end
+    end
+    
+    message = string.gsub(message, color_pattern, "\vnew")
+    print(minetest.serialize(new_colors))
+
+    for _,color in pairs(new_colors) do
+        message = string.gsub(message, "\vnew", color, 1)
+    end
+    print(message)
+    return message
+end
+
+function kmchat.colorize_escape(message)
+    return string.gsub(message, color_pattern, "")
+end
+
 function kmchat.log(message)
+    message = kmchat.colorize_escape(message)
     jabber.send(message)
     minetest.log("action", "CHAT: "..message)
 end
-
---function kmchat.colorize(color, message, clear_color)
-    --clear_color = clear_color or "FFFFFF"
-    --return freeminer.color(clear_color) .. message .. freeminer.color(clear_color)
---end
 
 function kmchat.process_messages(username, message)
     local player  = minetest.get_player_by_name(username)
@@ -104,7 +132,7 @@ function kmchat.process_messages(username, message)
 
     local result = format_string
     result = string.gsub(result, "{{username}}", username)
-    result = string.gsub(result, "{{visible_name}}", visible_name) -- TODO: add colorize
+    result = string.gsub(result, "{{visible_name}}", freeminer.colorize(name_color, visible_name))
     result = string.gsub(result, "{{real_name}}", real_name)
     result = string.gsub(result, "{{range_label}}", range_label)
     result = string.gsub(result, "{{text}}", text)
@@ -115,12 +143,12 @@ function kmchat.process_messages(username, message)
         local reciever_position  = players[i]:getpos()
         
         if is_global or vector.distance(sender_position, reciever_position) <= range then
-            minetest.chat_send_player(reciever_username, freeminer.colorize(color, result))
+            minetest.chat_send_player(reciever_username, kmchat.colorize_fix(freeminer.colorize(color, result)))
         elseif minetest.check_player_privs(reciever_username, {gm=true}) then
-            minetest.chat_send_player(reciever_username, freeminer.colorize(kmchat.gm_color, "(".. username .. ") " .. result))
+            minetest.chat_send_player(reciever_username, kmchat.colorize_fix(freeminer.colorize(kmchat.gm_color, "(".. username .. ") " .. result)))
         end
     end
-
+    
     kmchat.log("(".. username .. ") " .. result)
     return true
 end

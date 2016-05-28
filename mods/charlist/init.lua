@@ -102,7 +102,7 @@ local function get_random_color()
         --TODO: add trully random color
     end
     
-    return "#" .. free_colors[math.random(1, #free_colors)]
+    return free_colors[math.random(1, #free_colors)]
 end
 
 function charlist.get_color(username)
