@@ -10,31 +10,103 @@ inventory.parts = {
     head = {
         y = 0, x = 50,
         y2 = 43, x2 = 85,
-        tooltip = "Голова"
+        tooltip = "Голова",
+        attachments = {
+            {
+                bone = "Head",
+                position = nil,
+                rotation = nil,
+            },
+            {
+                bone = "Head",
+                position = nil,
+                rotation = nil,
+            },
+        }
     },
     body = {
         y = nil, x = 38,
         y2 = 131, x2  = 95,
-        tooltip = "Тело"
+        tooltip = "Тело",
+        attachments = {
+            {
+                bone = "Body",
+                position = nil,
+                rotation = nil,
+            },
+            {
+                bone = "Body",
+                position = nil,
+                rotation = nil,
+            },
+        }
     },
     lhand = {
         y = 53, x = nil,
         y2 = 179, x2 = 126,
-        tooltip = "Левая рука"
+        tooltip = "Левая рука",
+        attachments = {
+            {
+                bone = "Arm_Left",
+                position = nil,
+                rotation = nil,
+            },
+            {
+                bone = "Arm_Left",
+                position = nil,
+                rotation = nil,
+            },
+        }
     },
     rhand = {
         y = 48, x = 14,
         y2 = 189, x2 = 34,
-        tooltip = "Правая рука"
+        tooltip = "Правая рука",
+        attachments = {
+            {
+                bone = "Arm_Right",
+                position = nil,
+                rotation = nil,
+            },
+            {
+                bone = "Arm_Right",
+                position = nil,
+                rotation = nil,
+            },
+        }
     },
     legs = {
         y2 = 245, x2 = 95,
-        tooltip = "Ноги"
+        tooltip = "Ноги",
+        attachments = {
+            {
+                bone = "Leg_Right",
+                position = nil,
+                rotation = nil,
+            },
+            {
+                bone = "Leg_Left",
+                position = nil,
+                rotation = nil,
+            },
+        }
     },
     feet = {
         y = nil, x = 26,
         y2 = 300, x2 = 105,
-        tooltip = "Ступни"
+        tooltip = "Ступни",
+        attachments = {
+            {
+                bone = "Leg_Right",
+                position = nil,
+                rotation = nil,
+            },
+            {
+                bone = "Leg_Left",
+                position = nil,
+                rotation = nil,
+            },
+        }
     },
 }
 inventory.parts.body.y = inventory.parts.head.y2
@@ -261,7 +333,6 @@ function inventory.get_attachments(player)
     return attachments
 end
 
-
 -- Helper functions
 local function create_inventory(invref)
     -- Main list
@@ -299,6 +370,61 @@ local function turn_creative_page(formspec, backward)
         then return start - page
         else return start + page
     end
+end
+
+local function attach_item(item, player, part)
+-- Bones list:
+-- |- Body
+-- |   |- Head
+-- |   |- Arm_Left
+-- |   \- Arm_Right
+-- |- Leg_Right
+-- \- Leg_Left
+--
+--  object:set_attach(player, bone, position, rotation)
+
+    -- Getting our object
+    local object = minetest.add_entity(player:getpos(),
+        "inventory:" .. inventory.registered_item_entities[item:get_name()]
+        )
+
+    -- Getting desired bone, position and location
+    -- rewrite, bad logic
+    local attachments = inventory.parts[part].attachments
+    local attached = player:get_attached()
+
+    -- Check which index to use
+    local att_i = 1
+    for _, object_table in ipairs(attached) do
+        if att_i > 2 then
+            minetest.log("error",
+                "All slots already used."
+                )
+            return
+        end
+        if attachments[att_i].bone == object_table.bone
+        and vector.equals(object_table.positon, attachments[att_i].position)
+        and vector.equals(object_table.rotation, attachments[att_i].rotation)
+        then
+            att_i = att_i + 1
+        end
+    end
+
+    local bone, position, rotation = attachments[att_i]
+    if not position then position = {x = 0, y = 0, z = 0} end
+    if not rotation then rotation = {x = 0, y = 0, z = 0} end
+
+    -- One-object-in-hand correction
+    if att_i == 1 and part:sub(2) == "hand" then
+        -- центровать этот 1 объект. Если объекта в руке два, не трогать ничего
+        -- взять среднее между значениями координат двух обектов из attachments
+        local a = attachments[1].position
+        local b = attachments[2].position
+        position = vector.divide(vector.add(a, b), 2) -- (a+b)/2
+    end
+
+    -- Attaching
+    object:set_attach(player, bone, position, rotation)
 end
 --}}}
 
@@ -356,14 +482,4 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         end
     end
 end)
---}}}
-
---{{{ Attachments
--- Bones list:
--- |- Body
--- |   |- Head
--- |   |- Arm_Left
--- |   \- Arm_Right
--- |- Leg_Right
--- \- Leg_Left
 --}}}

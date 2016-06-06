@@ -444,3 +444,29 @@ function default.item_description_set(itemstack, desc)
     itemstack.set_metadata(meta)
 end
 --}}}
+
+--{{{ Child attachments
+function get_attached(parent, bone)
+    local pos = nil
+    local radius = 1
+    if bone then
+        pos = parent:get_bone_position(bone)
+    else
+        pos = parent:getpos()
+        pos.y = pos.y + 1
+        radius = 2
+    end
+    local objects = get_objects_inside_radius(pos, radius)
+    local result = {}
+
+    for _, object in pairs(objects) do
+        local o_parent, o_bone, o_pos, o_rot = object:get_attach()
+        minetest.debug(o_parent, parent)
+        if o_parent ~= nil and o_parent == parent and o_bone == bone then
+            table.insert(result, {object, o_pos, o_rot})
+        end
+    end
+
+    return result
+end
+--}}}
