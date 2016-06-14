@@ -6,6 +6,13 @@ inventory.height = 1
 inventory.part = { width = 2, height = 4 }
 inventory.creative = { width = 5 }
 
+-- Bones list:
+-- |- Body
+-- |   |- Head
+-- |   |- Arm_Left
+-- |   \- Arm_Right
+-- |- Leg_Right
+-- \- Leg_Left
 inventory.parts = {
     head = {
         y = 0, x = 50,
@@ -313,24 +320,70 @@ function inventory.get_attachments(player)
     local attachments = {}
 
     for part, _ in pairs(inventory.parts) do
+        local a_part = {}
         local invlist = invref:get_list(part)
-        local last_item= nil
-        local not_wear_item = invlist[7]
 
+        local not_wear_item = invlist[7]
+        if not_wear_item:get_name() ~= "" then
+            table.insert(a_part, not_wear_item)
+        end
+
+        local last_item= nil
         for i = 0,6 do
             if invlist[i] ~= "" then
                 last_item = invlist[i]
             end
         end
-
         if clothes.get(last_item) then
-            attachments[part] = {last_item, not_wear_item}
-        else
-            attachments[part] = {not_wear_item}
+            table.insert(a_part, 1, last_item)
+        end
+
+        if #a_part > 0 then
+            attachments[part] = a_part
         end
     end
 
     return attachments
+end
+
+function inventory.update_attachments(player, clear)
+    local attachments = inventory.get_attachments(player)
+    local attached = default.get_attached(player)
+
+    for part, items in pairs(attachments) do
+        for i, item in pairs(items) do
+            local itemname = item:get_name()
+
+            local bone, pos, rotation = inventory.parts[part].attachments[i]
+            if not pos      then pos      = {x = 0, y = 0, z = 0} end
+            if not rotation then rotation = {x = 0, y = 0, z = 0} end
+
+            -- One-object-in-hand correction
+            if #items < 2 and part:sub(2) == "hand" then
+                pos = single_object_correction(part)
+            end
+
+            local a_obj = default.get_attached(player, bone, pos, rotation)[1]
+            table.delete(attached, a_obj)
+
+            if a_obj == nil then
+                attach_item(itemname, player, bone, pos, rotation)
+            elseif a_obj.itemname ~= itemname then
+                a_obj:set_detach()
+                a_obj:remove()
+                attach_item(itemname, player, bone, pos, rotation)
+            end
+        end
+    end
+
+    if clear then
+        for _, object in pairs(attached) do
+            object:set_detach()
+            object:remove()
+        end
+    end
+
+    return #attached
 end
 
 -- Helper functions
@@ -372,58 +425,20 @@ local function turn_creative_page(formspec, backward)
     end
 end
 
-local function attach_item(item, player, part)
--- Bones list:
--- |- Body
--- |   |- Head
--- |   |- Arm_Left
--- |   \- Arm_Right
--- |- Leg_Right
--- \- Leg_Left
---
---  object:set_attach(player, bone, position, rotation)
-
-    -- Getting our object
-    local object = minetest.add_entity(player:getpos(),
-        "inventory:" .. inventory.registered_item_entities[item:get_name()]
-        )
-
-    -- Getting desired bone, position and location
-    -- rewrite, bad logic
-    local attachments = inventory.parts[part].attachments
-    local attached = player:get_attached()
-
-    -- Check which index to use
-    local att_i = 1
-    for _, object_table in ipairs(attached) do
-        if att_i > 2 then
-            minetest.log("error",
-                "All slots already used."
-                )
-            return
-        end
-        if attachments[att_i].bone == object_table.bone
-        and vector.equals(object_table.positon, attachments[att_i].position)
-        and vector.equals(object_table.rotation, attachments[att_i].rotation)
-        then
-            att_i = att_i + 1
-        end
-    end
-
-    local bone, position, rotation = attachments[att_i]
-    if not position then position = {x = 0, y = 0, z = 0} end
-    if not rotation then rotation = {x = 0, y = 0, z = 0} end
-
+local function single_object_correction (part)
     -- One-object-in-hand correction
-    if att_i == 1 and part:sub(2) == "hand" then
-        -- центровать этот 1 объект. Если объекта в руке два, не трогать ничего
-        -- взять среднее между значениями координат двух обектов из attachments
-        local a = attachments[1].position
-        local b = attachments[2].position
-        position = vector.divide(vector.add(a, b), 2) -- (a+b)/2
-    end
+    -- center this object between positions of two attachments
+    local attachments = inventory.parts[part].attachments
+    local a = attachments[1].position
+    local b = attachments[2].position
+    return vector.divide(vector.add(a, b), 2) -- (a+b)/2
+end
 
-    -- Attaching
+local function attach_item(itemname, player, bone, position, rotation)
+    local object = minetest.add_entity(player:getpos(),
+        "inventory:"
+        .. inventory.registered_item_entities[itemname]
+        )
     object:set_attach(player, bone, position, rotation)
 end
 --}}}
@@ -473,6 +488,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         elseif fields.creative_prev then
             local start = turn_creative_page(formspec, true)
             player:set_inventory_formspec(inventory.default(part, true, start))
+        elseif fields.quit then
+            inventory.update_attachments(player)
         else
             for part, _ in pairs(inventory.parts) do
                 if fields["btn_" .. part] then

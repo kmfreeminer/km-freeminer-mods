@@ -446,7 +446,7 @@ end
 --}}}
 
 --{{{ Child attachments
-function get_attached(parent, bone)
+function default.get_attached(parent, bone, position, rotation)
     local pos = nil
     local radius = 1
     if bone then
@@ -462,11 +462,31 @@ function get_attached(parent, bone)
     for _, object in pairs(objects) do
         local o_parent, o_bone, o_pos, o_rot = object:get_attach()
         minetest.debug(o_parent, parent)
-        if o_parent ~= nil and o_parent == parent and o_bone == bone then
-            table.insert(result, {object, o_pos, o_rot})
+
+        if o_parent ~= nil and o_parent == parent
+        and (bone == nil or o_bone == bone)
+        and (position == nil or o_pos == position)
+        and (rotation == nil or o_rot == rotation)
+        then
+            table.insert(result, object)
         end
     end
 
     return result
+end
+--}}}
+--{{{ Delete table elemet
+function table.delete(t, value, all)
+    if value == nil then return end
+    local all = all or false
+
+    for k,v in pairs(table) do
+        if v == value then
+            t[k] = nil
+
+            if not all then return true end
+        end
+    end
+    return true
 end
 --}}}
