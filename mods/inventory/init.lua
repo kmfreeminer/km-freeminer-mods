@@ -55,12 +55,12 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Arm_Left",
-                position = nil,
+                position = vector.new(0,0,0),
                 rotation = nil,
             },
             {
                 bone = "Arm_Left",
-                position = nil,
+                position = vector.new(0,0,0),
                 rotation = nil,
             },
         }
@@ -121,6 +121,8 @@ inventory.parts.lhand.x = inventory.parts.body.x2
 inventory.parts.legs.y = inventory.parts.body.y2
 inventory.parts.legs.x = inventory.parts.rhand.x2
 inventory.parts.feet.y = inventory.parts.legs.y2
+
+inventory.registered_item_entities = {}
 --}}}
 
 --{{{ Inventory formspec definitions
@@ -288,105 +290,7 @@ end
 
 --{{{ Functions
 
--- This function returns a list with all items, that can possibly be a weared
--- It returns them in a correct order.
--- After that, items needs to be checked if they actyally can be weared.
--- As to the adding to the model, if an item cannot be weared, it just not be
--- weared. And if it can be, it's OK.
--- So this behaviour is correct.
-function inventory.get_clothes(player)
-    local invref = player:get_inventory()
-    local clothes = {}
-    local order = {
-        "legs",
-        "body",
-        "rhand",
-        "lhand",
-        "feet",
-        "back",
-        "head",
-    }
-    for i = 0,6 do
-        for _, part in ipairs(order) do
-            local item_copy = invref:get_stack(part, i)
-            table.insert(clothes, item_copy)
-        end
-    end
-    return clothes
-end
-
-function inventory.get_attachments(player)
-    local invref = player:get_inventory()
-    local attachments = {}
-
-    for part, _ in pairs(inventory.parts) do
-        local a_part = {}
-        local invlist = invref:get_list(part)
-
-        local not_wear_item = invlist[7]
-        if not_wear_item:get_name() ~= "" then
-            table.insert(a_part, not_wear_item)
-        end
-
-        local last_item= nil
-        for i = 0,6 do
-            if invlist[i] ~= "" then
-                last_item = invlist[i]
-            end
-        end
-        if clothes.get(last_item) then
-            table.insert(a_part, 1, last_item)
-        end
-
-        if #a_part > 0 then
-            attachments[part] = a_part
-        end
-    end
-
-    return attachments
-end
-
-function inventory.update_attachments(player, clear)
-    local attachments = inventory.get_attachments(player)
-    local attached = default.get_attached(player)
-
-    for part, items in pairs(attachments) do
-        for i, item in pairs(items) do
-            local itemname = item:get_name()
-
-            local bone, pos, rotation = inventory.parts[part].attachments[i]
-            if not pos      then pos      = {x = 0, y = 0, z = 0} end
-            if not rotation then rotation = {x = 0, y = 0, z = 0} end
-
-            -- One-object-in-hand correction
-            if #items < 2 and part:sub(2) == "hand" then
-                pos = single_object_correction(part)
-            end
-
-            local a_obj = default.get_attached(player, bone, pos, rotation)[1]
-            table.delete(attached, a_obj)
-
-            if a_obj == nil then
-                attach_item(itemname, player, bone, pos, rotation)
-            elseif a_obj.itemname ~= itemname then
-                a_obj:set_detach()
-                a_obj:remove()
-                attach_item(itemname, player, bone, pos, rotation)
-            end
-        end
-    end
-
-    if clear then
-        for _, object in pairs(attached) do
-            object:set_detach()
-            object:remove()
-        end
-    end
-
-    return #attached
-end
-
--- Helper functions
+--{{{ Helpful local functions
 local function create_inventory(invref)
     -- Main list
     invref:set_size("main", inventory.width * inventory.height)
@@ -435,11 +339,119 @@ local function single_object_correction (part)
 end
 
 local function attach_item(itemname, player, bone, position, rotation)
+    print("Adding entity")
     local object = minetest.add_entity(player:getpos(),
-        "inventory:"
-        .. inventory.registered_item_entities[itemname]
-        )
+        inventory.registered_item_entities[itemname]
+    )
+    print("Attaching entity")
     object:set_attach(player, bone, position, rotation)
+    print("Entity attached")
+end
+--}}}
+
+-- This function returns a list with all items, that can possibly be a weared
+-- It returns them in a correct order.
+-- After that, items needs to be checked if they actyally can be weared.
+-- As to the adding to the model, if an item cannot be weared, it just not be
+-- weared. And if it can be, it's OK.
+-- So this behaviour is correct.
+function inventory.get_clothes(player)
+    local invref = player:get_inventory()
+    local clothes = {}
+    local order = {
+        "legs",
+        "body",
+        "rhand",
+        "lhand",
+        "feet",
+        "back",
+        "head",
+    }
+    for i = 0,6 do
+        for _, part in ipairs(order) do
+            local item_copy = invref:get_stack(part, i)
+            table.insert(clothes, item_copy)
+        end
+    end
+    return clothes
+end
+
+function inventory.get_attachments(player)
+    local invref = player:get_inventory()
+    local attachments = {}
+
+    for part, _ in pairs(inventory.parts) do
+        local a_part = {}
+        local invlist = invref:get_list(part)
+
+        local not_wear_item = invlist[8]
+        if not_wear_item:get_name() ~= "" then
+            table.insert(a_part, not_wear_item)
+        end
+
+        local last_item= nil
+        for i = 0,6 do
+            if invlist[i] ~= "" then
+                last_item = invlist[i]
+            end
+        end
+        if clothes.get(last_item) then
+            table.insert(a_part, 1, last_item)
+        end
+
+        if #a_part > 0 then
+            attachments[part] = a_part
+        end
+    end
+
+    return attachments
+end
+
+function inventory.update_attachments(player, clear)
+    local attachments = inventory.get_attachments(player)
+    local attached = default.get_attached(player)
+
+    for part, items in pairs(attachments) do
+        for i, item in pairs(items) do
+            local itemname = item:get_name()
+
+            local bone, pos, rotation = unpack(
+                inventory.parts[part].attachments[i]
+            )
+            if not pos      then pos      = {x = 0, y = 0, z = 0} end
+            if not rotation then rotation = {x = 0, y = 0, z = 0} end
+
+            -- One-object-in-hand correction
+            if #items < 2 and part:sub(2) == "hand" then
+                pos = single_object_correction(part)
+            end
+            print("Position corrected: ", minetest.pos_to_string(pos))
+
+            local a_obj = default.get_attached(player, bone, pos, rotation)[1]
+            print(dump(a_obj))
+            table.delete(attached, a_obj)
+
+            if a_obj == nil then
+                print("Attaching item")
+                attach_item(itemname, player, bone, pos, rotation)
+            elseif a_obj.itemname ~= itemname then
+                print("Detaching item")
+                a_obj:set_detach()
+                a_obj:remove()
+                print("Attaching item")
+                attach_item(itemname, player, bone, pos, rotation)
+            end
+        end
+    end
+
+    if clear then
+        for _, object in pairs(attached) do
+            object:set_detach()
+            object:remove()
+        end
+    end
+
+    return #attached
 end
 --}}}
 
@@ -500,3 +512,13 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     end
 end)
 --}}}
+
+
+minetest.register_entity("inventory:items_mage_staff", {
+    physical = false,
+    collide_with_objects = false,
+    visual = "wielditem",
+    textures = {"items_mage_staff.png"},
+})
+
+inventory.registered_item_entities["items:mage_staff"] = "inventory:items_mage_staff"

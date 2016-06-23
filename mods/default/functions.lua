@@ -447,21 +447,24 @@ end
 
 --{{{ Child attachments
 function default.get_attached(parent, bone, position, rotation)
+    print("In function")
     local pos = nil
     local radius = 1
-    if bone then
-        pos = parent:get_bone_position(bone)
-    else
+    --if bone then
+    --    print("Getting bone position")
+    --    pos = parent:get_bone_position(bone)
+    --else
         pos = parent:getpos()
         pos.y = pos.y + 1
         radius = 2
-    end
-    local objects = get_objects_inside_radius(pos, radius)
+    --end
+    print(minetest.pos_to_string(pos), radius)
+    local objects = minetest.get_objects_inside_radius(pos, radius)
     local result = {}
 
     for _, object in pairs(objects) do
         local o_parent, o_bone, o_pos, o_rot = object:get_attach()
-        minetest.debug(o_parent, parent)
+        print(o_parent, parent)
 
         if o_parent ~= nil and o_parent == parent
         and (bone == nil or o_bone == bone)
@@ -475,6 +478,7 @@ function default.get_attached(parent, bone, position, rotation)
     return result
 end
 --}}}
+
 --{{{ Delete table elemet
 function table.delete(t, value, all)
     if value == nil then return end
