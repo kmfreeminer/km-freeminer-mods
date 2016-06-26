@@ -16,10 +16,11 @@ local function download(texture)
 end
 
 --{{{ Functions
-clothes.get = function (itemstack)
+clothes.get = function (itemstack, quiet)
     if itemstack:is_empty() then
         return nil
     end
+    local quiet = quiet or false
 
     local meta = minetest.deserialize(itemstack:get_metadata())
     local default = itemstack:get_definition().clothes
@@ -35,10 +36,12 @@ clothes.get = function (itemstack)
             if default ~= nil then
                 return default
             else
-                minetest.log("error",
-                    "Item (" .. itemstack:to_string() .. ") "..
-                    "doesn't have a clothes texture"
-                )
+                if not quiet then
+                    minetest.log("error",
+                        "Item (" .. itemstack:to_string() .. ") "..
+                        "doesn't have a clothes texture"
+                    )
+                end
                 return nil
             end
         else
@@ -48,35 +51,27 @@ clothes.get = function (itemstack)
         if default ~= nil then
             return default
         else
-            minetest.log("error",
-                "Item (" .. itemstack:to_string() .. ") " ..
-                "doesn't have a serialized metadata"
-            )
+            if not quiet then
+                minetest.log("error",
+                    "Item (" .. itemstack:to_string() .. ") " ..
+                    "doesn't have a serialized metadata"
+                )
+            end
             return nil
         end
     end
 end
 
-clothes.update_skin = function (player)
+clothes.update_skin = function (player, clothes_list)
     -- Get base player skin
     local name = player:get_player_name()
     local skin = download(name .. ".png")
 
     -- Add clothes
-    local clothes_list = player:get_inventory():get_list("clothes")
-    if clothes_list == nil then
-        minetest.log("error",
-            name ..  " doesn't have an inventory list " .. '"clothes"'
-        )
-        minetest.log("warning",
-            "no clothes were applyed to the skin of player " ..  name
-        )
-    else
-        for _,itemstack in ipairs(clothes_list) do
-            local texture = clothes.get(itemstack)
-            if texture then
-                skin = skin .. "^" .. texture
-            end
+    for _,itemstack in ipairs(clothes_list) do
+        local texture = clothes.get(itemstack)
+        if texture then
+            skin = skin .. "^" .. texture
         end
     end
 
@@ -123,7 +118,7 @@ minetest.register_chatcommand(clothes.chatcommand, {
                 end
             end
         end
-        
+
         -- Applying needed changes
         if action == "set" then
             metatable.clothes = texture .. ".png"
@@ -170,16 +165,6 @@ minetest.register_chatcommand(clothes.chatcommand, {
         end
     end
 })
-
-minetest.register_on_player_receive_fields(function(player, formname, fields)
-    if (formname == "" or formname:sub(0,9) == "inventory") then
-        clothes.update_skin(player)
-    end
-end)
-
-minetest.register_on_joinplayer(function(player)
-    clothes.update_skin(player)
-end)
 --}}}
 
 --{{{ Clothes registration

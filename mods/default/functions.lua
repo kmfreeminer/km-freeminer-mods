@@ -398,3 +398,86 @@ function string.lower_cyr (str)
     return str
 end
 --}}}
+
+--{{{ Item metadata
+default.METASYMBOL = "§"
+function default.item_meta_get(itemstack)
+    local meta = itemstack.get_metadata()
+    meta = meta:match(default.METASYMBOL .. "(.+)")
+    if meta then
+        return minetest.deserialize(meta)
+    else
+        return {}
+    end
+end
+
+function default.item_meta_set(itemstack, table)
+    local meta = itemstack.get_metadata()
+    local newmeta = minetest.serialize(table)
+    meta, count = meta:gsub(
+        default.METASYMBOL .. ".*",
+        default.METASYMBOL .. newmeta
+    )
+    if count == 0 then
+        meta = meta .. default.METASYMBOL .. newmeta
+    end
+
+    itemstack.set_metadata(meta)
+end
+
+function default.item_description_get(itemstack)
+    local meta = itemstack.get_metadata()
+    meta = meta:match("(.+)" .. default.METASYMBOL)
+    return meta
+end
+
+function default.item_description_set(itemstack, desc)
+    local meta = itemstack.get_metadata()
+    meta, count = meta:gsub(
+        ".*" .. default.METASYMBOL,
+        desc .. default.METASYMBOL
+    )
+    if count == 0 then
+        meta = desc .. default.METASYMBOL .. meta
+    end
+
+    itemstack.set_metadata(meta)
+end
+--}}}
+
+--{{{ Child attachments
+function default.get_attached(parent, bone, position, rotation)
+    local result = {}
+
+    for _, entity in pairs(minetest.luaentities) do
+        local object = entity.object
+        local o_parent, o_bone, o_pos, o_rot = object:get_attach()
+
+        if o_parent ~= nil and o_parent == parent
+        and (bone == nil or o_bone == bone)
+        and (position == nil or vector.equals(o_pos, position))
+        and (rotation == nil or vector.equals(o_rot, rotation))
+        then
+            table.insert(result, object)
+        end
+    end
+
+    return result
+end
+--}}}
+
+--{{{ Delete table elemet
+function table.delete(t, value, all)
+    if value == nil then return end
+    local all = all or false
+
+    for k,v in pairs(table) do
+        if v == value then
+            t[k] = nil
+
+            if not all then return true end
+        end
+    end
+    return true
+end
+--}}}
