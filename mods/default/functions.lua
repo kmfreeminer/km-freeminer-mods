@@ -447,29 +447,16 @@ end
 
 --{{{ Child attachments
 function default.get_attached(parent, bone, position, rotation)
-    print("In function")
-    local pos = nil
-    local radius = 1
-    --if bone then
-    --    print("Getting bone position")
-    --    pos = parent:get_bone_position(bone)
-    --else
-        pos = parent:getpos()
-        pos.y = pos.y + 1
-        radius = 2
-    --end
-    print(minetest.pos_to_string(pos), radius)
-    local objects = minetest.get_objects_inside_radius(pos, radius)
     local result = {}
 
-    for _, object in pairs(objects) do
+    for _, entity in pairs(minetest.luaentities) do
+        local object = entity.object
         local o_parent, o_bone, o_pos, o_rot = object:get_attach()
-        print(o_parent, parent)
 
         if o_parent ~= nil and o_parent == parent
         and (bone == nil or o_bone == bone)
-        and (position == nil or o_pos == position)
-        and (rotation == nil or o_rot == rotation)
+        and (position == nil or vector.equals(o_pos, position))
+        and (rotation == nil or vector.equals(o_rot, rotation))
         then
             table.insert(result, object)
         end

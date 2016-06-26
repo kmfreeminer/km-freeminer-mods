@@ -21,13 +21,13 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Head",
-                position = nil,
-                rotation = nil,
+                position = {x = 0, y = 4.5, z = 0},
+                rotation = {x = 0, y = 0, z = 0},
             },
             {
                 bone = "Head",
-                position = nil,
-                rotation = nil,
+                position = {x = 0, y = 4.6, z = 0},
+                rotation = {x = 0, y = 0, z = 0},
             },
         }
     },
@@ -38,13 +38,30 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Body",
-                position = nil,
-                rotation = nil,
+                position = {x = 0, y = 4.5, z = -2},
+                rotation = {x = 0, y = 0, z = 0},
             },
             {
                 bone = "Body",
-                position = nil,
-                rotation = nil,
+                position = {x = 0, y = 2, z = -2},
+                rotation = {x = 0, y = 0, z = 0},
+            },
+        }
+    },
+    back = {
+        y = 0, x = 0,
+        y2 = 32, x2  = 32,
+        tooltip = "Спина",
+        attachments = {
+            {
+                bone = "Body",
+                position = {x = 0, y = 4.5, z = 1.4},
+                rotation = {x = 0, y = 0, z = 180},
+            },
+            {
+                bone = "Body",
+                position = {x = 0, y = 4.5, z = 1.9},
+                rotation = {x = 0, y = 0, z = 270},
             },
         }
     },
@@ -55,13 +72,13 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Arm_Left",
-                position = vector.new(0,0,0),
-                rotation = nil,
+                position = {x = -0.5, y = 6.5, z = 3},
+                rotation = {x = -100, y = 225, z = -75},
             },
             {
                 bone = "Arm_Left",
-                position = vector.new(0,0,0),
-                rotation = nil,
+                position = {x = 0.1, y = 6.5, z = 3},
+                rotation = {x = -100, y = 225, z = -75},
             },
         }
     },
@@ -72,13 +89,13 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Arm_Right",
-                position = nil,
-                rotation = nil,
+                position = {x = 0.5, y = 6.5, z = 3},
+                rotation = {x = -100, y = 225, z = 90},
             },
             {
                 bone = "Arm_Right",
-                position = nil,
-                rotation = nil,
+                position = {x = -0.1, y = 6.5, z = 3},
+                rotation = {x = -100, y = 225, z = 90},
             },
         }
     },
@@ -88,13 +105,13 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Leg_Right",
-                position = nil,
-                rotation = nil,
+                position = {x = -1.4, y = 0, z = 0},
+                rotation = {x = 0, y = 90, z = 0},
             },
             {
                 bone = "Leg_Left",
-                position = nil,
-                rotation = nil,
+                position = {x = 1.4, y = 0, z = 0},
+                rotation = {x = 0, y = 90, z = 0},
             },
         }
     },
@@ -105,13 +122,13 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Leg_Right",
-                position = nil,
-                rotation = nil,
+                position = {x = -1.4, y = 4.8, z = 0},
+                rotation = {x = 0, y = 90, z = 0},
             },
             {
                 bone = "Leg_Left",
-                position = nil,
-                rotation = nil,
+                position = {x = 1.4, y = 4.8, z = 0},
+                rotation = {x = 0, y = 90, z = 0},
             },
         }
     },
@@ -297,7 +314,9 @@ local function create_inventory(invref)
 
     -- Bodypart list
     for part, _ in pairs(inventory.parts) do
-        invref:set_list(part, {})
+        if invref:get_list(part) == nil then
+            invref:set_list(part, {})
+        end
         invref:set_size(part, inventory.part.width * inventory.part.height)
     end
 end
@@ -339,13 +358,12 @@ local function single_object_correction (part)
 end
 
 local function attach_item(itemname, player, bone, position, rotation)
-    print("Adding entity")
-    local object = minetest.add_entity(player:getpos(),
-        inventory.registered_item_entities[itemname]
+    local object = minetest.add_entity(
+        player:getpos(),
+        "inventory:attached_item"
     )
-    print("Attaching entity")
+    object:set_properties({textures = {itemname}})
     object:set_attach(player, bone, position, rotation)
-    print("Entity attached")
 end
 --}}}
 
@@ -367,7 +385,7 @@ function inventory.get_clothes(player)
         "back",
         "head",
     }
-    for i = 0,6 do
+    for i = 1,7 do
         for _, part in ipairs(order) do
             local item_copy = invref:get_stack(part, i)
             table.insert(clothes, item_copy)
@@ -390,12 +408,12 @@ function inventory.get_attachments(player)
         end
 
         local last_item= nil
-        for i = 0,6 do
-            if invlist[i] ~= "" then
+        for i = 1,7 do
+            if invlist[i]:get_name() ~= "" then
                 last_item = invlist[i]
             end
         end
-        if clothes.get(last_item) then
+        if last_item and not clothes.get(last_item, true) then
             table.insert(a_part, 1, last_item)
         end
 
@@ -407,7 +425,7 @@ function inventory.get_attachments(player)
     return attachments
 end
 
-function inventory.update_attachments(player, clear)
+function inventory.update_attachments(player, clean)
     local attachments = inventory.get_attachments(player)
     local attached = default.get_attached(player)
 
@@ -415,39 +433,37 @@ function inventory.update_attachments(player, clear)
         for i, item in pairs(items) do
             local itemname = item:get_name()
 
-            local bone, pos, rotation = unpack(
-                inventory.parts[part].attachments[i]
-            )
-            if not pos      then pos      = {x = 0, y = 0, z = 0} end
-            if not rotation then rotation = {x = 0, y = 0, z = 0} end
+            local bone = inventory.parts[part].attachments[i].bone
+            local pos = inventory.parts[part].attachments[i].position
+                or vector.new(0,0,0)
+            local rotation = inventory.parts[part].attachments[i].rotation
+                or vector.new(0,0,0)
 
             -- One-object-in-hand correction
             if #items < 2 and part:sub(2) == "hand" then
                 pos = single_object_correction(part)
             end
-            print("Position corrected: ", minetest.pos_to_string(pos))
 
             local a_obj = default.get_attached(player, bone, pos, rotation)[1]
-            print(dump(a_obj))
             table.delete(attached, a_obj)
 
+            -- TODO: optimize: it is best to update properties of already
+            -- existing object, than to detach and remove it
             if a_obj == nil then
-                print("Attaching item")
                 attach_item(itemname, player, bone, pos, rotation)
             elseif a_obj.itemname ~= itemname then
-                print("Detaching item")
                 a_obj:set_detach()
                 a_obj:remove()
-                print("Attaching item")
                 attach_item(itemname, player, bone, pos, rotation)
             end
         end
     end
 
-    if clear then
-        for _, object in pairs(attached) do
-            object:set_detach()
-            object:remove()
+    local clean = clean or true
+    if clean then
+        for _, entity in pairs(attached) do
+            entity:set_detach()
+            entity:remove()
         end
     end
 
@@ -467,11 +483,27 @@ minetest.register_on_joinplayer(function(player)
     -- For already existing players
     if not correct_inventory(invref) then create_inventory(invref) end
 
+    -- Init default formspec
     player:set_inventory_formspec(inventory.default())
 
+    -- Init hotbar
     player:hud_set_hotbar_image("gui_hotbar.png")
     player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
     player:hud_set_hotbar_itemcount(inventory.width)
+
+    -- Init attachments and clothes
+    inventory.update_attachments(player)
+    clothes.update_skin(player, inventory.get_clothes(player))
+end)
+
+minetest.register_on_leaveplayer(function(player)
+    -- Cleaning attachments
+    local attached = default.get_attached(player)
+
+    for _, entity in pairs(attached) do
+        entity:set_detach()
+        entity:remove()
+    end
 end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
@@ -479,6 +511,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         local formspec = player:get_inventory_formspec()
         local name = player:get_player_name()
 
+        -- Tabs
         if fields.tabs == 1 then
             player:set_inventory_formspec(inventory.default())
         elseif fields.tabs == 2 then
@@ -486,6 +519,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         elseif fields.tabs == 3 then
             --player:set_inventory_formspec(inventory.quenta())
 
+        -- Creative
         elseif fields.creative_toggle then
             if string.find(formspec, "list%[detached:creative") then
                 player:set_inventory_formspec(inventory.default(part))
@@ -500,8 +534,13 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         elseif fields.creative_prev then
             local start = turn_creative_page(formspec, true)
             player:set_inventory_formspec(inventory.default(part, true, start))
+
+        -- After closing inventory
         elseif fields.quit then
             inventory.update_attachments(player)
+            clothes.update_skin(player, inventory.get_clothes(player))
+
+        -- Tab 1, selecting different parts of character puppet
         else
             for part, _ in pairs(inventory.parts) do
                 if fields["btn_" .. part] then
@@ -511,14 +550,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         end
     end
 end)
---}}}
 
-
-minetest.register_entity("inventory:items_mage_staff", {
+minetest.register_entity("inventory:attached_item", {
     physical = false,
     collide_with_objects = false,
     visual = "wielditem",
-    textures = {"items_mage_staff.png"},
+    visual_size = {x=0.25, y=0.25},
 })
-
-inventory.registered_item_entities["items:mage_staff"] = "inventory:items_mage_staff"
+--}}}
