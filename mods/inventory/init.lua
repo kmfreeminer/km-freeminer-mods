@@ -564,4 +564,49 @@ minetest.register_entity("inventory:attached_item", {
     visual = "wielditem",
     visual_size = {x=0.25, y=0.25},
 })
+
+minetest.register_privilege("lore", "Изменение описаний предметов")
+minetest.register_chatcommand("lore", {
+    params = "[action]",
+    description = "Изменяет описание предмета",
+    privs = { lore = true },
+    func = function (playername, param)
+        if param ~= "add"
+        and param ~= "set"
+        and param ~= "delete"
+        and param ~= "" and param ~= nil
+        then
+            return false, "Wrong command parameters."
+        end
+
+        local player = minetest.get_player_by_name(playername)
+        local item = player:get_wield_item()
+        local current_label = item:get_inventory_label() or ""
+
+        if param == "add" or param == "set" then
+            minetest.show_formspec(playername, "inventory:lore",
+                "size[6;4]"
+                .. default.gui_bg
+                .. default.gui_bg_img
+                .. default.gui_slots
+                .. "textarea[0,0;6,3;lore;Описание;"
+                    .. current_label
+                    .. "]"
+                .. "button_exit[1,3;4,1;lore_exit;Записать]"
+            )
+            -- Set text to the itemstack:set_inventory_label
+        elseif param == "delete"then
+            item:set_inventory_label("")
+            --player:set_wield_item(item)
+
+            minetest.log("action",
+                "Player " .. playername
+                .. " deleted item description of " .. item:get_name() .. ".\n"
+                .. "\tNew item description: " .. item:get_inventory_label()
+            )
+            return true, "Описание было удалено."
+        end
+    end, -- Called when command is run.
+                                      -- Returns boolean success and text output.
+})
 --}}}
