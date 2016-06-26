@@ -510,44 +510,51 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     if (formname == "" or formname:sub(0,9) == "inventory") then
         local formspec = player:get_inventory_formspec()
         local name = player:get_player_name()
+        local current_part = string.match(formspec,
+            "character_(%a-)_selected.png"
+        )
+        local have_creative = string.find(formspec, "list%[detached:creative")
+        local creative_start = tonumber(string.match(formspec,
+            "list%[detached:creative;main;[%d.]+,[%d.]+;[%d.]+,[%d.]+;(%d+)%]"
+        ))
 
         -- Tabs
-        if fields.tabs == 1 then
-            player:set_inventory_formspec(inventory.default())
-        elseif fields.tabs == 2 then
-            --player:set_inventory_formspec(inventory.stats())
-        elseif fields.tabs == 3 then
-            --player:set_inventory_formspec(inventory.quenta())
+        --if fields.tabs == 1 then
+        --    player:set_inventory_formspec(inventory.default())
+        --elseif fields.tabs == 2 then
+        --    player:set_inventory_formspec(inventory.stats())
+        --elseif fields.tabs == 3 then
+        --    player:set_inventory_formspec(inventory.quenta())
 
         -- Creative
-        elseif fields.creative_toggle then
-            if string.find(formspec, "list%[detached:creative") then
-                player:set_inventory_formspec(inventory.default(part))
-            else
-                if minetest.check_player_privs(name, {creative = true}) then
-                    player:set_inventory_formspec(inventory.default(part,true))
-                end
-            end
+        if fields.creative_toggle then
+            --if minetest.check_player_privs(name, {creative = true}) then
+                have_creative = not have_creative
+            --end
         elseif fields.creative_next then
-            local start = turn_creative_page(formspec)
-            player:set_inventory_formspec(inventory.default(part, true, start))
+            creative_start = turn_creative_page(formspec)
         elseif fields.creative_prev then
-            local start = turn_creative_page(formspec, true)
-            player:set_inventory_formspec(inventory.default(part, true, start))
+            creative_start = turn_creative_page(formspec, true)
 
         -- After closing inventory
         elseif fields.quit then
             inventory.update_attachments(player)
             clothes.update_skin(player, inventory.get_clothes(player))
+            return
 
         -- Tab 1, selecting different parts of character puppet
         else
             for part, _ in pairs(inventory.parts) do
                 if fields["btn_" .. part] then
+                    current_part = part
                     player:set_inventory_formspec(inventory.default(part))
                 end
             end
         end
+
+        player:set_inventory_formspec(
+            inventory.default(current_part, have_creative, creative_start)
+        )
     end
 end)
 
