@@ -528,9 +528,9 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
         -- Creative
         if fields.creative_toggle then
-            --if minetest.check_player_privs(name, {creative = true}) then
+            if minetest.check_player_privs(name, {creative = true}) then
                 have_creative = not have_creative
-            --end
+            end
         elseif fields.creative_next then
             creative_start = turn_creative_page(formspec)
         elseif fields.creative_prev then
