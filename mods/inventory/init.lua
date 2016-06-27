@@ -4,7 +4,8 @@ inventory = {}
 inventory.width = 10
 inventory.height = 1
 inventory.part = { width = 2, height = 4 }
-inventory.creative = { width = 5 }
+inventory.creative = { width = 4 }
+inventory.lore = { width = 3 }
 
 -- Bones list:
 -- |- Body
@@ -213,7 +214,7 @@ function inventory.character (x, y, part)
         .. buttons
 end
 
-function inventory.creative(x, y, w, h, start)
+function inventory.creative.fc(x, y, w, h, start)
     local start = start or 0
     local page = h * (w - 1)
     local pagemax = math.ceil(creative.creative_inventory_size / page)
@@ -270,37 +271,106 @@ function inventory.creative(x, y, w, h, start)
         .. "listring[detached:creative;main]"
 end
 
-function inventory.default(part, creative, start)
+function inventory.lore.fc(x, y, w, h, playername)
+    local lore_item = minetest.get_inventory({
+        type = "detached",
+        name = "lore_item_" .. playername,
+    })
+    if not lore_item then
+        lore_item = minetest.create_detached_inventory(
+            "lore_item_" .. playername,
+            {
+                on_put = function(inv, listname, index, stack, player)
+                    inventory.update(player)
+                end,
+                on_take = function(inv, listname, index, stack, player)
+                    inventory.update(player)
+                end,
+            }
+        )
+        lore_item:set_size("main", 1)
+    end
+    local current_label = lore.get(lore_item:get_stack("main", 1))
+    local bw = 1.6
+    return "list["
+            .. "detached:lore_item_" .. playername .. ";main" .. ";"
+            .. (x + (w - 1)/2) .. "," .. y .. ";"
+            .. "1,1"
+            .. "]"
+        .. "textarea["
+            .. (x + 0.3) .. "," .. (y + 1) .. ";"
+            .. w .. "," .. (h - 2) .. ";"
+            .. "lore" .. ";"
+            .. "Описание" .. ";"
+            .. current_label
+            .. "]"
+        .. "button["
+            .. (x + (w - bw)/2) .. "," .. (h - 1.2) .. ";"
+            .. bw .. "," .. 0.5 .. ";"
+            .. "lore_update" .. ";"
+            .. "Записать"
+            .. "]"
+end
+
+function inventory.default(playername, part, lore, creative, start)
     local creative = creative or false
-    local width = inventory.width
-    local height = inventory.height + inventory.part.height
+    local w = inventory.width
+    local h = inventory.height + inventory.part.height
+    local lw = 0
+    local cw = 0
+
+    local lore_fc = ''
+    if lore then
+        lw = inventory.lore.width
+        lore_fc = inventory.lore.fc(
+            0, 0,
+            lw, h,
+            playername
+        )
+    end
+    local lore_button = ''
+    if minetest.check_player_privs(playername, {lore = true}) then
+        lore_button = "button["
+        .. lw .. ",0;"
+        .. "1,1;lore_toggle;Lore"
+        .. "]"
+    end
 
     local creative_fc = ''
     if creative then
-        local creative_width = 6
-        creative_fc = inventory.creative(width, 0, creative_width, height, start)
-        width = width + creative_width
+        cw = inventory.creative.width
+        creative_fc = inventory.creative.fc(
+            (lw + w), 0,
+            cw, h,
+            start
+        )
+    end
+    local creative_button = ''
+    if minetest.check_player_privs(playername, {creative = true}) then
+        creative_button = "button["
+        .. (lw + w - 1) .. ",0;"
+        .. "1,1;creative_toggle;CR"
+        .. "]"
     end
 
     return "size["
-        .. width .. "," .. height
+        .. (lw + w + cw) .. "," .. h
         .. "]"
     .. default.gui_bg
     .. default.gui_bg_img
     .. default.gui_slots
-    .. "tabheader["
-        .. "0,0;"
-        .. "tabs;"
-        .. "Инвентарь,Характеристики,Квента;"
-        .. "1;false;true"
-        .. "]"
-    .. inventory.character(1.20, 0, part)
-    .. inventory.craft(5.80, 0)
-    .. inventory.main(0, 4.25)
-    .. "button["
-        .. (inventory.width - 1) .. ",0;"
-        .. "1,1;creative_toggle;CR"
-        .. "]"
+    --.. "tabheader["
+    --    .. "0,0;"
+    --    .. "tabs;"
+    --    .. "Инвентарь,Характеристики,Квента;"
+    --    .. "1;false;true"
+    --    .. "]"
+    .. lore_button
+    .. lore_fc
+    .. inventory.character(lw + 1.20, 0, part)
+    .. inventory.craft(lw + 5.80, 0)
+    .. inventory.main(lw + 0, 4.25)
+    .. creative_button
     .. creative_fc
 end
 --}}}
@@ -469,6 +539,99 @@ function inventory.update_attachments(player, clean)
 
     return #attached
 end
+
+function inventory.update(player, fields)
+    local fields = fields or {}
+    local formspec = player:get_inventory_formspec()
+    local name = player:get_player_name()
+    local current_part = string.match(formspec,
+        "character_(%a-)_selected.png"
+    )
+    local have_lore = string.find(formspec, "list%[detached:lore_item")
+    local have_creative = string.find(formspec, "list%[detached:creative")
+    local creative_start = tonumber(string.match(formspec,
+        "list%[detached:creative;main;[%d.]+,[%d.]+;[%d.]+,[%d.]+;(%d+)%]"
+    ))
+
+    -- Tabs
+    --if fields.tabs == 1 then
+    --    player:set_inventory_formspec(inventory.default())
+    --elseif fields.tabs == 2 then
+    --    player:set_inventory_formspec(inventory.stats())
+    --elseif fields.tabs == 3 then
+    --    player:set_inventory_formspec(inventory.quenta())
+
+    -- Creative
+    if fields.creative_toggle then
+        have_creative = not have_creative
+    elseif fields.creative_next then
+        creative_start = turn_creative_page(formspec)
+    elseif fields.creative_prev then
+        creative_start = turn_creative_page(formspec, true)
+
+    -- Lore
+    elseif fields.lore_toggle then
+        have_lore = not have_lore
+    elseif fields.lore_update then
+        local lore_inv = minetest.get_inventory({
+            type = "detached",
+            name = "lore_item_" .. name
+        })
+        local item = lore_inv:get_stack("main", 1)
+        lore.set(item, fields.lore, name)
+        lore_inv:set_stack("main", 1, item)
+
+    -- After closing inventory
+    elseif fields.quit then
+        inventory.update_attachments(player)
+        clothes.update_skin(player, inventory.get_clothes(player))
+
+        -- Clean detached inventory in the Lore tab
+        local lore_inv = minetest.get_inventory({
+            type = "detached",
+            name = "lore_item_" .. name
+        })
+        if lore_inv and not lore_inv:is_empty("main") then
+            local item = lore_inv:get_stack("main", 1)
+            local invref = player:get_inventory()
+
+            if invref:room_for_item("main", item) then
+                item = invref:add_item("main", item)
+            else
+                for listname,_ in pairs(invref:get_lists()) do
+                    if invref:room_for_item(listname, item) then
+                        item = invref:add_item(listname, item)
+                    end
+                end
+            end
+            if not item:is_empty() then
+                local pos = player:getpos()
+                pos.y = pos.y + 1
+                minetest.add_item(pos, item)
+            end
+
+            lore_inv:set_stack("main", 1, "")
+        end
+        return
+
+    -- Tab 1, selecting different parts of character puppet
+    else
+        for part, _ in pairs(inventory.parts) do
+            if fields["btn_" .. part] then
+                current_part = part
+            end
+        end
+    end
+
+    player:set_inventory_formspec(
+        inventory.default(
+            name,
+            current_part,
+            have_lore,
+            have_creative, creative_start
+        )
+    )
+end
 --}}}
 
 --{{{ minetest.register
@@ -484,7 +647,7 @@ minetest.register_on_joinplayer(function(player)
     if not correct_inventory(invref) then create_inventory(invref) end
 
     -- Init default formspec
-    player:set_inventory_formspec(inventory.default())
+    player:set_inventory_formspec(inventory.default(player:get_player_name()))
 
     -- Init hotbar
     player:hud_set_hotbar_image("gui_hotbar.png")
@@ -508,65 +671,7 @@ end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if (formname == "" or formname:sub(0,9) == "inventory") then
-        local formspec = player:get_inventory_formspec()
-        local name = player:get_player_name()
-        local current_part = string.match(formspec,
-            "character_(%a-)_selected.png"
-        )
-        local have_creative = string.find(formspec, "list%[detached:creative")
-        local creative_start = tonumber(string.match(formspec,
-            "list%[detached:creative;main;[%d.]+,[%d.]+;[%d.]+,[%d.]+;(%d+)%]"
-        ))
-
-        -- Tabs
-        --if fields.tabs == 1 then
-        --    player:set_inventory_formspec(inventory.default())
-        --elseif fields.tabs == 2 then
-        --    player:set_inventory_formspec(inventory.stats())
-        --elseif fields.tabs == 3 then
-        --    player:set_inventory_formspec(inventory.quenta())
-
-        -- Creative
-        if fields.creative_toggle then
-            if minetest.check_player_privs(name, {creative = true}) then
-                have_creative = not have_creative
-            end
-        elseif fields.creative_next then
-            creative_start = turn_creative_page(formspec)
-        elseif fields.creative_prev then
-            creative_start = turn_creative_page(formspec, true)
-
-        -- After closing inventory
-        elseif fields.quit then
-            inventory.update_attachments(player)
-            clothes.update_skin(player, inventory.get_clothes(player))
-            return
-
-        -- Lore
-        elseif fields.lore then
-            local item = player:get_wielded_item()
-            item:set_inventory_label(lore)
-            --player:set_wielded_item(item)
-            minetest.log("action",
-                "Player " .. playername
-                .. " changed item description of " .. item:get_name() .. ".\n"
-                .. "\tNew item description: " .. item:get_inventory_label()
-            )
-            print(player:get_wielded_item():get_inventory_label())
-
-        -- Tab 1, selecting different parts of character puppet
-        else
-            for part, _ in pairs(inventory.parts) do
-                if fields["btn_" .. part] then
-                    current_part = part
-                    player:set_inventory_formspec(inventory.default(part))
-                end
-            end
-        end
-
-        player:set_inventory_formspec(
-            inventory.default(current_part, have_creative, creative_start)
-        )
+        inventory.update(player, fields)
     end
 end)
 
@@ -575,50 +680,5 @@ minetest.register_entity("inventory:attached_item", {
     collide_with_objects = false,
     visual = "wielditem",
     visual_size = {x=0.25, y=0.25},
-})
-
-minetest.register_privilege("lore", "Изменение описаний предметов")
-minetest.register_chatcommand("lore", {
-    params = "[action]",
-    description = "Изменяет описание предмета",
-    privs = { lore = true },
-    func = function (playername, param)
-        if param ~= "add"
-        and param ~= "set"
-        and param ~= "delete"
-        and param ~= "" and param ~= nil
-        then
-            return false, "Wrong command parameters."
-        end
-
-        local player = minetest.get_player_by_name(playername)
-        local item = player:get_wielded_item()
-        local current_label = item:get_inventory_label() or ""
-
-        if param == "add" or param == "set" then
-            minetest.show_formspec(playername, "inventory:lore",
-                "size[6;4]"
-                .. default.gui_bg
-                .. default.gui_bg_img
-                .. default.gui_slots
-                .. "textarea[0,0;6,3;lore;Описание;"
-                    .. current_label
-                    .. "]"
-                .. "button_exit[1,3;4,1;lore_exit;Записать]"
-            )
-            -- Set text to the itemstack:set_inventory_label
-        elseif param == "delete"then
-            item:set_inventory_label("")
-            --player:set_wielded_item(item)
-
-            minetest.log("action",
-                "Player " .. playername
-                .. " deleted item description of " .. item:get_name() .. ".\n"
-                .. "\tNew item description: " .. item:get_inventory_label()
-            )
-            return true, "Описание было удалено."
-        end
-    end, -- Called when command is run.
-                                      -- Returns boolean success and text output.
 })
 --}}}
