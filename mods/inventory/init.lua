@@ -542,6 +542,18 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
             clothes.update_skin(player, inventory.get_clothes(player))
             return
 
+        -- Lore
+        elseif fields.lore then
+            local item = player:get_wielded_item()
+            item:set_inventory_label(lore)
+            --player:set_wielded_item(item)
+            minetest.log("action",
+                "Player " .. playername
+                .. " changed item description of " .. item:get_name() .. ".\n"
+                .. "\tNew item description: " .. item:get_inventory_label()
+            )
+            print(player:get_wielded_item():get_inventory_label())
+
         -- Tab 1, selecting different parts of character puppet
         else
             for part, _ in pairs(inventory.parts) do
@@ -580,7 +592,7 @@ minetest.register_chatcommand("lore", {
         end
 
         local player = minetest.get_player_by_name(playername)
-        local item = player:get_wield_item()
+        local item = player:get_wielded_item()
         local current_label = item:get_inventory_label() or ""
 
         if param == "add" or param == "set" then
@@ -597,7 +609,7 @@ minetest.register_chatcommand("lore", {
             -- Set text to the itemstack:set_inventory_label
         elseif param == "delete"then
             item:set_inventory_label("")
-            --player:set_wield_item(item)
+            --player:set_wielded_item(item)
 
             minetest.log("action",
                 "Player " .. playername
