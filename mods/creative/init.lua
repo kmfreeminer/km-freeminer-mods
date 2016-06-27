@@ -9,7 +9,10 @@ minetest.register_privilege("creative", "Creative game mode.")
 -- Create detached creative inventory after loading all mods
 minetest.after(0, function()
     local inv = minetest.create_detached_inventory("creative", {
-        allow_move = function(inv, from_list, from_index, to_list, to_index, count, player)
+        allow_move = function(inv,
+                from_list, from_index,
+                to_list, to_index,
+                count, player)
             local name = player:get_player_name()
             if minetest.check_player_privs(name, {creative = true}) then
                 return count
@@ -17,7 +20,7 @@ minetest.after(0, function()
                 return 0
             end
         end,
-        allow_put = function(inv, listname, index, stack, player)
+        allow_put = function()
             return 0
         end,
         allow_take = function(inv, listname, index, stack, player)
@@ -28,22 +31,22 @@ minetest.after(0, function()
                 return 0
             end
         end,
-        on_move = function(inv, from_list, from_index, to_list, to_index, count, player)
-        end,
-        on_put = function(inv, listname, index, stack, player)
-        end,
         on_take = function(inv, listname, index, stack, player)
-            --print(player:get_player_name().." takes item from creative inventory; listname="..dump(listname)..", index="..dump(index)..", stack="..dump(stack))
             if stack then
-                minetest.log("action", player:get_player_name().." takes "..dump(stack:get_name()).." from creative inventory")
-                --print("stack:get_name()="..dump(stack:get_name())..", stack:get_count()="..dump(stack:get_count()))
+                minetest.log("action",
+                    player:get_player_name()
+                    .. " takes "
+                    .. dump(stack:get_name())
+                    .. " from creative inventory"
+                )
             end
         end,
     })
     local creative_list = {}
-    for name,def in pairs(minetest.registered_items) do
-        if (not def.groups.not_in_creative_inventory or def.groups.not_in_creative_inventory == 0)
-                and def.description and def.description ~= "" then
+    for name, def in pairs(minetest.registered_items) do
+        if (not def.groups.not_in_creative_inventory
+            or def.groups.not_in_creative_inventory == 0)
+        and def.description and def.description ~= "" then
             table.insert(creative_list, name)
         end
     end
