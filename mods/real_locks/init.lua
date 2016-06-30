@@ -21,11 +21,11 @@ real_locks.formspec =
 
 --{{{ Functions
 real_locks.can_open_locked = function (pos, wield)
-    if minetest.get_item_group(wield, "key") > 0 then 
-		local lock_pass = minetest.get_meta(pos):get_string("keyform")
-		local key_pass = minetest.deserialize(wield:get_metadata()).keyform
+    if minetest.get_item_group(wield, "key") > 0 then
+        local lock_pass = minetest.get_meta(pos):get_string("keyform")
+        local key_pass = minetest.deserialize(wield:get_metadata()).keyform
 
-		return lock_pass == key_pass
+        return lock_pass == key_pass
     else
         return false
     end
@@ -92,14 +92,14 @@ minetest.register_node("real_locks:table", {
         end
     end,
 
-	allow_metadata_inventory_put = function(pos,listname, index, stack, player)
+    allow_metadata_inventory_put = function(pos,listname, index, stack, player)
         if listname == "src" then
             return stack:get_count()
         elseif listname:sub(1,-2) == "dst" then
             return 0
         end
     end,
-	allow_metadata_inventory_move =
+    allow_metadata_inventory_move =
         function (pos, from_list, from_index, to_list, to_index, count, player)
             if from_list:sub(1,-2) == "dst" or to_list:sub(1,-2) == "dst" then
                 return 0

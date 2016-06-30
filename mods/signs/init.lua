@@ -2,7 +2,7 @@
 -- Based on xyz's code
 
 local sign_width = 200
-local poster_width = 320 
+local poster_width = 320
 local sign_padding = 12
 
 -- avoiding of bug with russian input ====================================== --

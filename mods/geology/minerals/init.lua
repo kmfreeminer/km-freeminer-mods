@@ -28,20 +28,20 @@ end
 
 --{{{ Fuel registration
 minetest.register_craft({
-	type = "fuel",
-	recipe = "minerals:charcoal",
-	burntime = 20,
+    type = "fuel",
+    recipe = "minerals:charcoal",
+    burntime = 20,
 })
 
 minetest.register_craft({
-	type = "fuel",
-	recipe = "minerals:bituminous_coal",
-	burntime = 35,
+    type = "fuel",
+    recipe = "minerals:bituminous_coal",
+    burntime = 35,
 })
 
 minetest.register_craft({
-	type = "fuel",
-	recipe = "minerals:anthracite",
-	burntime = 50,
+    type = "fuel",
+    recipe = "minerals:anthracite",
+    burntime = 50,
 })
 --}}}

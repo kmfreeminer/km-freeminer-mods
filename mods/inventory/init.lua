@@ -29,12 +29,12 @@ minetest.register_on_joinplayer(function(player)
         invref:set_size("clothes", inventory.width * inventory.clothes_height)
     end
 
-	if not minetest.check_player_privs(player:get_player_name(), {creative = true}) then
-		player:set_inventory_formspec(inventory.craft)
-	end
+    if not minetest.check_player_privs(player:get_player_name(), {creative = true}) then
+        player:set_inventory_formspec(inventory.craft)
+    end
     
-	player:hud_set_hotbar_image("gui_hotbar.png")
-	player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
+    player:hud_set_hotbar_image("gui_hotbar.png")
+    player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
     player:hud_set_hotbar_itemcount(inventory.width)
 end)
 
