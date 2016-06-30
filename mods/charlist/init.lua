@@ -11,16 +11,20 @@ local dataload = {}
 
 local function update_nametag(username)
     local player = minetest.get_player_by_name(username)
+    player:set_nametag_attributes({
+        color = charlist.get_color(username),
+        text = charlist.get_visible_name(username)
+    })
 end
 
 -- Quenta
 -- {{
 function charlist.find_name_owners(name)
     local usernames = {}
-    for username, data in pairs(charlist.data[username]) do
+    for username, data in pairs(charlist.data) do
         if string.match(data.name,          "^" .. name .. " %[.*%]") 
         or string.match(data.visible_name , "^" .. name .. " %[.*%]") then
-            table.insert(tmp, username)
+            table.insert(usernames, username)
         end
         
     end
@@ -104,6 +108,7 @@ local function get_random_color()
     local free_colors = get_free_colors()
     
     if #free_colors < 0 then
+        print("TODO")
         --TODO: add trully random color
     end
     
@@ -150,7 +155,8 @@ if not httpenv then
     minetest.log("error", "Unable to get HTTPApiTable, maybe you should add secure.trusted_mods = roleplay or secure.http_mods = roleplay to your .conf file.")
 end
 
-if require("lfs") then
+lfs = require("lfs")
+if lfs then
     lfs.mkdir(charlist.data_folder)
 else
     minetest.log("error", "Unable to get lfs, install lfs for lua5.1 or create " .. charlist.data_folder .. " folder yourtself.")
@@ -182,27 +188,25 @@ function dataload.load_from_file(username)
 end
 
 -- Server load function
-function dataload.load_from_server(httpenv, username)
-    if httpenv then
-        local url = string.gsub(charlist.user_get_url, "{{username}}", username)
-        local handle = httpenv.fetch_async({ url = url, timeout = 2 })
-        
-        local result = nil
-        repeat
-            result = httpenv.fetch_async_get(handle)
-        until result.completed
+function dataload.load_from_server(username)
+    local url = string.gsub(charlist.user_get_url, "{{username}}", username)
+    local handle = httpenv.fetch_async({ url = url, timeout = 2 })
+    
+    local result;
+    repeat
+        result = httpenv.fetch_async_get(handle)
+    until result.completed
 
-        local fetched_data = minetest.parse_json(result.data)
-        if result.succeeded and type(fetched_data) == "table" then
-            return fetched_data
-        end
+    local fetched_data = minetest.parse_json(result.data)
+    if result.succeeded and type(fetched_data) == "table" then
+        return fetched_data
     end
-    return nil
 end
 
 -- Load data from server on join
 minetest.register_on_prejoinplayer(function(username, ip)    
     charlist.data[username] = {}
+    
     local data = {}
     data.skills = {}
     data.wounds = {}
@@ -212,10 +216,12 @@ minetest.register_on_prejoinplayer(function(username, ip)
         data = fetched_data
     end
     
-    fetched_data = dataload.load_from_server(httpenv, username)
-    if fetched_data then
-        for key, value in pairs(fetched_data) do
-            data[key] = value
+    if httpenv then
+        fetched_data = dataload.load_from_server(username)
+        if fetched_data then
+            for key, value in pairs(fetched_data) do
+                data[key] = value
+            end
         end
     end
     

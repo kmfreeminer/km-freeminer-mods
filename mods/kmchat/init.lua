@@ -4,7 +4,7 @@ dofile(minetest.get_modpath("kmchat").."/config.lua")
 dofile(minetest.get_modpath("kmchat").."/ranges.lua")
 
 local function get_message_type_and_text(message)
-    local substrings = nil
+    local substrings;
 
     for rexp, mtype in pairs(kmchat.rexps) do
         substrings = { string.match(message, rexp) }
