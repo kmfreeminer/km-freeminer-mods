@@ -22,7 +22,7 @@ minetest.register_item(":", {
 --
 
 minetest.register_tool("default:pick_wood", {
-	description = "Wooden Pickaxe",
+	description = "Деревянная кирка",
 	inventory_image = "default_tool_woodpick.png",
 	tool_capabilities = {
 		full_punch_interval = 1.2,
@@ -34,7 +34,7 @@ minetest.register_tool("default:pick_wood", {
 	},
 })
 minetest.register_tool("default:pick_stone", {
-	description = "Stone Pickaxe",
+	description = "Каменная кирка",
 	inventory_image = "default_tool_stonepick.png",
 	tool_capabilities = {
 		full_punch_interval = 1.3,
@@ -51,7 +51,7 @@ minetest.register_tool("default:pick_stone", {
 --
 
 minetest.register_tool("default:shovel_wood", {
-	description = "Wooden Shovel",
+	description = "Деревянная лопата",
 	inventory_image = "default_tool_woodshovel.png",
 	wield_image = "default_tool_woodshovel.png^[transformR90",
 	tool_capabilities = {
@@ -64,7 +64,7 @@ minetest.register_tool("default:shovel_wood", {
 	},
 })
 minetest.register_tool("default:shovel_stone", {
-	description = "Stone Shovel",
+	description = "Каменная лопата",
 	inventory_image = "default_tool_stoneshovel.png",
 	wield_image = "default_tool_stoneshovel.png^[transformR90",
 	tool_capabilities = {
@@ -82,7 +82,7 @@ minetest.register_tool("default:shovel_stone", {
 --
 
 minetest.register_tool("default:axe_wood", {
-	description = "Wooden Axe",
+	description = "Деревянный топор",
 	inventory_image = "default_tool_woodaxe.png",
 	tool_capabilities = {
 		full_punch_interval = 1.0,
@@ -94,7 +94,7 @@ minetest.register_tool("default:axe_wood", {
 	},
 })
 minetest.register_tool("default:axe_stone", {
-	description = "Stone Axe",
+	description = "Каменный топор",
 	inventory_image = "default_tool_stoneaxe.png",
 	tool_capabilities = {
 		full_punch_interval = 1.2,
@@ -111,7 +111,7 @@ minetest.register_tool("default:axe_stone", {
 --
 
 minetest.register_tool("default:sword_wood", {
-	description = "Wooden Sword",
+	description = "Деревянный меч",
 	inventory_image = "default_tool_woodsword.png",
 	tool_capabilities = {
 		full_punch_interval = 1,
@@ -123,7 +123,7 @@ minetest.register_tool("default:sword_wood", {
 	}
 })
 minetest.register_tool("default:sword_stone", {
-	description = "Stone Sword",
+	description = "Каменный меч",
 	inventory_image = "default_tool_stonesword.png",
 	tool_capabilities = {
 		full_punch_interval = 1.2,

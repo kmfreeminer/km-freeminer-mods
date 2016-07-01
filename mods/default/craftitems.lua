@@ -1,13 +1,13 @@
 -- mods/default/craftitems.lua
 
 minetest.register_craftitem("default:stick", {
-	description = "Stick",
+	description = "Палочка",
 	inventory_image = "default_stick.png",
 	groups = {stick=1},
 })
 
 minetest.register_craftitem("default:paper", {
-	description = "Paper",
+	description = "Бумага",
 	inventory_image = "default_paper.png",
 })
 
@@ -74,14 +74,14 @@ minetest.register_on_player_receive_fields(function(player, form_name, fields)
 end)
 
 minetest.register_craftitem("default:book", {
-	description = "Book",
+	description = "Книга",
 	inventory_image = "default_book.png",
 	groups = {book=1},
 	on_use = book_on_use,
 })
 
 minetest.register_craftitem("default:book_written", {
-	description = "Book With Text",
+	description = "Книга с текстом",
 	inventory_image = "default_book.png",
 	groups = {book=1, not_in_creative_inventory=1},
 	stack_max = 1,
@@ -90,16 +90,16 @@ minetest.register_craftitem("default:book_written", {
 
 
 minetest.register_craftitem("default:clay_lump", {
-	description = "Clay Lump",
+	description = "Кусок глины",
 	inventory_image = "default_clay_lump.png",
 })
 
 minetest.register_craftitem("default:clay_brick", {
-	description = "Clay Brick",
+	description = "Глиняный кирпич",
 	inventory_image = "default_clay_brick.png",
 })
 
 minetest.register_craftitem("default:obsidian_shard", {
-	description = "Obsidian Shard",
+	description = "Осколок обсидиана",
 	inventory_image = "default_obsidian_shard.png",
 })
