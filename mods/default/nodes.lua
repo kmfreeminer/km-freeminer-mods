@@ -83,7 +83,7 @@ minetest.register_node("default:dirt", {
 	liquidtype = flowing_sand_type,
 	paramtype2 = flowing_sand_paramtype2,
 	drowning = 1,
-	melt = "default:dirt_dry",
+--	melt = "default:dirt_dry",
 })
 
 minetest.register_node("default:dirt_with_grass", {
@@ -97,8 +97,8 @@ minetest.register_node("default:dirt_with_grass", {
 		footstep = {name = "default_grass_footstep", gain = 0.25},
 	}),
 	drowning = 1,
-	melt = "default:dirt_with_dry_grass",
-	freeze = "default:dirt_with_snow",
+--	melt = "default:dirt_with_dry_grass",
+--	freeze = "default:dirt_with_snow",
 })
 
 minetest.register_node("default:dirt_with_grass_footsteps", {
@@ -112,8 +112,8 @@ minetest.register_node("default:dirt_with_grass_footsteps", {
 		footstep = {name = "default_grass_footstep", gain = 0.25},
 	}),
 	drowning = 1,
-	melt = "default:dirt_with_dry_grass",
-	freeze = "default:dirt_with_snow",
+--	melt = "default:dirt_with_dry_grass",
+--	freeze = "default:dirt_with_snow",
 })
 
 minetest.register_node("default:dirt_with_dry_grass", {
@@ -128,7 +128,7 @@ minetest.register_node("default:dirt_with_dry_grass", {
 		footstep = {name = "default_grass_footstep", gain = 0.4},
 	}),
 	drowning = 1,
-	melt = "default:dirt_dry",
+--	melt = "default:dirt_dry",
 	freeze = "default:dirt_with_snow",
 })
 
@@ -143,7 +143,7 @@ minetest.register_node("default:dirt_with_snow", {
 		footstep = {name = "default_snow_footstep", gain = 0.25},
 	}),
 	drowning = 1,
-	melt = "default:dirt",
+--	melt = "default:dirt",
 })
 
 minetest.register_node("default:dirt_dry", {
@@ -212,7 +212,7 @@ minetest.register_node("default:clay", {
 	groups = {crumbly=3, melt=1500},
 	drop = 'default:clay_lump 4',
 	sounds = default.node_sound_dirt_defaults(),
-	melt = "default:stone",
+--	melt = "default:stone",
 })
 
 
@@ -244,7 +244,7 @@ minetest.register_node("default:snow", {
 	end,
 	leveled = 7,
 	paramtype2 = "leveled",
-	melt = "default:water_flowing",
+--	melt = "default:water_flowing",
 })
 
 minetest.register_node("default:snowblock", {
@@ -255,7 +255,7 @@ minetest.register_node("default:snowblock", {
 		footstep = {name = "default_snow_footstep", gain = 0.25},
 		dug = {name = "default_snow_footstep", gain = 0.75},
 	}),
-	melt = "default:water_source",
+--	melt = "default:water_source",
 })
 
 
@@ -266,7 +266,7 @@ minetest.register_node("default:ice", {
 	paramtype = "light",
 	groups = {cracky = 3, puts_out_fire = 1, melt = 3, slippery = 90},
 	sounds = default.node_sound_glass_defaults(),
-	melt = "default:water_source",
+--	melt = "default:water_source",
 })
 --}}}
 
@@ -624,7 +624,7 @@ minetest.register_node("default:junglegrass", {
 		type = "fixed",
 		fixed = {-0.5, -0.5, -0.5, 0.5, -5/16, 0.5},
 	},
-	melt = "default:dry_grass_5"
+--	melt = "default:dry_grass_5"
 })
 
 
@@ -654,7 +654,7 @@ minetest.register_node("default:grass_1", {
 		return ItemStack("default:grass_1 " ..
 			itemstack:get_count() - (1 - ret:get_count()))
 	end,
-	melt = "default:dry_grass_1"
+--	melt = "default:dry_grass_1"
 })
 
 for i = 2, 5 do
@@ -678,7 +678,7 @@ for i = 2, 5 do
 			type = "fixed",
 			fixed = {-0.5, -0.5, -0.5, 0.5, -5/16, 0.5},
 		},
-		melt = "default:dry_grass_" .. i
+--		melt = "default:dry_grass_" .. i
 	})
 end
 
@@ -784,7 +784,7 @@ minetest.register_node("default:water_source", {
 	leveled = 8,
 	paramtype2 = "leveled",
 	freeze = "default:ice",
-	melt = "air",
+--	melt = "air",
 })
 
 minetest.register_node("default:water_flowing", {
@@ -838,7 +838,7 @@ minetest.register_node("default:water_flowing", {
 	leveled = 8,
 	paramtype2 = "leveled",
 	freeze = "default:snow",
-	melt = "air",
+--	melt = "air",
 })
 
 
@@ -890,7 +890,7 @@ minetest.register_node("default:river_water_source", {
 	leveled = 4,
 	paramtype2 = "leveled",
 	freeze = "default:ice",
-	melt = "air",
+--	melt = "air",
 })
 
 minetest.register_node("default:river_water_flowing", {
@@ -946,7 +946,7 @@ minetest.register_node("default:river_water_flowing", {
 	leveled = 4,
 	paramtype2 = "leveled",
 	freeze = "default:snow",
-	melt = "air",
+--	melt = "air",
 })
 
 
@@ -1288,7 +1288,7 @@ minetest.register_node("default:glass", {
 	groups = {cracky = 3, oddly_breakable_by_hand = 3, melt = 1500},
 	sounds = default.node_sound_glass_defaults(),
 
-	melt = "default:obsidian_glass",
+--	melt = "default:obsidian_glass",
 })
 
 minetest.register_node("default:obsidian_glass", {
@@ -1333,7 +1333,7 @@ minetest.register_node("default:brick", {
 	groups = {cracky = 3, melt = 3500},
 	sounds = default.node_sound_stone_defaults(),
 
-	melt = "default:lava_source",
+--	melt = "default:lava_source",
 })
 --}}}
 
