@@ -80,7 +80,7 @@ for item, itemdef in pairs(items.tools_metal) do
 
         minetest.register_tool("items:" .. item .. "_" .. metal, {
             description = itemdef[1] ..
-                "(" .. metaldef.description:lower_cyr() .. ")",
+                " (" .. metaldef.description:lower_cyr() .. ")",
             inventory_image = "items_" .. item .. "_hand.png" ..
                 "^(" ..
                     "items_" .. item .. "_head.png" ..
