@@ -40,9 +40,9 @@ local function get_container_formspec(pos, name)
         "size["..form_w..","..form_h.."]"..
         "label[0,-0.4;"..label.."]"..
         "label[0,"..label_y..";Inventory]"..
-        default.gui_bg..
-        default.gui_bg_img..
-        default.gui_slots..
+        gui.bg..
+        gui.bg_img..
+        gui.slots..
         "list[nodemeta:"..spos..";main;"..
             x_offset..","..y_offset..";"..
             w..","..h..

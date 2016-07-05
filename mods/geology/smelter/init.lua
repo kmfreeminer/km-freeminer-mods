@@ -162,9 +162,9 @@ end
 --{{{ Formspecs
 smelter.inactive_formspec =
 	"size[" .. inventory.width .. "," .. (inventory.height + 4) .. "]"..
-    default.gui_bg..
-    default.gui_bg_img..
-    default.gui_slots..
+    gui.bg..
+    gui.bg_img..
+    gui.slots..
 	"list[current_name;src;2,0;2,2;]"..
 	"image[4.5,0.5;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
 	"list[current_name;dst;6,0.5;1,1;]"..
@@ -175,13 +175,13 @@ smelter.inactive_formspec =
     "listring[current_player;main]"..
     "listring[current_name;src]"..
     "listring[current_player;main]"
-	--default.get_hotbar_bg(0, 4.25)
+	--gui.get_hotbar_bg(0, 4.25)
 
 smelter.active_formspec = function(fuel_percent, item_percent)
     return "size[" .. inventory.width ..",".. (inventory.height + 4) .."]"..
-    default.gui_bg..
-    default.gui_bg_img..
-    default.gui_slots..
+    gui.bg..
+    gui.bg_img..
+    gui.slots..
 	"list[current_name;src;2,0;2,2;]"..
 	"image[4.5,0.5;1,1;gui_furnace_arrow_bg.png^"..
         "[lowpart:" .. item_percent .. ":gui_furnace_arrow_fg.png^" ..
@@ -197,7 +197,7 @@ smelter.active_formspec = function(fuel_percent, item_percent)
     "listring[current_player;main]"..
     "listring[current_name;src]"..
     "listring[current_player;main]"
-	--default.get_hotbar_bg(0, 4.25)
+	--gui.get_hotbar_bg(0, 4.25)
 end
 --}}}
 

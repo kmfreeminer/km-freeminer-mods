@@ -1115,15 +1115,15 @@ minetest.register_node("default:torch", {
 
 local bookshelf_formspec =
 	"size[8,7;]" ..
-	default.gui_bg ..
-	default.gui_bg_img ..
-	default.gui_slots ..
+	gui.bg ..
+	gui.bg_img ..
+	gui.slots ..
 	"list[context;books;0,0.3;8,2;]" ..
 	"list[current_player;main;0,2.85;8,1;]" ..
 	"list[current_player;main;0,4.08;8,3;8]" ..
 	"listring[context;books]" ..
 	"listring[current_player;main]" ..
-	default.get_hotbar_bg(0,2.85)
+	gui.get_hotbar_bg(0,2.85)
 
 minetest.register_node("default:bookshelf", {
 	description = "Книжная полка",

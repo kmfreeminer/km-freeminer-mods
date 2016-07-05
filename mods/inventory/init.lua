@@ -356,9 +356,9 @@ function inventory.default(playername, part, lore, creative, start)
     return "size["
         .. (lw + w + cw) .. "," .. h
         .. "]"
-    .. default.gui_bg
-    .. default.gui_bg_img
-    .. default.gui_slots
+    .. gui.bg
+    .. gui.bg_img
+    .. gui.slots
     --.. "tabheader["
     --    .. "0,0;"
     --    .. "tabs;"
