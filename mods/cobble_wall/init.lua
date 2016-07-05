@@ -149,9 +149,9 @@ minetest.register_on_placenode(update_nearby)
 minetest.register_on_dignode(update_nearby)
 
 minetest.register_craft({
-	output = 'cobble_wall:wall 16',
-	recipe = {
-		{'default:cobble', 'default:cobble', 'default:cobble'},
+    output = 'cobble_wall:wall 16',
+    recipe = {
+        {'default:cobble', 'default:cobble', 'default:cobble'},
         {'default:cobble', 'default:cobble', 'default:cobble'}
-	}
+    }
 })

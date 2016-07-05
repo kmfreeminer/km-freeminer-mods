@@ -341,7 +341,7 @@ minetest.register_decoration({
     biomes = nil,
     y_min = -31000,
     y_max = 0,
-    
+
     ----- Schematic-type parameters
     schematic = gems.crystal_decoration,
     flags = "place_center_x, place_center_z",
@@ -363,20 +363,20 @@ gems.register_drop = function(wherein, gems)
     local wherein_def = ItemStack(wherein):get_definition()
     local drops = wherein_def.drop
     local too_many_items = false
-	if drops == nil then
-		drops = {
+    if drops == nil then
+        drops = {
             max_items = 2,
             items = { {items = {wherein}}, }
         }
-	elseif type(drops) == "string" then
-		drops = {
+    elseif type(drops) == "string" then
+        drops = {
             max_items = 2,
             items = { {items = {drops}}, }
         }
-	elseif drops.items == nil then
-		-- drop = {} in definition disables default drop
+    elseif drops.items == nil then
+        -- drop = {} in definition disables default drop
         drops = table.copy(wherein_def.drop) -- we never should modify original table
-		drops = {
+        drops = {
             max_items = 1,
             items = {}
         }
@@ -387,7 +387,7 @@ gems.register_drop = function(wherein, gems)
     else
         drops = table.copy(wherein_def.drop) -- we never should modify original table
         drops.max_items = drops.max_items + 1
-	end
+    end
 
     local prev = 0
     for gem, howrare in pairs(gems) do

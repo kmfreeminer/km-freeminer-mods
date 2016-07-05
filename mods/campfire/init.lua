@@ -33,7 +33,7 @@ minetest.register_node("campfire:fireplace", {
         for _, v in ipairs(fire_struct) do
             minetest.add_entity({x=pos.x+v[1],y=pos.y+v[2],z=pos.z+v[3]}, "campfire:fire"):setyaw(v[4])
         end
-	minetest.swap_node(pos, {name="campfire:fireplace_fire"})
+    minetest.swap_node(pos, {name="campfire:fireplace_fire"})
     end,
 
 })

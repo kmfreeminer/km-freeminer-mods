@@ -94,7 +94,7 @@ doors.after_dig = function (pos, oldnode)
     if count == 0 then
         name, count = string.gsub(name, "_b_", "_t_")
     end
-        
+
     if string.find(name, "_t_") then
         pos.y = pos.y + 1
     else
@@ -203,73 +203,73 @@ end
 
 --{{{ doors:register_door
 function doors:register_door(name, def)
-	def.groups.not_in_creative_inventory = 1
-	
+    def.groups.not_in_creative_inventory = 1
+
     --{{{ Item registration
-	minetest.register_craftitem(name, {
-		description = def.description,
-		inventory_image = def.inventory_image,
-		
-		on_place = function(itemstack, placer, pointed_thing)
-			if not pointed_thing.type == "node" then
-				return itemstack
-			end
-			
-			local ptu = pointed_thing.under
-			local nu = minetest.get_node(ptu)
-			if minetest.registered_nodes[nu.name].on_rightclick then
-				return minetest.registered_nodes[nu.name].on_rightclick(ptu, nu, placer, itemstack)
-			end
-			
-			local pt = pointed_thing.above
-			local pt2 = {x=pt.x, y=pt.y, z=pt.z}
-			pt2.y = pt2.y+1
-			if
-				not minetest.registered_nodes[minetest.get_node(pt).name].buildable_to or
-				not minetest.registered_nodes[minetest.get_node(pt2).name].buildable_to or
-				not placer or
-				not placer:is_player()
-			then
-				return itemstack
-			end
-			
-			local p2 = minetest.dir_to_facedir(placer:get_look_dir())
-			local pt3 = {x=pt.x, y=pt.y, z=pt.z}
-			if p2 == 0 then
-				pt3.x = pt3.x-1
-			elseif p2 == 1 then
-				pt3.z = pt3.z+1
-			elseif p2 == 2 then
-				pt3.x = pt3.x+1
-			elseif p2 == 3 then
-				pt3.z = pt3.z-1
-			end
-			if not string.find(minetest.get_node(pt3).name, name.."_b_") then
-				minetest.set_node(pt, {name=name.."_b_1", param2=p2})
-				minetest.set_node(pt2, {name=name.."_t_1", param2=p2})
-			else
-				minetest.set_node(pt, {name=name.."_cw_b_1", param2=p2})
-				minetest.set_node(pt2, {name=name.."_cw_t_1", param2=p2})
-			end
-			
-			local passwd = itemstack:get_metadata()
-			if passwd ~= nil then
-			    local meta = minetest.get_meta(pt)
-			    meta:set_string("lock_pass", passwd)
-			    meta:set_string("infotext", def.infotext)
-			    meta = minetest.get_meta(pt2)
-			    meta:set_string("lock_pass", passwd)
-			    meta:set_string("infotext", def.infotext)
-			end
-			
-			if not minetest.setting_getbool("creative_mode") then
-				itemstack:take_item()
-			end
-			return itemstack
-		end,
-	})
+    minetest.register_craftitem(name, {
+        description = def.description,
+        inventory_image = def.inventory_image,
+
+        on_place = function(itemstack, placer, pointed_thing)
+            if not pointed_thing.type == "node" then
+                return itemstack
+            end
+
+            local ptu = pointed_thing.under
+            local nu = minetest.get_node(ptu)
+            if minetest.registered_nodes[nu.name].on_rightclick then
+                return minetest.registered_nodes[nu.name].on_rightclick(ptu, nu, placer, itemstack)
+            end
+
+            local pt = pointed_thing.above
+            local pt2 = {x=pt.x, y=pt.y, z=pt.z}
+            pt2.y = pt2.y+1
+            if
+                not minetest.registered_nodes[minetest.get_node(pt).name].buildable_to or
+                not minetest.registered_nodes[minetest.get_node(pt2).name].buildable_to or
+                not placer or
+                not placer:is_player()
+            then
+                return itemstack
+            end
+
+            local p2 = minetest.dir_to_facedir(placer:get_look_dir())
+            local pt3 = {x=pt.x, y=pt.y, z=pt.z}
+            if p2 == 0 then
+                pt3.x = pt3.x-1
+            elseif p2 == 1 then
+                pt3.z = pt3.z+1
+            elseif p2 == 2 then
+                pt3.x = pt3.x+1
+            elseif p2 == 3 then
+                pt3.z = pt3.z-1
+            end
+            if not string.find(minetest.get_node(pt3).name, name.."_b_") then
+                minetest.set_node(pt, {name=name.."_b_1", param2=p2})
+                minetest.set_node(pt2, {name=name.."_t_1", param2=p2})
+            else
+                minetest.set_node(pt, {name=name.."_cw_b_1", param2=p2})
+                minetest.set_node(pt2, {name=name.."_cw_t_1", param2=p2})
+            end
+
+            local passwd = itemstack:get_metadata()
+            if passwd ~= nil then
+                local meta = minetest.get_meta(pt)
+                meta:set_string("lock_pass", passwd)
+                meta:set_string("infotext", def.infotext)
+                meta = minetest.get_meta(pt2)
+                meta:set_string("lock_pass", passwd)
+                meta:set_string("infotext", def.infotext)
+            end
+
+            if not minetest.setting_getbool("creative_mode") then
+                itemstack:take_item()
+            end
+            return itemstack
+        end,
+    })
     --}}}
-	
+
     --{{{ Node registration
 
     --{{{ Nodeboxes
@@ -297,21 +297,21 @@ function doors:register_door(name, def)
     end
 
     for k,part in pairs(nodes) do
-	    minetest.register_node(name.."_"..part, {
-		    tiles = def.tiles[part],
-		    paramtype = "light",
-		    paramtype2 = "facedir",
-		    drop = name,
-		    drawtype = "nodebox",
-		    node_box = {
+        minetest.register_node(name.."_"..part, {
+            tiles = def.tiles[part],
+            paramtype = "light",
+            paramtype2 = "facedir",
+            drop = name,
+            drawtype = "nodebox",
+            node_box = {
                 type = "fixed",
                 fixed = def.nodeboxes[part],
             },
-		    groups = def.groups,
-		    after_dig_node = def.after_dig,
-		    on_rightclick = def.on_rightclick,
+            groups = def.groups,
+            after_dig_node = def.after_dig,
+            on_rightclick = def.on_rightclick,
             on_construct = def.on_construct,
-	    })
+        })
     end
 
     --}}}
@@ -343,7 +343,7 @@ local function setTiles(tiles)
             tiles[2].."^[transformfx", tiles[2],
             tiles[4], tiles[4]
         },
-    
+
         cw_t_1 = {
             tiles[5].."^[transformfx", tiles[5].."^[transformfx",
             tiles[3].."^[transformfx", tiles[3].."^[transformfx",
@@ -415,9 +415,9 @@ t = setTiles({
 })
 
 doors:register_door("doors:door_wood", {
-	description = "Wooden Door",
-	inventory_image = "door_wood.png",
-	groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
+    description = "Wooden Door",
+    inventory_image = "door_wood.png",
+    groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
     tiles = t,
     on_rightclick = function (pos, node, clicker, wield_item)
         if wield_item:get_name() == "real_locks:lock" then
@@ -435,9 +435,9 @@ doors:register_door("doors:door_wood", {
 
 -- Bolted version
 doors:register_door("doors:door_wood_bolt", {
-	description = "Wooden Door",
-	inventory_image = "door_wood.png",
-	groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
+    description = "Wooden Door",
+    inventory_image = "door_wood.png",
+    groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
     tiles = t,
     on_rightclick = doors.rightclick_on_bolted,
     on_construct = function(pos)
@@ -448,9 +448,9 @@ doors:register_door("doors:door_wood_bolt", {
 
 -- Locked version
 doors:register_door("doors:door_wood_lock", {
-	description = "Wooden Door",
-	inventory_image = "door_wood.png",
-	groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
+    description = "Wooden Door",
+    inventory_image = "door_wood.png",
+    groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
     tiles = t,
     on_rightclick = doors.rightclick_on_locked,
     on_construct = function(pos)
@@ -461,12 +461,12 @@ doors:register_door("doors:door_wood_lock", {
 
 -- Craft
 minetest.register_craft({
-	output = "doors:door_wood",
-	recipe = {
-		{"group:wood", "group:wood"},
-		{"group:wood", "group:wood"},
-		{"group:wood", "group:wood"}
-	}
+    output = "doors:door_wood",
+    recipe = {
+        {"group:wood", "group:wood"},
+        {"group:wood", "group:wood"},
+        {"group:wood", "group:wood"}
+    }
 })
 --}}}
 
@@ -478,9 +478,9 @@ t = setTiles({
 })
 
 doors:register_door("doors:door_wood_studded", {
-	description = "Wooden door, studded with iron",
-	inventory_image = "door_wood_studded.png",
-	groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
+    description = "Wooden door, studded with iron",
+    inventory_image = "door_wood_studded.png",
+    groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
     tiles = t,
     on_rightclick = function (pos, node, clicker, wield_item)
         if wield_item:get_name() == "real_locks:lock" then
@@ -498,9 +498,9 @@ doors:register_door("doors:door_wood_studded", {
 
 -- Bolted version
 doors:register_door("doors:door_wood_studded_bolt", {
-	description = "Wooden door, studded with iron, with bolt",
-	inventory_image = "door_wood_studded.png",
-	groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
+    description = "Wooden door, studded with iron, with bolt",
+    inventory_image = "door_wood_studded.png",
+    groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
     tiles = t,
     on_rightclick = doors.rightclick_on_bolted,
     on_construct = function(pos)
@@ -511,9 +511,9 @@ doors:register_door("doors:door_wood_studded_bolt", {
 
 -- Locked version
 doors:register_door("doors:door_wood_studded_lock", {
-	description = "Wooden door, studded with iron, with lock",
-	inventory_image = "door_wood_studded.png",
-	groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
+    description = "Wooden door, studded with iron, with lock",
+    inventory_image = "door_wood_studded.png",
+    groups = {snappy=1,choppy=2,oddly_breakable_by_hand=1,flammable=2,door=1,level=1},
     tiles = t,
     on_rightclick = doors.rightclick_on_locked,
     on_construct = function(pos)
@@ -524,12 +524,12 @@ doors:register_door("doors:door_wood_studded_lock", {
 
 -- Craft
 minetest.register_craft({
-	output = "doors:door_wood",
-	recipe = {
-		{"group:wood", "group:wood"},
-		{"group:wood", "group:wood"},
-		{"group:wood", "group:wood"}
-	}
+    output = "doors:door_wood",
+    recipe = {
+        {"group:wood", "group:wood"},
+        {"group:wood", "group:wood"},
+        {"group:wood", "group:wood"}
+    }
 })
 --}}}
 
@@ -541,8 +541,8 @@ t = setTiles({
 })
 
 doors:register_door("doors:door_iron_bars", {
-	description = "Door of iron bars",
-	inventory_image = "door_iron_bars.png",
+    description = "Door of iron bars",
+    inventory_image = "door_iron_bars.png",
     groups = {cracky=1,bendy=2,melty=1,door=1,level=1},
     tiles = t,
     on_rightclick = function (pos, node, clicker, wield_item)
@@ -559,8 +559,8 @@ doors:register_door("doors:door_iron_bars", {
 
 -- Locked version
 doors:register_door("doors:door_iron_bars_lock", {
-	description = "Door of iron bars, with lock",
-	inventory_image = "door_iron_bars.png",
+    description = "Door of iron bars, with lock",
+    inventory_image = "door_iron_bars.png",
     groups = {cracky=1,bendy=2,melty=1,door=1,level=1},
     tiles = t,
     on_rightclick = doors.rightclick_on_locked,
@@ -572,12 +572,12 @@ doors:register_door("doors:door_iron_bars_lock", {
 
 -- Craft
 minetest.register_craft({
-	output = "doors:door_iron_bars",
-	recipe = {
-		{"default:steel_ingot",""},
-		{"default:steel_ingot",""},
-		{"default:steel_ingot", "default:steel_ingot"}
-	}
+    output = "doors:door_iron_bars",
+    recipe = {
+        {"default:steel_ingot",""},
+        {"default:steel_ingot",""},
+        {"default:steel_ingot", "default:steel_ingot"}
+    }
 })
 --}}}
 
@@ -589,8 +589,8 @@ t = setTiles({
 })
 
 doors:register_door("doors:door_iron_heavy", {
-	description = "Heavy Metal door",
-	inventory_image = "door_iron_heavy.png",
+    description = "Heavy Metal door",
+    inventory_image = "door_iron_heavy.png",
     groups = {cracky=3,bendy=2,melty=3,door=1,level=3},
     tiles = t,
     on_rightclick = function (pos, node, clicker, wield_item)
@@ -609,8 +609,8 @@ doors:register_door("doors:door_iron_heavy", {
 
 -- Bolted version
 doors:register_door("doors:door_iron_heavy_bolt", {
-	description = "Heavy Metal door, with bolt",
-	inventory_image = "door_iron_heavy.png",
+    description = "Heavy Metal door, with bolt",
+    inventory_image = "door_iron_heavy.png",
     groups = {cracky=3,bendy=2,melty=3,door=1,level=3},
     tiles = t,
     on_rightclick = doors.rightclick_on_bolted,
@@ -622,8 +622,8 @@ doors:register_door("doors:door_iron_heavy_bolt", {
 
 -- Locked version
 doors:register_door("doors:door_iron_heavy_lock", {
-	description = "Heavy Metal door, with lock",
-	inventory_image = "door_iron_heavy.png",
+    description = "Heavy Metal door, with lock",
+    inventory_image = "door_iron_heavy.png",
     groups = {cracky=3,bendy=2,melty=3,door=1,level=3},
     tiles = t,
     on_rightclick = doors.rightclick_on_locked,
@@ -635,12 +635,12 @@ doors:register_door("doors:door_iron_heavy_lock", {
 
 -- Craft
 minetest.register_craft({
-	output = "doors:door_iron_heavy",
-	recipe = {
-		{"default:steel_ingot", "default:steel_ingot"},
-		{"default:steel_ingot", "default:steel_ingot"},
-		{"default:steel_ingot", "default:steel_ingot"}
-	}
+    output = "doors:door_iron_heavy",
+    recipe = {
+        {"default:steel_ingot", "default:steel_ingot"},
+        {"default:steel_ingot", "default:steel_ingot"},
+        {"default:steel_ingot", "default:steel_ingot"}
+    }
 })
 --}}}
 
@@ -652,8 +652,8 @@ t = setTiles({
 })
 
 doors:register_door("doors:door_iron_decorative", {
-	description = "Decorative iron door",
-	inventory_image = "door_iron_decorative.png",
+    description = "Decorative iron door",
+    inventory_image = "door_iron_decorative.png",
     groups = {cracky=2,bendy=2,melty=2,door=1,level=2},
     tiles = t,
     on_rightclick = function (pos, node, clicker, wield_item)
@@ -670,8 +670,8 @@ doors:register_door("doors:door_iron_decorative", {
 
 -- Locked version
 doors:register_door("doors:door_iron_decorative_lock", {
-	description = "Decorative iron door, with lock",
-	inventory_image = "door_iron_decorative.png",
+    description = "Decorative iron door, with lock",
+    inventory_image = "door_iron_decorative.png",
     groups = {cracky=2,bendy=2,melty=2,door=1,level=2},
     tiles = t,
     on_rightclick = doors.rightclick_on_locked,
@@ -683,12 +683,12 @@ doors:register_door("doors:door_iron_decorative_lock", {
 
 -- Craft
 minetest.register_craft({
-	output = "doors:door_iron_decorative",
-	recipe = {
-		{"", "default:steel_ingot"},
-		{"default:steel_ingot", "default:steel_ingot"},
-		{"default:steel_ingot", "default:steel_ingot"}
-	}
+    output = "doors:door_iron_decorative",
+    recipe = {
+        {"", "default:steel_ingot"},
+        {"default:steel_ingot", "default:steel_ingot"},
+        {"default:steel_ingot", "default:steel_ingot"}
+    }
 })
 --}}}
 --}}}

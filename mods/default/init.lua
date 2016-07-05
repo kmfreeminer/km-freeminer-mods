@@ -15,11 +15,11 @@ default.gui_slots = "listcolors[#00000069;#5A5A5A;#141318;#30434C;#FFF]"
 default.nametag_alpha = 100
 
 function default.get_hotbar_bg(x,y)
-	local out = ""
-	for i=0,7,1 do
-		out = out .."image["..x+i..","..y..";1,1;gui_hb_bg.png]"
-	end
-	return out
+    local out = ""
+    for i=0,7,1 do
+        out = out .."image["..x+i..","..y..";1,1;gui_hb_bg.png]"
+    end
+    return out
 end
 
 -- Load files
