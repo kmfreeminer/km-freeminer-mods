@@ -186,3 +186,7 @@ minetest.register_on_leaveplayer(function(player)
     charlist.set_color(username, nil)
 end)
 -- }}
+
+minetest.register_on_shutdown(function()
+    database.stop()
+end))
