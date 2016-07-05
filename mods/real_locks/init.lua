@@ -2,9 +2,9 @@ real_locks = {}
 
 real_locks.formspec =
     "size[" ..inventory.width.. "," ..(inventory.height + 1).. "]" ..
-    default.gui_bg..
-    default.gui_bg_img..
-    default.gui_slots..
+    gui.bg..
+    gui.bg_img..
+    gui.slots..
     "field[0.3,0.3;2,1;keypass;Форма ключа;]" ..
     "list[current_name;src;2.5,0;1,1;]" ..
     "image[3.5,0;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
