@@ -1,4 +1,4 @@
-local function default.dig_up(pos, node, digger)
+local function dig_up(pos, node, digger)
     -- используется только в функциях убирания папируса и кактуса после срубки
     if digger == nil then return end
     local np = {x = pos.x, y = pos.y + 1, z = pos.z}
@@ -572,7 +572,7 @@ minetest.register_node("default:cactus", {
     on_place = minetest.rotate_node,
 
     after_dig_node = function(pos, node, metadata, digger)
-        default.dig_up(pos, node, digger)
+        dig_up(pos, node, digger)
     end,
 })
 
@@ -593,7 +593,7 @@ minetest.register_node("default:papyrus", {
     sounds = default.node_sound_leaves_defaults(),
 
     after_dig_node = function(pos, node, metadata, digger)
-        default.dig_up(pos, node, digger)
+        dig_up(pos, node, digger)
     end,
 })
 
