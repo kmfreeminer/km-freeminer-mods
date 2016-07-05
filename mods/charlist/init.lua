@@ -1,62 +1,104 @@
+database = dofile(minetest.get_modpath("charlist") .. "/database.lua")
+assert(database.init({
+    ["type"] = "sqlite",
+    ["path"] = minetest.get_modpath("charlist") .. "/database.sqlite"
+}))
+
 charlist = {}
-
--- CONFIG-ZONE
--- {{
-charlist.user_get_url = "127.0.0.1/users/{{username}}"
-charlist.data_folder = minetest.get_modpath("charlist").."/data/"
---}}
-
 charlist.data = {}
-local dataload = {}
 
 local function update_nametag(username)
     local player = minetest.get_player_by_name(username)
     player:set_nametag_attributes({
-        color = charlist.get_color(username),
+        --color = charlist.get_color(username),
         text = charlist.get_visible_name(username)
     })
+end
+
+local function get_active_character(username) 
+    local cursor = database.find("characters", {["username"] = username, ["active"] = 1}, 1);
+    assert(cursor, "This user has no active characters.")
+    return cursor:fetch({}, "a")
 end
 
 -- Quenta
 -- {{
 function charlist.find_name_owners(name)
-    local usernames = {}
-    for username, data in pairs(charlist.data) do
-        if string.match(data.name,          "^" .. name .. " %[.*%]") 
-        or string.match(data.visible_name , "^" .. name .. " %[.*%]") then
-            table.insert(usernames, username)
-        end
-        
+    -- TODO: check both name and visible name (need to add OR to orm)
+    local cursor = database.find("characters", {["name"] = name, ["active"] = 1});
+
+    local owners = {}
+    
+    local row = cursor:fetch({}, "a")
+    while row do
+        table.insert(owners, character.username)
+        row = cursor:fetch(row, "a")
     end
-    return usernames
+    
+    cursor:close()
+
+    if #owners <= 0 then
+        return nil
+    end
+    
+    return owners
 end
 
 function charlist.set_visible_name(username, visible_name)
-    assert(type(charlist.data[username]) == "table")
-    charlist.data[username].visible_name = visible_name
-    update_nametag()
+
 end
 
 function charlist.get_visible_name(username)
-    assert(type(charlist.data[username]) == "table")
-    return charlist.data[username].visible_name
+    local character = get_active_character(username)
+    return character.visible_name
 end
 
 function charlist.get_real_name(username)
-    assert(type(charlist.data[username]) == "table")
-    return charlist.data[username].name
+    local character = get_active_character(username)
+    return character.name
 end
 
 function charlist.get_quenta(username)
-    assert(type(charlist.data[username]) == "table")
-    return charlist.data[username].color
+    local character = get_active_character(username)
+    return character.quenta
+end
+-- }}
+
+-- Skills
+-- {{
+function charlist.get_skill_table(username)
+    local character = get_active_character(username)
+    
+    local cursor = database.find("skills", {["character_id"] = character.id})
+    if not cursor then
+        return {}
+    end
+    
+    local skill_table = {}
+    
+    local row = cursor:fetch({}, "a")
+    while row do
+        skill_table[row.name] = row.level
+        row = cursor:fetch(row, "a")
+    end
+    
+    cursor:close()
+    
+    return skill_table
+end
+
+function charlist.get_skill_level(username, skill_name)
+    local character = get_active_character(username)    
+    local cursor = database.find("skills", {["character_id"] = character.id, ["name"] = skill_name}, 1)
+    return cursor:fetch({}, "a").level
 end
 -- }}
 
 -- Color
 -- {{
-local colors ={}
+charlist.data.colors = {}
 
+local colors ={}
 colors.primary = {
     "E0143C", "E9967A", "FF4500", "FFD700", "B8860B", "7FFF00", "32CD32",
     "90EE90", "00FF7F", "66CDAA", "00FFFF", "E0FFFF", "48D1CC", "5F9EA0", 
@@ -74,8 +116,9 @@ colors.secondary = {
 }
 
 local function find_color_owner(color)
-    for username, data in pairs(charlist.data) do
-        if data.color == color then
+    local players = minetest.get_connected_players();
+    for username, color in pairs(charlist.data.colors) do
+        if color == color then
             return username
         end
     end
@@ -104,10 +147,10 @@ local function get_free_colors()
     return color_table
 end
 
-local function get_random_color()
+function charlist.get_free_random_color()
     local free_colors = get_free_colors()
     
-    if #free_colors < 0 then
+    if #free_colors <= 0 then
         print("TODO")
         --TODO: add trully random color
     end
@@ -116,130 +159,30 @@ local function get_random_color()
 end
 
 function charlist.get_color(username)
-    assert(type(charlist.data[username]) == "table")
-    return charlist.data[username].color
+    return charlist.data.colors[username]
+end
+
+-- identifier is username for players 
+function charlist.set_color(identifier, color)
+    assert(find_color_owner(color) == nil, "")
+    charlist.data.colors[identifier] = color
 end
 -- }}
 
--- Skills
+-- On join and on leave actions
 -- {{
-function charlist.get_skill_table(username)
-    if type(charlist.data[username].skills) == "table" then
-        return charlist.data[username].skills    
-    else
-        return nil
-    end
-end
-
-function charlist.get_skill_level(username, skill_name)
-    assert(type(charlist.data[username].skills) == "table")
-    
-    local fudge_level = nil 
-    
-    if charlist.data[username].skills[skill_name] then
-        fudge_level = charlist.data[username].skills[skill_name]
-    end
-    
-    if not fudge_level then
-        return nil
-    end
-    
-    return fudge_level
-end
--- }}
-
--- Player data save and load functions
--- {{
-local httpenv = core.request_http_api()
-if not httpenv then
-    minetest.log("error", "Unable to get HTTPApiTable, maybe you should add secure.trusted_mods = roleplay or secure.http_mods = roleplay to your .conf file.")
-end
-
-lfs = require("lfs")
-if lfs then
-    lfs.mkdir(charlist.data_folder)
-else
-    minetest.log("error", "Unable to get lfs, install lfs for lua5.1 or create " .. charlist.data_folder .. " folder yourtself.")
-end
-
--- Data save functions
-function dataload.save_to_file(username, data)
-    local storage = io.open(charlist.data_folder .. username, "w")
-    storage:write(minetest.serialize(data))
-    storage:close()
-end
-
--- Data load functions
-function dataload.load_from_file(username)
-    local storage = io.open(charlist.data_folder ..username, "r")
-    
-    if not storage then
-        return nil
-    end
-    
-    local result = minetest.deserialize(storage:read("*all"))
-    if type(result) ~= "table" then
-        return nil
-    end
-    
-    storage:close()
-    
-    return result
-end
-
--- Server load function
-function dataload.load_from_server(username)
-    local url = string.gsub(charlist.user_get_url, "{{username}}", username)
-    local handle = httpenv.fetch_async({ url = url, timeout = 2 })
-    
-    local result;
-    repeat
-        result = httpenv.fetch_async_get(handle)
-    until result.completed
-
-    local fetched_data = minetest.parse_json(result.data)
-    if result.succeeded and type(fetched_data) == "table" then
-        return fetched_data
-    end
-end
-
--- Load data from server on join
-minetest.register_on_prejoinplayer(function(username, ip)    
-    charlist.data[username] = {}
-    
-    local data = {}
-    data.skills = {}
-    data.wounds = {}
-    
-    local fetched_data = dataload.load_from_file(username)
-    if fetched_data then
-        data = fetched_data
-    end
-    
-    if httpenv then
-        fetched_data = dataload.load_from_server(username)
-        if fetched_data then
-            for key, value in pairs(fetched_data) do
-                data[key] = value
-            end
-        end
-    end
-    
-    charlist.data[username] = data
-    charlist.data[username].color = get_random_color()
+minetest.register_on_prejoinplayer(function(username, ip)
 end)
 
 minetest.register_on_joinplayer(function(player)  
     local username = player:get_player_name()
+    charlist.set_color(username, charlist.get_free_random_color())
     update_nametag(username)
 end)
 
 -- Clear user on leave
 minetest.register_on_leaveplayer(function(player)
     local username = player:get_player_name()
-    charlist.data[username].color = nil
-
-    dataload.save_to_file(username, charlist.data[username])
-    charlist.data[username] = nil
+    charlist.set_color(username, nil)
 end)
 -- }}
