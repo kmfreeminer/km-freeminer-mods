@@ -1370,9 +1370,18 @@ default.stairs_and_slabs = {
     "sandstonebrick",
     "obsidian",
 }
-for material in pairs(default.stairs_and_slabs) do
+for _,material in pairs(default.stairs_and_slabs) do
+    local name = "default:" .. material
+    local def = minetest.registered_nodes[name]
+
     stairs.register_stair_and_slab(
         material,
-        "default:" .. material,
-
+        name,
+        def.groups,
+        def.tiles,
+        def.description .. "(лестница)",
+        def.description .. "(полублок)",
+        def.sounds
+    )
+end
 --}}}
