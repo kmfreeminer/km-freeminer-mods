@@ -385,32 +385,53 @@ function string.lower_cyr (str)
 end
 --}}}
 
+--{{{ Cyrillic string index fix
+function string.cyr_index (s, index)
+    local new_index = index
+    local step_index = index
+
+    local function increase_index()
+        new_index = new_index + 1
+    end
+
+    repeat
+        step_index = new_index
+        new_index = index
+        local sub = s:sub(1, step_index)
+        for upper, lower in pairs(string.CYRILLIC_LOWER) do
+            sub:gsub(upper, increase_index)
+            sub:gsub(lower, increase_index)
+        end
+    until step_index == new_index
+
+    return step_index
+end
+--}}}
+
 --{{{ string: Find nearest
 function string.find_nearest(s, pattern, index, range)
-    local before, after
+    local i = s:cyr_index(index)
+
+    local before = s:sub(1, i - 1)
+    local after = s:sub(i + 1)
+
     if range then
-        before = s:sub(index - range, index - 1)
-        after = s:sub(index + 1, index + range)
-    else
-        before = s:sub(1, index - 1)
-        after = s:sub(index + 1)
+        before = before:sub(before:cyr_index(index - range))
+        after = after:sub(1, after:cyr_index(range))
     end
-    print("'" .. before .. "'", "'" .. after .. "'")
+
     local first_before = before:reverse():find(pattern)
     local first_after = after:find(pattern)
 
-    print(first_before, first_after)
     if first_before == nil and first_after ~= nil then
-        return index + first_after
+        return i + first_after
     elseif first_before ~=nil and first_after == nil then
-        return index - first_before
+        return i - first_before
     elseif first_before ~= nil and first_after ~= nil then
         if first_before < first_after then
-            print(index - first_before)
-            return index - first_before
+            return i - first_before
         else
-            print(index + first_after)
-            return index + first_after
+            return i + first_after
         end
     else
         return

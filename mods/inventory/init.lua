@@ -5,7 +5,7 @@ inventory.width = 10
 inventory.height = 1
 inventory.part = { width = 2, height = 4 }
 inventory.creative = { width = 4 }
-inventory.lore = { width = 3 }
+inventory.lore = { width = 3.5 }
 
 -- Bones list:
 -- |- Body

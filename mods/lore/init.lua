@@ -1,6 +1,6 @@
 lore = {
-    max_length = 50,
-    delta = 10,
+    max_length = 40,
+    delta = 8,
 }
 
 minetest.register_privilege("lore", "Изменение описаний предметов")
@@ -16,7 +16,7 @@ function lore.set (itemstack, text, playername)
         text = text:gsub("\n", " ")
 
         -- Split text into lines
-        while text:len() > lore.max_length do
+        while text:len() > text:cyr_index(lore.max_length) do
             local split_pos =
                 text:find_nearest("%.", lore.max_length, lore.delta)
                 or text:find_nearest(",", lore.max_length, lore.delta)
