@@ -1,10 +1,46 @@
-lore = {}
+lore = {
+    max_length = 50,
+    delta = 10,
+}
 
 minetest.register_privilege("lore", "Изменение описаний предметов")
 
 --{{{ Functions
 function lore.set (itemstack, text, playername)
     if itemstack then
+        -- Split lines
+        -- 1. граница - 50 символов
+        -- 2. Ищем в пределах delta = 5 символом точку или запятую, бьём по ней
+        -- 3. если нет — ищем ближайший пробел и бьём по нему.
+        local lines = {}
+        text = text:gsub("\n", " ")
+
+        -- Split text into lines
+        while text:len() > lore.max_length do
+            local split_pos =
+                text:find_nearest("%.", lore.max_length, lore.delta)
+                or text:find_nearest(",", lore.max_length, lore.delta)
+                or text:find_nearest(" ", lore.max_length)
+            table.insert(lines, text:sub(1, split_pos))
+            text = text:sub(split_pos + 1)
+        end
+        table.insert(lines, text)
+        text = ""
+
+        -- Stick them together
+        for i, line in ipairs(lines) do
+            if i == 1 then
+                text = line
+            else
+                -- Remove space at the start of the line
+                if line:sub(1,1) == " " then
+                    line = line:sub(2)
+                end
+                text = text .. "\n" .. line
+            end
+        end
+
+        -- Write lore
         itemstack:set_inventory_label(text)
         minetest.log("action",
             "Player " .. playername

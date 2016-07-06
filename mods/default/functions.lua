@@ -164,7 +164,7 @@ minetest.register_abm({
         end
     end,
 })
-
+--}}}
 
 --{{{ Leafdecay
 default.leafdecay_trunk_cache = {}
@@ -382,6 +382,39 @@ function string.lower_cyr (str)
         str = str:gsub(upper, lower)
     end
     return str
+end
+--}}}
+
+--{{{ string: Find nearest
+function string.find_nearest(s, pattern, index, range)
+    local before, after
+    if range then
+        before = s:sub(index - range, index - 1)
+        after = s:sub(index + 1, index + range)
+    else
+        before = s:sub(1, index - 1)
+        after = s:sub(index + 1)
+    end
+    print("'" .. before .. "'", "'" .. after .. "'")
+    local first_before = before:reverse():find(pattern)
+    local first_after = after:find(pattern)
+
+    print(first_before, first_after)
+    if first_before == nil and first_after ~= nil then
+        return index + first_after
+    elseif first_before ~=nil and first_after == nil then
+        return index - first_before
+    elseif first_before ~= nil and first_after ~= nil then
+        if first_before < first_after then
+            print(index - first_before)
+            return index - first_before
+        else
+            print(index + first_after)
+            return index + first_after
+        end
+    else
+        return
+    end
 end
 --}}}
 
