@@ -9,7 +9,7 @@ local function dig_up(pos, node, digger)
 end
 
 --}}}
--{{{ Stone
+--{{{ Stone
 minetest.register_node("default:stone", {
     description = "Камень",
     tiles = {"default_stone.png"},
