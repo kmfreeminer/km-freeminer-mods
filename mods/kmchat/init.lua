@@ -3,6 +3,8 @@ kmchat = {}
 dofile(minetest.get_modpath("kmchat").."/config.lua")
 dofile(minetest.get_modpath("kmchat").."/ranges.lua")
 
+dofile(minetest.get_modpath("kmchat").."/chat_string.lua")
+
 local function get_message_type_and_text(message)
     local substrings;
 
@@ -26,36 +28,7 @@ local function find_skill_name(username, text_unparsed)
     return nil
 end
 
-local color_pattern = "(\v[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])"
-
-function kmchat.colorize_fix(message, default_color)
-    if not default_color then
-        default_color = freeminer.color("ffffff")
-    end
-    
-    local new_colors = {}
-    for color in string.gfind(message, color_pattern) do
-        if color == default_color and #new_colors ~= 0 then
-            table.insert(new_colors, new_colors[#new_colors - 1])
-        else
-            table.insert(new_colors, color)
-        end
-    end
-    
-    message = string.gsub(message, color_pattern, "\vcolor_slot")
-
-    for _,color in pairs(new_colors) do
-        message = string.gsub(message, "\vcolor_slot", color, 1)
-    end
-    return message
-end
-
-function kmchat.colorize_escape(message)
-    return string.gsub(message, color_pattern, "")
-end
-
 function kmchat.log(message)
-    message = kmchat.colorize_escape(message)
     jabber.send(message)
     minetest.log("action", "CHAT: "..message)
 end
@@ -63,6 +36,9 @@ end
 function kmchat.process_messages(username, message)
     local player  = minetest.get_player_by_name(username)
 
+    -- Special object for avoiding lua and lua_api shit
+    local chatString = ChatString:new()
+    
     -- Calculate range delta 
     -- {{{
     local range_delta = #(string.match(string.gsub(message,"=",""), '!*')) 
@@ -82,8 +58,9 @@ function kmchat.process_messages(username, message)
     if not minetest.check_player_privs(username, {["gm"]=true,}) and action_type == "event" then
         action_type = "default"
     end
-    local format_string = kmchat[action_type].format_string
+    
     local color = kmchat[action_type].color
+    chatString:setFormatString(kmchat[action_type].format_string)
 
     if action_type == "global_ooc" then
         is_global = true
@@ -91,8 +68,8 @@ function kmchat.process_messages(username, message)
         local dice = text
         if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
             local dice_result = math.random(dice)
-            format_string = string.gsub(format_string, "{{dice}}", dice)
-            format_string = string.gsub(format_string, "{{dice_result}}", dice_result)
+            chatString:setVariable("dice", dice)
+            chatString:setVariable("dice_result", dice_result)
             range, range_label = kmchat.ranges.getRangeInfo(range_delta)
         end
     elseif action_type == "fudge_dice" then
@@ -116,35 +93,37 @@ function kmchat.process_messages(username, message)
             local signs = fudge.dices_to_string(dices)
             local result_level = fudge.add_modifiers(level, dices)
             
-            format_string = string.gsub(format_string, "{{signs}}", signs)
-            format_string = string.gsub(format_string, "{{fudge_level_orignal}}", level)
-            format_string = string.gsub(format_string, "{{fudge_level_result}}",  result_level)
-            range, range_label = kmchat.ranges.getRangeInfo(range_delta)            
+            chatString:setVariable("signs", signs)
+            chatString:setVariable("fudge_level_orignal", level)
+            chatString:setVariable("fudge_level_result", result_level)
+            range, range_label = kmchat.ranges.getRangeInfo(range_delta)   
+        else
+            chatString:setFormatString(kmchat["default"].format_string)
+            color = kmchat["default"].color
         end
     end
 
     local players = minetest.get_connected_players()
 
-    local result = format_string
-    result = string.gsub(result, "{{username}}", username)
-    result = string.gsub(result, "{{visible_name}}", freeminer.colorize(name_color, visible_name))
-    result = string.gsub(result, "{{real_name}}", real_name)
-    result = string.gsub(result, "{{range_label}}", range_label)
-    result = string.gsub(result, "{{text}}", text)
-
+    chatString:setVariable("username", username)
+    chatString:setVariable("visible_name", visible_name, name_color)
+    chatString:setVariable("real_name", real_name)
+    chatString:setVariable("range_label", range_label)
+    chatString:setVariable("text", text)
+    
     local sender_position = player:getpos()
     for i = 1, #players do
         local reciever_username  = players[i]:get_player_name()
         local reciever_position  = players[i]:getpos()
         
         if is_global or vector.distance(sender_position, reciever_position) <= range then
-            minetest.chat_send_player(reciever_username, kmchat.colorize_fix(freeminer.colorize(color, result)))
+            minetest.chat_send_player(reciever_username, chatString:get(color))
         elseif minetest.check_player_privs(reciever_username, {gm=true}) then
-            minetest.chat_send_player(reciever_username, kmchat.colorize_fix(freeminer.colorize(kmchat.gm_color, "(".. username .. ") " .. result)))
+            minetest.chat_send_player(reciever_username, "(".. username .. ") " .. chatString:get(kmchat.gm_color))
         end
     end
     
-    kmchat.log("(".. username .. ") " .. result)
+    kmchat.log("(".. username .. ") " .. chatString:get())
     return true
 end
 
