@@ -5,9 +5,9 @@ anvil.multiplier_neg = 2
 
 anvil.formspec =
     "size[" ..inventory.width.. "," ..(inventory.height + 3).. "]" ..
-    default.gui_bg..
-    default.gui_bg_img..
-    default.gui_slots..
+    gui.bg..
+    gui.bg_img..
+    gui.slots..
     "list[current_name;hammer;1,1;1,1;]" ..
     "list[current_name;src;2.4,0;3,3;]" ..
     "image[5.7,1;1,1;gui_furnace_arrow_bg.png^[transformR270]" ..

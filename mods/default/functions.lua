@@ -164,20 +164,6 @@ minetest.register_abm({
         end
     end,
 })
-
---
--- dig upwards
--- используется только в функциях убирания папируса и кактуса после срубки
---
-
-function default.dig_up(pos, node, digger)
-    if digger == nil then return end
-    local np = {x = pos.x, y = pos.y + 1, z = pos.z}
-    local nn = minetest.get_node(np)
-    if nn.name == node.name then
-        minetest.node_dig(np, nn, digger)
-    end
-end
 --}}}
 
 --{{{ Leafdecay
@@ -396,5 +382,96 @@ function string.lower_cyr (str)
         str = str:gsub(upper, lower)
     end
     return str
+end
+--}}}
+
+--{{{ Cyrillic string index fix
+function string.cyr_index (s, index)
+    local new_index = index
+    local step_index = index
+
+    local function increase_index()
+        new_index = new_index + 1
+    end
+
+    repeat
+        step_index = new_index
+        new_index = index
+        local sub = s:sub(1, step_index)
+        for upper, lower in pairs(string.CYRILLIC_LOWER) do
+            sub:gsub(upper, increase_index)
+            sub:gsub(lower, increase_index)
+        end
+    until step_index == new_index
+
+    return step_index
+end
+--}}}
+
+--{{{ string: Find nearest
+function string.find_nearest(s, pattern, index, range)
+    local i = s:cyr_index(index)
+
+    local before = s:sub(1, i - 1)
+    local after = s:sub(i + 1)
+
+    if range then
+        before = before:sub(before:cyr_index(index - range))
+        after = after:sub(1, after:cyr_index(range))
+    end
+
+    local first_before = before:reverse():find(pattern)
+    local first_after = after:find(pattern)
+
+    if first_before == nil and first_after ~= nil then
+        return i + first_after
+    elseif first_before ~=nil and first_after == nil then
+        return i - first_before
+    elseif first_before ~= nil and first_after ~= nil then
+        if first_before < first_after then
+            return i - first_before
+        else
+            return i + first_after
+        end
+    else
+        return
+    end
+end
+--}}}
+
+--{{{ Child attachments
+function default.get_attached(parent, bone, position, rotation)
+    local result = {}
+
+    for _, entity in pairs(minetest.luaentities) do
+        local object = entity.object
+        local o_parent, o_bone, o_pos, o_rot = object:get_attach()
+
+        if o_parent ~= nil and o_parent == parent
+        and (bone == nil or o_bone == bone)
+        and (position == nil or vector.equals(o_pos, position))
+        and (rotation == nil or vector.equals(o_rot, rotation))
+        then
+            table.insert(result, object)
+        end
+    end
+
+    return result
+end
+--}}}
+
+--{{{ Delete table elemet
+function table.delete(t, value, all)
+    if value == nil then return end
+    local all = all or false
+
+    for k,v in pairs(table) do
+        if v == value then
+            t[k] = nil
+
+            if not all then return true end
+        end
+    end
+    return true
 end
 --}}}

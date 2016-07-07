@@ -2,9 +2,9 @@ real_locks = {}
 
 real_locks.formspec =
     "size[" ..inventory.width.. "," ..(inventory.height + 1).. "]" ..
-    default.gui_bg..
-    default.gui_bg_img..
-    default.gui_slots..
+    gui.bg..
+    gui.bg_img..
+    gui.slots..
     "field[0.3,0.3;2,1;keypass;Форма ключа;]" ..
     "list[current_name;src;2.5,0;1,1;]" ..
     "image[3.5,0;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
@@ -21,11 +21,11 @@ real_locks.formspec =
 
 --{{{ Functions
 real_locks.can_open_locked = function (pos, wield)
-    if minetest.get_item_group(wield, "key") > 0 then 
-		local lock_pass = minetest.get_meta(pos):get_string("keyform")
-		local key_pass = minetest.deserialize(wield:get_metadata()).keyform
+    if minetest.get_item_group(wield, "key") > 0 then
+        local lock_pass = minetest.get_meta(pos):get_string("keyform")
+        local key_pass = minetest.deserialize(wield:get_metadata()).keyform
 
-		return lock_pass == key_pass
+        return lock_pass == key_pass
     else
         return false
     end
@@ -92,14 +92,14 @@ minetest.register_node("real_locks:table", {
         end
     end,
 
-	allow_metadata_inventory_put = function(pos,listname, index, stack, player)
+    allow_metadata_inventory_put = function(pos,listname, index, stack, player)
         if listname == "src" then
             return stack:get_count()
         elseif listname:sub(1,-2) == "dst" then
             return 0
         end
     end,
-	allow_metadata_inventory_move =
+    allow_metadata_inventory_move =
         function (pos, from_list, from_index, to_list, to_index, count, player)
             if from_list:sub(1,-2) == "dst" or to_list:sub(1,-2) == "dst" then
                 return 0

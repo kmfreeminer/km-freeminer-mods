@@ -4,19 +4,19 @@ minetest.register_node("gallows:knot", {
     paramtype = "light",
     inventory_image = "gallows_knot.png",
     wield_image = "gallows_knot.png",
-    
+
     selection_box = {
         type = "fixed",
         fixed = {-0.1, -0.1, -0.1, 0.1, 0.5, 0.1}
     },
-    
+
     groups = {cracky=3 },
-    
+
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         local rope = minetest.add_entity(pos, "gallows:knot_entity");
         rope:setyaw( placer:get_look_yaw() + math.pi/2 );
     end,
-    
+
     on_destruct = function(pos)
         local all_objects = minetest.get_objects_inside_radius(pos, 0.9);
         for _,obj in ipairs(all_objects) do

@@ -14,7 +14,7 @@ containers = {
 
 local function get_container_formspec(pos, name)
     -- Prepare coord of metadata
-	local spos = pos.x .. "," .. pos.y .. "," ..pos.z
+    local spos = pos.x .. "," .. pos.y .. "," ..pos.z
 
     -- Add aliases for container inventory width and height
     local w,h = containers[name].w, containers[name].h
@@ -40,9 +40,9 @@ local function get_container_formspec(pos, name)
         "size["..form_w..","..form_h.."]"..
         "label[0,-0.4;"..label.."]"..
         "label[0,"..label_y..";Inventory]"..
-        default.gui_bg..
-        default.gui_bg_img..
-        default.gui_slots..
+        gui.bg..
+        gui.bg_img..
+        gui.slots..
         "list[nodemeta:"..spos..";main;"..
             x_offset..","..y_offset..";"..
             w..","..h..
@@ -75,7 +75,7 @@ local function handle_unlocked_container(pos, node, clicker, wield_item)
         -- Changing locked containter infotext
         -- back to it's normal value
         -- (not this one from unlocked container)
-		meta:set_string("infotext", minetest.registered_nodes[node.name].description)
+        meta:set_string("infotext", minetest.registered_nodes[node.name].description)
 
         -- Now set's the password (lock)
         minetest.get_meta(pos):set_string("lock_pass", wield_item:get_metadata())
@@ -84,7 +84,7 @@ local function handle_unlocked_container(pos, node, clicker, wield_item)
         wield_item:take_item()
     else
         -- Open container
-		minetest.log("action",
+        minetest.log("action",
             clicker:get_player_name()..
             " open "..
             node.name:sub(12,-1)..
@@ -92,10 +92,10 @@ local function handle_unlocked_container(pos, node, clicker, wield_item)
             minetest.pos_to_string(pos))
 
         minetest.show_formspec(
-			clicker:get_player_name(),
-			node.name,
-			get_container_formspec(pos, node.name)
-		)
+            clicker:get_player_name(),
+            node.name,
+            get_container_formspec(pos, node.name)
+        )
     end
 end
 
@@ -160,69 +160,69 @@ end
 
 --{{{ unlocked
 minetest.register_node("containers:chest", {
-	description = "Chest",
-	tiles = {
+    description = "Chest",
+    tiles = {
         "default_chest_top.png", "default_chest_top.png",
         "default_chest_side.png", "default_chest_side.png",
         "default_chest_side.png", "default_chest_front.png"
     },
-	paramtype2 = "facedir",
-	groups = {choppy=2,oddly_breakable_by_hand=2},
-	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+    paramtype2 = "facedir",
+    groups = {choppy=2,oddly_breakable_by_hand=2},
+    is_ground_content = false,
+    sounds = default.node_sound_wood_defaults(),
     drop = "",
 
-	on_construct = construct_container,
+    on_construct = construct_container,
     after_dig_node = dig_container,
     on_rightclick = handle_unlocked_container,
     --{{{ Logging
-	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff in chest at "..minetest.pos_to_string(pos))
-	end,
+    on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
+        minetest.log("action", player:get_player_name()..
+                " moves stuff in chest at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_put = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff to chest at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " moves stuff to chest at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_take = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" takes stuff from chest at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " takes stuff from chest at "..minetest.pos_to_string(pos))
+    end,
     --}}}
 })
 --}}}
 
 --{{{ locked
 minetest.register_node("containers:chest_locked", {
-	description = "Locked chest",
-	tiles = {
+    description = "Locked chest",
+    tiles = {
         "default_chest_top.png", "default_chest_top.png",
         "default_chest_side.png", "default_chest_side.png",
         "default_chest_side.png", "default_chest_front.png"
     },
-	paramtype2 = "facedir",
-	groups = {choppy=2,oddly_breakable_by_hand=2},
-	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+    paramtype2 = "facedir",
+    groups = {choppy=2,oddly_breakable_by_hand=2},
+    is_ground_content = false,
+    sounds = default.node_sound_wood_defaults(),
     drop = "",
 
-	on_construct = construct_container,
+    on_construct = construct_container,
     after_place_node = place_locked_container,
     after_dig_node = dig_container,
     on_rightclick = handle_locked_container,
     --{{{ Logging
-	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff in chest at "..minetest.pos_to_string(pos))
-	end,
+    on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
+        minetest.log("action", player:get_player_name()..
+                " moves stuff in chest at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_put = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff to chest at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " moves stuff to chest at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_take = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" takes stuff from chest at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " takes stuff from chest at "..minetest.pos_to_string(pos))
+    end,
     --}}}
 })
 --}}}
@@ -231,66 +231,66 @@ minetest.register_node("containers:chest_locked", {
 
 --{{{ Wooden bin
 minetest.register_node("containers:wood_bin", {
-	description = "Wooden bin",
-	tiles = {"containers_wood_bin.png"},
-	groups = {choppy=2,oddly_breakable_by_hand=2},
-	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+    description = "Wooden bin",
+    tiles = {"containers_wood_bin.png"},
+    groups = {choppy=2,oddly_breakable_by_hand=2},
+    is_ground_content = false,
+    sounds = default.node_sound_wood_defaults(),
     drop = "",
 
-	on_construct = construct_container,
+    on_construct = construct_container,
     after_dig_node = dig_container,
     on_rightclick = handle_unlocked_container,
     --{{{ Logging
-	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff in bin at "..minetest.pos_to_string(pos))
-	end,
+    on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
+        minetest.log("action", player:get_player_name()..
+                " moves stuff in bin at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_put = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff to bin at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " moves stuff to bin at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_take = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" takes stuff from bin at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " takes stuff from bin at "..minetest.pos_to_string(pos))
+    end,
     --}}}
 })
 
 minetest.register_node("containers:wood_bin_locked", {
-	description = "Locked wooden bin",
-	tiles = {"containers_wood_bin.png"},
-	groups = {choppy=2,oddly_breakable_by_hand=2},
-	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+    description = "Locked wooden bin",
+    tiles = {"containers_wood_bin.png"},
+    groups = {choppy=2,oddly_breakable_by_hand=2},
+    is_ground_content = false,
+    sounds = default.node_sound_wood_defaults(),
     drop = "",
 
-	on_construct = construct_container,
+    on_construct = construct_container,
     after_place_node = place_locked_container,
     after_dig_node = dig_container,
     on_rightclick = handle_locked_container,
     --{{{ Logging
-	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff in bin at "..minetest.pos_to_string(pos))
-	end,
+    on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
+        minetest.log("action", player:get_player_name()..
+                " moves stuff in bin at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_put = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff to bin at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " moves stuff to bin at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_take = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" takes stuff from bin at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " takes stuff from bin at "..minetest.pos_to_string(pos))
+    end,
     --}}}
 })
 --}}}
 
 --{{{ Wooden jewelry box
 minetest.register_node("containers:wood_jbox", {
-	description = "Wooden jewelry box",
+    description = "Wooden jewelry box",
     --{{{ Tiles
-	tiles = {
+    tiles = {
         "default_wood.png^containers_wood_jbox_top.png",
         "default_wood.png^containers_wood_jbox_top.png",
         "default_wood.png^containers_wood_jbox_side2.png",
@@ -300,7 +300,7 @@ minetest.register_node("containers:wood_jbox", {
     },
     --}}}
     paramtype = "light",
-	paramtype2 = "facedir",
+    paramtype2 = "facedir",
     drawtype = "nodebox",
     --{{{ Node box
     node_box = {
@@ -324,12 +324,12 @@ minetest.register_node("containers:wood_jbox", {
         }
     },
     --}}}
-	groups = {choppy=2,oddly_breakable_by_hand=2},
-	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+    groups = {choppy=2,oddly_breakable_by_hand=2},
+    is_ground_content = false,
+    sounds = default.node_sound_wood_defaults(),
     drop = "",
 
-	on_construct = construct_container,
+    on_construct = construct_container,
     after_dig_node = dig_container,
     on_rightclick = handle_unlocked_container,
     allow_metadata_inventory_put = function(pos, listname, index, stack, player)
@@ -341,25 +341,25 @@ minetest.register_node("containers:wood_jbox", {
         end
     end,
     --{{{ Logging
-	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff in jewelry box at "..minetest.pos_to_string(pos))
-	end,
+    on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
+        minetest.log("action", player:get_player_name()..
+                " moves stuff in jewelry box at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_put = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff to jewelry box at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " moves stuff to jewelry box at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_take = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" takes stuff from jewelry box at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " takes stuff from jewelry box at "..minetest.pos_to_string(pos))
+    end,
     --}}}
 })
 
 minetest.register_node("containers:wood_jbox_locked", {
-	description = "Locked wooden jewelry box",
+    description = "Locked wooden jewelry box",
     --{{{ Tiles
-	tiles = {
+    tiles = {
         "default_wood.png^containers_wood_jbox_top.png",
         "default_wood.png^containers_wood_jbox_top.png",
         "default_wood.png^containers_wood_jbox_side2.png",
@@ -369,7 +369,7 @@ minetest.register_node("containers:wood_jbox_locked", {
     },
     --}}}
     paramtype = "light",
-	paramtype2 = "facedir",
+    paramtype2 = "facedir",
     drawtype = "nodebox",
     --{{{ Node box
     node_box = {
@@ -393,12 +393,12 @@ minetest.register_node("containers:wood_jbox_locked", {
         }
     },
     --}}}
-	groups = {choppy=2,oddly_breakable_by_hand=2},
-	is_ground_content = false,
-	sounds = default.node_sound_wood_defaults(),
+    groups = {choppy=2,oddly_breakable_by_hand=2},
+    is_ground_content = false,
+    sounds = default.node_sound_wood_defaults(),
     drop = "",
 
-	on_construct = construct_container,
+    on_construct = construct_container,
     after_place_node = place_locked_container,
     after_dig_node = dig_container,
     on_rightclick = handle_locked_container,
@@ -411,18 +411,18 @@ minetest.register_node("containers:wood_jbox_locked", {
         end
     end,
     --{{{ Logging
-	on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff in jewelry box at "..minetest.pos_to_string(pos))
-	end,
+    on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
+        minetest.log("action", player:get_player_name()..
+                " moves stuff in jewelry box at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_put = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" moves stuff to jewelry box at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " moves stuff to jewelry box at "..minetest.pos_to_string(pos))
+    end,
     on_metadata_inventory_take = function(pos, listname, index, stack, player)
-		minetest.log("action", player:get_player_name()..
-				" takes stuff from jewelry box at "..minetest.pos_to_string(pos))
-	end,
+        minetest.log("action", player:get_player_name()..
+                " takes stuff from jewelry box at "..minetest.pos_to_string(pos))
+    end,
     --}}}
 })
 --}}}

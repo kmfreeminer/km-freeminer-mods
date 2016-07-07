@@ -69,12 +69,24 @@ metals.register_metal = function (metal, metal_desc)
         },
         sounds = default.node_sound_stone_defaults(),
     })
-    --[[ нужно или нет?
-    realtest.register_stair("metals:" .. metal .. "_block",nil,nil,nil,metal_desc.description .. " Stair",nil,
-            "metals:" .. metal .. "_doubleingot 3")
-    realtest.register_slab("metals:" .. metal .. "_block",nil,nil,nil,metal_desc.description .. " Slab",nil,
-            "metals:" .. metal .. "_doubleingot 2")
-    --]]
+    
+    -- Stair and slab
+    stairs.register_stair_and_slab(
+        "metals_" .. metal, 
+        "metals:" .. metal .. "_block", 
+        {
+            snappy = 1,
+            bendy = 2,
+            cracky = 2,
+            melty = 2,
+            metal = 2,
+            level = metal_desc.level,
+        },
+        {"metals_" .. metal .. "_block.png"},
+        metal_desc.description .. " (ступени)",
+        metal_desc.description .. " (полублок)",
+        default.node_sound_stone_defaults()
+    )
 
     -- Craft
     minetest.register_craft({
@@ -102,29 +114,6 @@ metals.register_metal = function (metal, metal_desc)
         output = "metals:" .. metal .. "_wire" .. metals.WIRECOUNT,
         recipe = { "metals:" .. metal .. "_sheet" },
     })
-
-    --[[ нужно или нет?
-    minetest.register_craft({
-        output = "metals:" .. metal .. "_block_slab",
-        recipe = {
-            {"metals:" .. metal .. "_doubleingot","metals:" .. metal .. "_doubleingot"},
-        },
-    })
-    minetest.register_craft({
-        output = "metals:" .. metal .. "_block_stair",
-        recipe = {
-            {"metals:" .. metal .. "_doubleingot",""},
-            {"metals:" .. metal .. "_doubleingot","metals:" .. metal .. "_doubleingot"},
-        },
-    })
-    minetest.register_craft({
-        output = "metals:" .. metal .. "_block_stair",
-        recipe = {
-            {"","metals:" .. metal .. "_doubleingot"},
-            {"metals:" .. metal .. "_doubleingot","metals:" .. metal .. "_doubleingot"},
-        },
-    })
-    --]]
 
     -- Smelting
     if not metal_desc.is_alloy then

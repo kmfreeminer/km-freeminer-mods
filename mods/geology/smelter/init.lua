@@ -161,74 +161,74 @@ end
 
 --{{{ Formspecs
 smelter.inactive_formspec =
-	"size[" .. inventory.width .. "," .. (inventory.height + 4) .. "]"..
-    default.gui_bg..
-    default.gui_bg_img..
-    default.gui_slots..
-	"list[current_name;src;2,0;2,2;]"..
-	"image[4.5,0.5;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
-	"list[current_name;dst;6,0.5;1,1;]"..
-	"image[2.5,2;1,1;default_furnace_fire_bg.png]"..
-	"list[current_name;fuel;2.5,3;1,1;]"..
+    "size[" .. inventory.width .. "," .. (inventory.height + 4) .. "]"..
+    gui.bg..
+    gui.bg_img..
+    gui.slots..
+    "list[current_name;src;2,0;2,2;]"..
+    "image[4.5,0.5;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
+    "list[current_name;dst;6,0.5;1,1;]"..
+    "image[2.5,2;1,1;default_furnace_fire_bg.png]"..
+    "list[current_name;fuel;2.5,3;1,1;]"..
     inventory.main(0,4.2) ..
     "listring[current_name;dst]"..
     "listring[current_player;main]"..
     "listring[current_name;src]"..
     "listring[current_player;main]"
-	--default.get_hotbar_bg(0, 4.25)
+    --gui.get_hotbar_bg(0, 4.25)
 
 smelter.active_formspec = function(fuel_percent, item_percent)
     return "size[" .. inventory.width ..",".. (inventory.height + 4) .."]"..
-    default.gui_bg..
-    default.gui_bg_img..
-    default.gui_slots..
-	"list[current_name;src;2,0;2,2;]"..
-	"image[4.5,0.5;1,1;gui_furnace_arrow_bg.png^"..
+    gui.bg..
+    gui.bg_img..
+    gui.slots..
+    "list[current_name;src;2,0;2,2;]"..
+    "image[4.5,0.5;1,1;gui_furnace_arrow_bg.png^"..
         "[lowpart:" .. item_percent .. ":gui_furnace_arrow_fg.png^" ..
         "[transformR270" ..
     "]"..
-	"list[current_name;dst;6,0.5;1,1;]"..
-	"image[2.5,2;1,1;default_furnace_fire_bg.png^"..
+    "list[current_name;dst;6,0.5;1,1;]"..
+    "image[2.5,2;1,1;default_furnace_fire_bg.png^"..
         "[lowpart:" .. fuel_percent .. ":default_furnace_fire_fg.png" ..
     "]"..
-	"list[current_name;fuel;2.5,3;1,1;]"..
+    "list[current_name;fuel;2.5,3;1,1;]"..
     inventory.main(0,4.2) ..
     "listring[current_name;dst]"..
     "listring[current_player;main]"..
     "listring[current_name;src]"..
     "listring[current_player;main]"
-	--default.get_hotbar_bg(0, 4.25)
+    --gui.get_hotbar_bg(0, 4.25)
 end
 --}}}
 
 --{{{ Functions that are the same for active and inactive smelter
 smelter.allow_metadata_inventory_put =
 function (pos, listname, index, stack, player)
-	local meta = minetest.get_meta(pos)
-	local inv = meta:get_inventory()
-	if listname == "fuel" then
-		if minetest.get_craft_result({
+    local meta = minetest.get_meta(pos)
+    local inv = meta:get_inventory()
+    if listname == "fuel" then
+        if minetest.get_craft_result({
             method="fuel",
             width=1,
             items={stack}
         }).time ~= 0 then
-			return stack:get_count()
-		else
-			return 0
-		end
-	elseif listname == "src" then
-		return stack:get_count()
-	elseif listname == "dst" then
-		return 0
-	end
+            return stack:get_count()
+        else
+            return 0
+        end
+    elseif listname == "src" then
+        return stack:get_count()
+    elseif listname == "dst" then
+        return 0
+    end
 end
 
 smelter.allow_metadata_inventory_move = 
 function (pos, from_list, from_index, to_list, to_index, count, player)
-	local meta = minetest.get_meta(pos)
-	local inv = meta:get_inventory()
-	local stack = inv:get_stack(from_list, from_index)
-	return smelter.allow_metadata_inventory_put(
+    local meta = minetest.get_meta(pos)
+    local inv = meta:get_inventory()
+    local stack = inv:get_stack(from_list, from_index)
+    return smelter.allow_metadata_inventory_put(
         pos, to_list, to_index, stack, player
     )
 end
@@ -255,17 +255,17 @@ end
 
 --{{{ Nodes
 minetest.register_node("smelter:smelter", {
-	description = "Плавильня",
-	tiles = {
+    description = "Плавильня",
+    tiles = {
         "smelter_smelter_top.png", "smelter_smelter_base.png",
         "smelter_smelter_side.png", "smelter_smelter_side.png",
         "smelter_smelter_side.png", "smelter_smelter_front.png"
     },
-	paramtype2 = "facedir",
-	groups = {cracky=2},
-	legacy_facedir_simple = true,
-	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
+    paramtype2 = "facedir",
+    groups = {cracky=2},
+    legacy_facedir_simple = true,
+    is_ground_content = false,
+    sounds = default.node_sound_stone_defaults(),
 
     on_construct = function (pos)
         local meta = minetest.get_meta(pos)
@@ -279,39 +279,39 @@ minetest.register_node("smelter:smelter", {
         meta:set_string("formspec", smelter.inactive_formspec)
     end,
     after_dig_node = smelter.after_dig_node,
-	allow_metadata_inventory_put = smelter.allow_metadata_inventory_put,
-	allow_metadata_inventory_move = smelter.allow_metadata_inventory_move,
+    allow_metadata_inventory_put = smelter.allow_metadata_inventory_put,
+    allow_metadata_inventory_move = smelter.allow_metadata_inventory_move,
 })
 
 minetest.register_node("smelter:smelter_active", {
-	description = "Плавильня",
-	tiles = {
+    description = "Плавильня",
+    tiles = {
         "smelter_smelter_top.png", "smelter_smelter_base.png",
         "smelter_smelter_side.png", "smelter_smelter_side.png",
         "smelter_smelter_side.png", "smelter_smelter_front_active.png" -- ANIMATION
     },
-	paramtype2 = "facedir",
-	light_source = 8,
-	groups = {cracky=2, not_in_creative_inventory=1},
-	legacy_facedir_simple = true,
-	is_ground_content = false,
-	sounds = default.node_sound_stone_defaults(),
-	drop = "smelter:smelter",
+    paramtype2 = "facedir",
+    light_source = 8,
+    groups = {cracky=2, not_in_creative_inventory=1},
+    legacy_facedir_simple = true,
+    is_ground_content = false,
+    sounds = default.node_sound_stone_defaults(),
+    drop = "smelter:smelter",
 
     after_dig_node = smelter.after_dig_node,
-	allow_metadata_inventory_put = smelter.allow_metadata_inventory_put,
-	allow_metadata_inventory_move = smelter.allow_metadata_inventory_move,
+    allow_metadata_inventory_put = smelter.allow_metadata_inventory_put,
+    allow_metadata_inventory_move = smelter.allow_metadata_inventory_move,
 })
 --}}}
 
 --{{{ ABM
 local function swap_node(pos, name)
-	local node = minetest.get_node(pos)
-	if node.name == name then
-		return
-	end
-	node.name = name
-	minetest.swap_node(pos, node)
+    local node = minetest.get_node(pos)
+    if node.name == name then
+        return
+    end
+    node.name = name
+    minetest.swap_node(pos, node)
 end
 
 smelter.step = function (pos, node, meta)
@@ -413,31 +413,31 @@ smelter.step = function (pos, node, meta)
 end
 
 minetest.register_abm({
-	nodenames = {"smelter:smelter","smelter:smelter_active"},
-	interval = 1.0,
-	chance = 1,
-	action = function(pos, node, active_object_count, active_object_count_wider)
-		local meta = minetest.get_meta(pos)
-		local gametime = minetest.get_gametime()
-		if meta:get_string("game_time") == "" then
-			meta:set_int("game_time", gametime - 1)
-		end
+    nodenames = {"smelter:smelter","smelter:smelter_active"},
+    interval = 1.0,
+    chance = 1,
+    action = function(pos, node, active_object_count, active_object_count_wider)
+        local meta = minetest.get_meta(pos)
+        local gametime = minetest.get_gametime()
+        if meta:get_string("game_time") == "" then
+            meta:set_int("game_time", gametime - 1)
+        end
 
-		for i = 1, math.min(1200, gametime - meta:get_int("game_time")) do
-			smelter.step(pos, node, meta)
-			if node.name == "smelter:smelter" then break end
-		end
-		swap_node(pos, node.name)
-		meta:set_int("game_time", gametime)
-	end,
+        for i = 1, math.min(1200, gametime - meta:get_int("game_time")) do
+            smelter.step(pos, node, meta)
+            if node.name == "smelter:smelter" then break end
+        end
+        swap_node(pos, node.name)
+        meta:set_int("game_time", gametime)
+    end,
 })
 
 minetest.register_craft({
-	output = 'smelter:smelter',
-	recipe = {
-		{'default:brick', 'default:brick', 'default:brick'},
-		{'default:brick', ''             , 'default:brick'},
-		{'default:cobble', 'default:cobble', 'default:cobble'},
-	}
+    output = 'smelter:smelter',
+    recipe = {
+        {'default:brick', 'default:brick', 'default:brick'},
+        {'default:brick', ''             , 'default:brick'},
+        {'default:cobble', 'default:cobble', 'default:cobble'},
+    }
 })
 --}}}
