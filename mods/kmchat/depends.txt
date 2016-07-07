@@ -1,2 +1,3 @@
 jabber
 charlist
+fudge

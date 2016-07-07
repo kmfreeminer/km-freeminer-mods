@@ -1,0 +1,3 @@
+[submodule "mods/fudge/luafudge"]
+	path = mods/fudge/luafudge
+	url = https://github.com/vegasd/luafudge

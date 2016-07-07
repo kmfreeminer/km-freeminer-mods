@@ -147,9 +147,9 @@ minetest.register_on_joinplayer(function(player)
     default.player_set_textures(player, {"character.png"})
 
     -- Set default alpha
-    player:set_nametag_attributes({color = 
-        {a = default.nametag_alpha, red = 255, g = 255, b = 255}
-    })
+    --player:set_nametag_attributes({color = 
+    --    {a = default.nametag_alpha, red = 255, g = 255, b = 255}
+    --})
 end)
 
 minetest.register_on_leaveplayer(function(player)
