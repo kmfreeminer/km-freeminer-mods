@@ -10,20 +10,14 @@ database.enviroment = nil
 
 function escape(value)
     if type(value) == 'string' then
-        return "'" .. value .. "'"
+        value = "'" .. database.connection:escape(value) .. "'"
     elseif type(value) == 'table' then
         if value.null then
-            return "NULL"
+            value = "NULL"
         end
     end
-    
     return value
 end
-
-function escape2(value)
-    return "`" .. value .. "`"
-end
-
 
 function database.init(definition)
     if definition.type == "sqlite" then
@@ -48,26 +42,51 @@ end
 
 function database.stop()
     database.connection:close()
-    env:close()
+    database.enviroment:close()
+end
+
+local function rows(connection, sql_statement)
+  local cursor = assert (connection:execute (sql_statement))
+  return function ()
+    return cursor:fetch({}, "a")
+  end
+end
+
+local function build_condition(where, sql_operator)
+    local tmp = "";
+    local sql = "("
+    for key, value in pairs(where) do 
+        if type(value) == "table"  then
+            if key == "OR" then
+                sql = sql .. build_condition(value, "OR")
+            else
+                sql = sql .. build_condition(value, "AND")
+            end
+        else
+            sql = sql .. string.format("%s`%s`.`%s`=%s", tmp, "record", key, escape(value))
+            tmp = " " .. sql_operator .. " "
+        end
+    end
+    sql = sql .. ")"
+    return sql
 end
 
 function database.find(table_name, where, limit) 
-    local sql = "SELECT * FROM " .. escape2(table_name) .. " AS " .. escape2("record") 
+    local sql = string.format("SELECT * FROM `%s` AS `record`", table_name)
     
     if where then
         sql = sql .. " WHERE "
-        local tmp = "";
-        for key, value in pairs(where) do 
-            sql = sql .. tmp .. escape2("record") .. "." .. escape2(key)  .. "=" .. escape(value)
-            tmp = " AND "
-        end
+        sql = sql .. build_condition(where, "AND")
     end
     
     if limit then
         sql = sql .. string.format(" LIMIT %s", limit)
     end
+    
     sql = sql .. ";"
-    return database.connection:execute(sql)
+    
+    minetest.log("verbose", sql)
+    return rows(database.connection, sql)
 end
 
 return database

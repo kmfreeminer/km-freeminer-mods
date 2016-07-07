@@ -5,38 +5,42 @@ assert(database.init({
 }))
 
 charlist = {}
+
+minetest.register_privilege("gm", {
+    description = "Мастерская привелегия"
+})
+
 charlist.data = {}
 
 local function update_nametag(username)
     local player = minetest.get_player_by_name(username)
     player:set_nametag_attributes({
-        --color = charlist.get_color(username),
+        color = charlist.get_color(username),
         text = charlist.get_visible_name(username)
     })
 end
 
 local function get_active_character(username) 
-    local cursor = database.find("characters", {["username"] = username, ["active"] = 1}, 1);
-    assert(cursor, "This user has no active characters.")
-    return cursor:fetch({}, "a")
+    return database.find("characters", {["username"] = username, ["active"] = 1}, 1)();
 end
 
 -- Quenta
 -- {{
 function charlist.find_name_owners(name)
-    -- TODO: check both name and visible name (need to add OR to orm)
-    local cursor = database.find("characters", {["name"] = name, ["active"] = 1});
+    local characters = database.find("characters", 
+        { 
+            ["OR"] = {
+                ["name"] = name, 
+                ["visible_name"] = name
+            }, 
+            ["active"] = 1
+        });
 
     local owners = {}
-    
-    local row = cursor:fetch({}, "a")
-    while row do
+    for character in characters do
         table.insert(owners, character.username)
-        row = cursor:fetch(row, "a")
     end
-    
-    cursor:close()
-
+        
     if #owners <= 0 then
         return nil
     end
@@ -49,17 +53,17 @@ function charlist.set_visible_name(username, visible_name)
 end
 
 function charlist.get_visible_name(username)
-    local character = get_active_character(username)
+    local character = get_active_character(username) or {}
     return character.visible_name
 end
 
 function charlist.get_real_name(username)
-    local character = get_active_character(username)
+    local character = get_active_character(username) or {}
     return character.name
 end
 
 function charlist.get_quenta(username)
-    local character = get_active_character(username)
+    local character = get_active_character(username) or {}
     return character.quenta
 end
 -- }}
@@ -68,29 +72,27 @@ end
 -- {{
 function charlist.get_skill_table(username)
     local character = get_active_character(username)
-    
-    local cursor = database.find("skills", {["character_id"] = character.id})
-    if not cursor then
+    if not character then
         return {}
     end
     
+    local skills = database.find("skills", {["character_id"] = character.id})
+
     local skill_table = {}
-    
-    local row = cursor:fetch({}, "a")
-    while row do
-        skill_table[row.name] = row.level
-        row = cursor:fetch(row, "a")
+    for skill in skills do
+        skill_table[skill.name] = skill.level
     end
-    
-    cursor:close()
     
     return skill_table
 end
 
 function charlist.get_skill_level(username, skill_name)
-    local character = get_active_character(username)    
-    local cursor = database.find("skills", {["character_id"] = character.id, ["name"] = skill_name}, 1)
-    return cursor:fetch({}, "a").level
+    local character = get_active_character(username)
+    if not character then
+        return nil
+    end
+    
+    return database.find("skills", {["character_id"] = character.id, ["name"] = skill_name}, 1)()
 end
 -- }}
 
@@ -117,8 +119,8 @@ colors.secondary = {
 
 local function find_color_owner(color)
     local players = minetest.get_connected_players();
-    for username, color in pairs(charlist.data.colors) do
-        if color == color then
+    for username, occupied_color in pairs(charlist.data.colors) do
+        if occupied_color == color then
             return username
         end
     end
@@ -164,7 +166,6 @@ end
 
 -- identifier is username for players 
 function charlist.set_color(identifier, color)
-    assert(find_color_owner(color) == nil, "")
     charlist.data.colors[identifier] = color
 end
 -- }}
@@ -177,16 +178,18 @@ end)
 minetest.register_on_joinplayer(function(player)  
     local username = player:get_player_name()
     charlist.set_color(username, charlist.get_free_random_color())
+    
     update_nametag(username)
 end)
 
 -- Clear user on leave
 minetest.register_on_leaveplayer(function(player)
     local username = player:get_player_name()
+
     charlist.set_color(username, nil)
 end)
 -- }}
 
 minetest.register_on_shutdown(function()
     database.stop()
-end))
+end)

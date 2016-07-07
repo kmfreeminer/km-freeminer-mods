@@ -35,46 +35,44 @@ end
 
 function kmchat.process_messages(username, message)
     local player  = minetest.get_player_by_name(username)
+    local players = minetest.get_connected_players()
 
-    -- Special object for avoiding lua and lua_api shit
-    local chatString = ChatString:new()
-    
     -- Calculate range delta 
     -- {{{
     local range_delta = #(string.match(string.gsub(message,"=",""), '!*')) 
     range_delta = range_delta - #(string.match(string.gsub(message,"!",""), '=*'))
-
     message = string.gsub(message, "^[!=]*", "")
+    
     local is_global = false
     -- }}}
     
-    local name_color   = charlist.get_color(username)
-    local real_name    = charlist.get_real_name(username) or username
-    local visible_name = charlist.get_visible_name(username) or real_name
-    
+    -- Default range
+    local action_type, text = get_message_type_and_text(message)
     local range, range_label = kmchat.ranges.getRangeInfo(range_delta, "speak")
 
-    local action_type, text = get_message_type_and_text(message)
-    if not minetest.check_player_privs(username, {["gm"]=true,}) and action_type == "event" then
-        action_type = "default"
-    end
-    
-    local color = kmchat[action_type].color
-    chatString:setFormatString(kmchat[action_type].format_string)
+    -- String object, chat_string.lua
+    local chat_string = ChatString:new()
 
-    if action_type == "global_ooc" then
+    -- Set message properties
+    if action_type == "event" and not minetest.check_player_privs(username, {["gm"]=true,}) then
+        action_type = "default"
+    elseif action_type == "global_ooc" then
         is_global = true
+    elseif action_type == "action" then
+        range, range_label = kmchat.ranges.getRangeInfo(range_delta)
     elseif action_type == "dice" then
         local dice = text
         if dice=="4" or dice=="6" or dice=="8" or dice=="10" or dice=="12" or dice=="20" then
             local dice_result = math.random(dice)
-            chatString:setVariable("dice", dice)
-            chatString:setVariable("dice_result", dice_result)
+            chat_string:set_variable("dice", dice)
+            chat_string:set_variable("dice_result", dice_result)
             range, range_label = kmchat.ranges.getRangeInfo(range_delta)
+        else
+            action_type = "default"
         end
     elseif action_type == "fudge_dice" then
         local level = string.split(string.gsub(text, "[,(]", " "), " ")[1]
-                    
+        
         if not fudge.is_valid(level) then
             local skill_name = find_skill_name(username, text)
             
@@ -93,23 +91,29 @@ function kmchat.process_messages(username, message)
             local signs = fudge.dices_to_string(dices)
             local result_level = fudge.add_modifiers(level, dices)
             
-            chatString:setVariable("signs", signs)
-            chatString:setVariable("fudge_level_orignal", level)
-            chatString:setVariable("fudge_level_result", result_level)
+            chat_string:set_variable("signs", signs)
+            chat_string:set_variable("fudge_level_orignal", level)
+            chat_string:set_variable("fudge_level_result", result_level)
             range, range_label = kmchat.ranges.getRangeInfo(range_delta)   
         else
-            chatString:setFormatString(kmchat["default"].format_string)
-            color = kmchat["default"].color
+            action_type = "default"
         end
     end
+    
+    -- Build and send message
+    chat_string:set_base_color(kmchat[action_type].color)
+    chat_string:set_format_string(kmchat[action_type].format_string)
+    
+    local name_color = charlist.get_color(username)
+    local real_name = charlist.get_real_name(username) or username
+    local visible_name = charlist.get_visible_name(username) or real_name
 
-    local players = minetest.get_connected_players()
-
-    chatString:setVariable("username", username)
-    chatString:setVariable("visible_name", visible_name, name_color)
-    chatString:setVariable("real_name", real_name)
-    chatString:setVariable("range_label", range_label)
-    chatString:setVariable("text", text)
+    chat_string:set_variable("username", username)
+    chat_string:set_variable("visible_name", visible_name, name_color)
+    chat_string:set_variable("real_name", real_name, name_color)
+    chat_string:set_variable("range_label", range_label)
+    chat_string:set_variable("message", message)
+    chat_string:set_variable("text", text)
     
     local sender_position = player:getpos()
     for i = 1, #players do
@@ -117,13 +121,13 @@ function kmchat.process_messages(username, message)
         local reciever_position  = players[i]:getpos()
         
         if is_global or vector.distance(sender_position, reciever_position) <= range then
-            minetest.chat_send_player(reciever_username, chatString:get(color))
+            minetest.chat_send_player(reciever_username, chat_string:build())
         elseif minetest.check_player_privs(reciever_username, {gm=true}) then
-            minetest.chat_send_player(reciever_username, "(".. username .. ") " .. chatString:get(kmchat.gm_color))
+            minetest.chat_send_player(reciever_username, "(".. username .. ") " .. chat_string:build(kmchat.gm_color))
         end
     end
     
-    kmchat.log("(".. username .. ") " .. chatString:get())
+    kmchat.log("(".. username .. ") " .. chat_string:build(false))
     return true
 end
 

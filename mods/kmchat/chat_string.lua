@@ -4,15 +4,12 @@ function ChatString:new()
     tmp = {}
     setmetatable(tmp, self)
     self.__index = self
-
     self.variables = {}
-    self.build = {}
-    
     return tmp
 end
 
-function ChatString:setFormatString(format_string)
-    self.build = {}
+function ChatString:set_format_string(format_string)
+    self.tokens = {}
     local begin = 0
     local finish = 0
     repeat
@@ -20,35 +17,43 @@ function ChatString:setFormatString(format_string)
         local new_begin, new_finish, variable = string.find(format_string, "{{(.-)}}", begin)
         if new_begin then
             if new_begin ~= begin + 1 then
-                table.insert(self.build, { ["text"] = string.sub(format_string, begin + 1, new_begin - 1) })
+                table.insert(self.tokens, { ["text"] = string.sub(format_string, begin + 1, new_begin - 1) })
             end
-            table.insert(self.build, { ["variable"] = string.trim(variable) })
+            table.insert(self.tokens, { ["variable_name"] = string.trim(variable) })
         end
         begin = new_finish
     until not begin
     
     if finish ~= #format_string then
-        table.insert(self.build, { ["text"] = string.sub(format_string, finish + 1, #format_string) })
+        table.insert(self.tokens, { ["text"] = string.sub(format_string, finish + 1, #format_string) })
     end
-
 end
 
-function ChatString:setVariable(variableName, variableValue, color)
-    self.variables[variableName] = {}
-    self.variables[variableName].value = variableValue
-    self.variables[variableName].color = color
+function ChatString:set_base_color(color)
+    self.color = color
 end
 
-function ChatString:get(base_color)
-    local tmp = ""
-    for _, part in pairs(self.build) do
+function ChatString:set_variable(variable_name, variable_value, color)
+    assert(type(variable_name) == "string")
+    self.variables[variable_name] = {}
+    self.variables[variable_name].value = variable_value
+    self.variables[variable_name].color = color
+end
+
+function ChatString:build(base_color)
+    if base_color == nil then
+        base_color = self.color
+    end
+    
+    local result = ""
+    for _, part in pairs(self.tokens) do
         local text = ""
         local color = ""
         
-        if part.variable then
-            self.variables[part.variable] = self.variables[part.variable] or {}
-            text = self.variables[part.variable].value or "undefined"
-            color = self.variables[part.variable].color or base_color
+        if part.variable_name then
+            local variable = self.variables[part.variable_name] or {}
+            text = variable.value or "undefined"
+            color = variable.color or base_color
         elseif part.text  then
             text = part.text
             color = base_color
@@ -58,7 +63,8 @@ function ChatString:get(base_color)
             text = core.colorize(color, text)
         end
         
-        tmp = tmp .. text
+        result = result .. text
     end
-    return tmp;
+    
+    return result;
 end

@@ -9,7 +9,7 @@ kmchat.rexps = {["^_(.+)"] = "local_ooc",
                 ["^*%s?(.+)"] = "action",
                 ["^d(%d+)(.*)$"] = "dice",
                 ["^4d[Ff] (.*)$"] = "fudge_dice",
-                ["^%%%%%% (.*)$"] = "fudge_dive",
+                ["^%%%%%% (.*)$"] = "fudge_diсe",
                 ["^#%s?(.+)"] = "event"}
 
 kmchat.default = {color = "FFFFFF",

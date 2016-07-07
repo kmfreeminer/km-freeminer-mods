@@ -13,3 +13,66 @@ CREATE TABLE skills (
 	level                varchar(100) NOT NULL  ,
 	CONSTRAINT Pk_skills PRIMARY KEY ( id )
  );
+
+
+database:create_database({
+    ["id"] = {
+        ["type"] = "integer",
+        ["flags"] = {
+            ["primary"] = true,
+            ["NOT NULL"] = true
+        }
+    },
+    ["username"] = {
+        ["type"] = "varchar(100)",
+        ["flags"] = {
+            ["NOT NULL"] = true
+        }
+    },
+    ["name"] = {
+        ["type"] = "varchar(100)",
+        ["flags"] = {
+            ["NOT NULL"] = true
+        }
+    },
+    ["visible_name"] = {
+        ["type"] = "varchar(100)",
+        ["flags"] = {
+            ["NOT NULL"] = true
+        }
+    },
+    ["quenta"] = {
+        ["type"] = "text",
+        ["flags"] = {
+            ["NOT NULL"] = true
+        }
+    }
+})
+
+database:create_database({
+    ["id"] = {
+        ["type"] = "integer",
+        ["flags"] = {
+            ["primary"] = true,
+            ["NOT NULL"] = true
+        }
+    },
+    ["character_id"] = {
+        ["type"] = "integer",
+        ["flags"] = {
+            ["NOT NULL"] = true
+        }
+    },
+    ["name"] = {
+        ["type"] = "varchar(100)",
+        ["flags"] = {
+            ["NOT NULL"] = true
+        }
+    },
+    ["level"] = {
+        ["type"] = "varchar(100)",
+        ["flags"] = {
+            ["NOT NULL"] = true
+        }
+    }
+})
