@@ -1,5 +1,3 @@
-local enviroment = nil
-
 database = {}
 database.null = {
     ["null"] = true

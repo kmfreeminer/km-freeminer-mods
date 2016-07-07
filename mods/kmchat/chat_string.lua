@@ -1,7 +1,7 @@
 ChatString = {}
 
 function ChatString:new()
-    tmp = {}
+    local tmp = {}
     setmetatable(tmp, self)
     self.__index = self
     self.variables = {}

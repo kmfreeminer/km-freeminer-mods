@@ -119,7 +119,6 @@ colors.secondary = {
 }
 
 local function find_color_owner(color)
-    local players = minetest.get_connected_players();
     for username, occupied_color in pairs(charlist.data.colors) do
         if occupied_color == color then
             return username
