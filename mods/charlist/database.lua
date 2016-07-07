@@ -44,10 +44,17 @@ function database.stop()
 end
 
 local function rows(connection, sql_statement)
-  local cursor = assert (connection:execute (sql_statement))
-  return function ()
-    return cursor:fetch({}, "a")
-  end
+    local cursor = connection:execute(sql_statement)
+    if cursor then
+        return function ()
+            return cursor:fetch({}, "a")
+        end
+    end
+    
+    minetest.log("error", "Database isn't initialized.")
+    return function ()
+        return nil
+    end
 end
 
 local function build_condition(where, sql_operator)
