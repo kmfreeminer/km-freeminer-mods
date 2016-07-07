@@ -11,7 +11,9 @@ hunger.conf = {
 hunger.timers = {}
 
 function hunger.need_to_take(playername)
-    if minetest.check_player_privs(playername, {["don't starve"] = true}) then
+    if minetest.check_player_privs(playername, {["don't starve"] = true})
+    or minetest.get_player_by_name(playername):is_chat_opened()
+    then
         return false
     else
         return true
