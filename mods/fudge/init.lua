@@ -1,5 +1,5 @@
-package.path = package.path .. ";" .. minetest.get_modpath("fudge") .. "/luafudge/?.lua"
+fudge = require("luafudge")
 
-if require("fudge") then
+if fudge then
     fudge.set_lang("russian")
 end
