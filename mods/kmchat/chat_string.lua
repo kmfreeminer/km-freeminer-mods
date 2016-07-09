@@ -11,7 +11,7 @@ end
 function ChatString:set_format_string(format_string)
     self.tokens = {}
     local begin = 0
-    local finish = 0
+    local finish
     repeat
         finish = begin
         local new_begin, new_finish, variable = string.find(format_string, "{{(.-)}}", begin)
