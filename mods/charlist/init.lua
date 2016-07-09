@@ -1,8 +1,78 @@
-database = dofile(minetest.get_modpath("charlist") .. "/database.lua")
-assert(database.init({
-    ["type"] = "sqlite",
-    ["path"] = minetest.get_modpath("charlist") .. "/database.sqlite"
-}))
+local database = {}
+
+function database_init()
+    local env = require("luasql.sqlite3").sqlite3()
+    database.connection = env:connect(minetest.get_modpath("charlist") .. "/database.sqlite")
+    
+    database.connection:execute([[
+        CREATE TABLE characters ( 
+            id                   integer NOT NULL  ,
+            username             char(100) NOT NULL  ,
+            name                 varchar(100) NOT NULL  ,
+            visible_name         varchar(100)   ,
+            quenta               text   , active integer   NOT NULL DEFAULT 0,
+            CONSTRAINT Pk_characters PRIMARY KEY ( id )
+        );
+    ]])
+    
+    database.connection:execute([[
+        CREATE TABLE skills ( 
+            id                   integer NOT NULL  ,
+            character_id         integer NOT NULL  ,
+            name                 varchar(100) NOT NULL  ,
+            level                varchar(100) NOT NULL  ,
+            CONSTRAINT Pk_skills PRIMARY KEY ( id ),
+            FOREIGN KEY ( character_id ) REFERENCES characters( id )  
+        );
+    ]])
+    
+    database.connection:execute([[
+        CREATE INDEX idx_skills ON skills ( character_id );
+    ]])
+
+end
+
+if pcall(database_init) then    
+    function database.execute(sql, ...)
+        local tmp
+        
+        tmp = {}
+        for _, binding in pairs({...}) do
+            table.insert(tmp, database.connection:escape(binding))
+        end
+        
+        sql = string.format(sql, unpack(tmp))
+        
+        local cursor = database.connection:execute(sql)
+        
+        tmp = {}
+        local data
+        repeat
+            data = cursor:fetch({}, "a")
+            table.insert(tmp, data)
+        until not data
+        
+        local i = 0
+        return function()
+            i = i + 1
+            return tmp[i]
+        end
+    end
+    
+    function database.stop()
+        database.connection:close()
+    end
+else
+    function database.prepare() end
+    
+    function database.execute()
+        return function()
+            return {}
+        end
+    end
+    
+    function database.stop() end
+end
 
 charlist = {}
 
@@ -21,21 +91,14 @@ local function update_nametag(username)
     })
 end
 
-local function get_active_character(username) 
-    return database.find("characters", {["username"] = username, ["active"] = 1}, 1)();
-end
-
 -- Quenta
 -- {{
 function charlist.find_name_owners(name)
-    local characters = database.find("characters", 
-        { 
-            ["OR"] = {
-                ["name"] = name, 
-                ["visible_name"] = name
-            }, 
-            ["active"] = 1
-        });
+    local characters = database.execute([[
+        SELECT * FROM `characters` AS `character` 
+        WHERE (`character`.`name`='%s' OR `character`.`name`='%s') 
+        AND `character`.`active` = 1;
+    ]], name, name)
 
     local owners = {}
     for character in characters do
@@ -50,7 +113,20 @@ function charlist.find_name_owners(name)
 end
 
 function charlist.set_visible_name(username, visible_name)
+    database.execute([[
+        UPDATE `characters` AS `character` 
+        WHERE `character`.`username`='%s' 
+        SET `character`.`visible_name`='%s'
+        LIMIT 1;
+    ]], username, visible_name)
+    update_nametag(username)
+end
 
+local function get_active_character(username) 
+    return database.execute([[
+        SELECT * FROM `characters` AS `character` 
+        WHERE `character`.`username`='%s' LIMIT 1;
+    ]], username)()
 end
 
 function charlist.get_visible_name(username)
@@ -72,28 +148,34 @@ end
 -- Skills
 -- {{
 function charlist.get_skill_table(username)
-    local character = get_active_character(username)
-    if not character then
-        return {}
-    end
-    
-    local skills = database.find("skills", {["character_id"] = character.id})
+    local skills = database.execute([[
+        SELECT `character`.`username`, `skill`.`name`, `skill`.`level` 
+        FROM `skills` AS `skill`
+        INNER JOIN `characters` AS `character`
+            ON (`skill`.`character_id` = `character`.`id`) 
+            WHERE `character`.`username` = '%s';
+    ]], username)
 
     local skill_table = {}
     for skill in skills do
         skill_table[skill.name] = skill.level
     end
-    
+
     return skill_table
 end
 
 function charlist.get_skill_level(username, skill_name)
-    local character = get_active_character(username)
-    if not character then
-        return nil
-    end
-    
-    return database.find("skills", {["character_id"] = character.id, ["name"] = skill_name}, 1)()
+    local tmp = database.execute([[
+        SELECT `character`.`username`, `skill`.`name`, `skill`.`level` 
+        FROM `skills` AS `skill`
+        INNER JOIN `characters` AS `character`
+            ON (`skill`.`character_id` = `character`.`id`) 
+            WHERE 
+                `character`.`username` = '%s' AND
+                `skill`.`name` = '%s'
+        LIMIT 1;
+    ]], username, skill_name)()
+    return tmp.level
 end
 -- }}
 
@@ -164,9 +246,9 @@ function charlist.get_color(username)
     return charlist.data.colors[username]
 end
 
--- identifier is username for players 
-function charlist.set_color(identifier, color)
-    charlist.data.colors[identifier] = color
+function charlist.set_color(username, color)
+    charlist.data.colors[username] = color
+    update_nametag(username)
 end
 -- }}
 
@@ -178,14 +260,11 @@ end)
 minetest.register_on_joinplayer(function(player)  
     local username = player:get_player_name()
     charlist.set_color(username, charlist.get_free_random_color())
-    
-    update_nametag(username)
 end)
 
 -- Clear user on leave
 minetest.register_on_leaveplayer(function(player)
     local username = player:get_player_name()
-
     charlist.set_color(username, nil)
 end)
 -- }}
