@@ -18,3 +18,6 @@ After that it must looks like this:
         └── mods
 ```
 ...and so on.
+
+# Dependencies
+1. `mods/fudge/fudge.lua` is from `https://github.com/vegasd/luafudge`
