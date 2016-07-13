@@ -84,7 +84,7 @@ for i = 0, 15 do
 
     minetest.register_node("cobble_wall:wall_"..i, {
         drawtype = "nodebox",
-        tile_images = {"default_cobble.png"},
+        tiles = {"default_cobble.png"},
         paramtype = "light",
         groups = {snappy=2,cracky=3,oddly_breakable_by_hand=3},
         drop = "cobble_wall:wall",
@@ -97,7 +97,7 @@ end
 
 minetest.register_node("cobble_wall:wall_0", {
     drawtype = "nodebox",
-    tile_images = {"default_cobble.png"},
+    tiles = {"default_cobble.png"},
     paramtype = "light",
     groups = {snappy=2,cracky=3,oddly_breakable_by_hand=3},
     drop = "cobble_wall:wall",
@@ -109,7 +109,7 @@ minetest.register_node("cobble_wall:wall_0", {
 
 minetest.register_node("cobble_wall:wall_16", {
     drawtype = "nodebox",
-    tile_images = {"default_cobble.png"},
+    tiles = {"default_cobble.png"},
     paramtype = "light",
     groups = {snappy=2,cracky=3,oddly_breakable_by_hand=3},
     drop = "cobble_wall:wall",
@@ -121,7 +121,7 @@ minetest.register_node("cobble_wall:wall_16", {
 
 minetest.register_node("cobble_wall:wall_21", {
     drawtype = "nodebox",
-    tile_images = {"default_cobble.png"},
+    tiles = {"default_cobble.png"},
     paramtype = "light",
     groups = {snappy=2,cracky=3,oddly_breakable_by_hand=3},
     drop = "cobble_wall:wall",
@@ -133,7 +133,7 @@ minetest.register_node("cobble_wall:wall_21", {
 
 minetest.register_node("cobble_wall:wall", {
     description = "Cobblestone Wall",
-    tile_images = {"default_cobble.png"},
+    tiles = {"default_cobble.png"},
     stack_max = 64,
 
     drawtype = "nodebox",
