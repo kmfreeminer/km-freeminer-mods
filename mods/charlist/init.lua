@@ -3,55 +3,32 @@ local database = {}
 function database_init()
     local env = require("luasql.sqlite3").sqlite3()
     database.connection = env:connect(minetest.get_modpath("charlist") .. "/database.sqlite")
-    
-    database.connection:execute([[
-        CREATE TABLE characters ( 
-            id                   integer NOT NULL  ,
-            username             char(100) NOT NULL  ,
-            name                 varchar(100) NOT NULL  ,
-            visible_name         varchar(100)   ,
-            quenta               text   , active integer   NOT NULL DEFAULT 0,
-            CONSTRAINT Pk_characters PRIMARY KEY ( id )
-        );
-    ]])
-    
-    database.connection:execute([[
-        CREATE TABLE skills ( 
-            id                   integer NOT NULL  ,
-            character_id         integer NOT NULL  ,
-            name                 varchar(100) NOT NULL  ,
-            level                varchar(100) NOT NULL  ,
-            CONSTRAINT Pk_skills PRIMARY KEY ( id ),
-            FOREIGN KEY ( character_id ) REFERENCES characters( id )  
-        );
-    ]])
-    
-    database.connection:execute([[
-        CREATE INDEX idx_skills ON skills ( character_id );
-    ]])
-
 end
 
 if pcall(database_init) then    
     function database.execute(sql, ...)
         local tmp
         
+        -- Escape arguments
         tmp = {}
         for _, binding in pairs({...}) do
             table.insert(tmp, database.connection:escape(binding))
         end
         
         sql = string.format(sql, unpack(tmp))
-        
         local cursor = database.connection:execute(sql)
         
+        -- Fetch data and close cursor
         tmp = {}
-        local data
-        repeat
-            data = cursor:fetch({}, "a")
-            table.insert(tmp, data)
-        until not data
+        if cursor then
+            local data
+            repeat
+                data = cursor:fetch({}, "a")
+                table.insert(tmp, data)
+            until not data
+        end
         
+        -- Return iterator
         local i = 0
         return function()
             i = i + 1
@@ -75,11 +52,6 @@ else
 end
 
 charlist = {}
-
-minetest.register_privilege("gm", {
-    description = "Мастерская привелегия"
-})
-
 charlist.data = {}
 
 local function update_nametag(username)
@@ -94,19 +66,18 @@ end
 -- Quenta
 -- {{
 function charlist.find_name_owners(name)
-    local characters = database.execute([[
-        SELECT * FROM `characters` AS `character` 
-        WHERE (`character`.`name`='%s' OR `character`.`name`='%s') 
-        AND `character`.`active` = 1;
+    local users = database.execute([[
+        SELECT `user`.`username` FROM `users` as `user`
+        INNER JOIN `characters` as `character` 
+            ON (`user`.`id` = `character`.`user_id`)  
+        WHERE 
+            `character`.`real_name`    = '%s' OR 
+            `character`.`visible_name` = '%s';
     ]], name, name)
-
+    
     local owners = {}
-    for character in characters do
+    for character in users do
         table.insert(owners, character.username)
-    end
-        
-    if #owners <= 0 then
-        return nil
     end
     
     return owners
@@ -124,8 +95,12 @@ end
 
 local function get_active_character(username) 
     return database.execute([[
-        SELECT * FROM `characters` AS `character` 
-        WHERE `character`.`username`='%s' LIMIT 1;
+        SELECT `character`.*
+        FROM `characters` AS `character`
+        INNER JOIN `users` AS `user`
+            ON (`character`.`user_id` = `user`.`id`) 
+            WHERE `user`.`username` = '%s'
+        LIMIT 1;
     ]], username)()
 end
 
@@ -136,24 +111,32 @@ end
 
 function charlist.get_real_name(username)
     local character = get_active_character(username) or {}
-    return character.name
+    return character.real_name
 end
 
 function charlist.get_quenta(username)
     local character = get_active_character(username) or {}
     return character.quenta
 end
+
+function charlist.get_age(username)
+    local character = get_active_character(username) or {}
+    return character.age
+end
+
 -- }}
 
 -- Skills
 -- {{
 function charlist.get_skill_table(username)
     local skills = database.execute([[
-        SELECT `character`.`username`, `skill`.`name`, `skill`.`level` 
-        FROM `skills` AS `skill`
-        INNER JOIN `characters` AS `character`
-            ON (`skill`.`character_id` = `character`.`id`) 
-            WHERE `character`.`username` = '%s';
+        SELECT `skill`.`name`, `skill`.`level`
+        FROM `skills` as `skill`
+            INNER JOIN `characters` AS `character`
+                ON (`skill`.`character_id` = `character`.`id`)  
+            INNER JOIN `users` AS `user`
+                ON (`character`.`user_id` = `user`.`id`)  
+        WHERE `user`.`username` = '%s';
     ]], username)
 
     local skill_table = {}
@@ -165,17 +148,18 @@ function charlist.get_skill_table(username)
 end
 
 function charlist.get_skill_level(username, skill_name)
-    local tmp = database.execute([[
-        SELECT `character`.`username`, `skill`.`name`, `skill`.`level` 
-        FROM `skills` AS `skill`
-        INNER JOIN `characters` AS `character`
-            ON (`skill`.`character_id` = `character`.`id`) 
-            WHERE 
-                `character`.`username` = '%s' AND
-                `skill`.`name` = '%s'
+    local skill = database.execute([[
+        SELECT `skill`.`level`
+        FROM `skills` as `skill`
+            INNER JOIN `characters` AS `character`
+                ON (`skill`.`character_id` = `character`.`id`)  
+            INNER JOIN `users` AS `user`
+                ON (`character`.`user_id` = `user`.`id`)  
+        WHERE `user`.`username` = '%s'
         LIMIT 1;
     ]], username, skill_name)()
-    return tmp.level
+    skill = skill or {}
+    return skill.level
 end
 -- }}
 
@@ -272,3 +256,22 @@ end)
 minetest.register_on_shutdown(function()
     database.stop()
 end)
+
+minetest.register_chatcommand("charlist_test", {
+    description = "",
+    func = function(username, param)
+        print("\n=== charlist.find_name_owners test ===")
+        print("(\"sad\") name_owners: " .. dump(charlist.find_name_owners("sad")))
+
+        print("\n=== get_active_character test ===")
+        print("active_character: " .. dump(get_active_character(username)))
+        print("visible_name: " .. dump(charlist.get_visible_name(username)))
+        print("real_name: " .. dump(charlist.get_real_name(username)))
+        print("age: " .. dump(charlist.get_age(username)))
+        print("quenta: " .. dump(charlist.get_quenta(username)))
+
+        print("\n=== skills test ===")
+        print("skill_table: " .. dump(charlist.get_skill_table(username)))
+        print("skill_level: " .. dump(charlist.get_skill_level(username, "test")))
+    end
+})
