@@ -58,7 +58,7 @@ local function update_nametag(username)
     local player = minetest.get_player_by_name(username)
     local name = username or charlist.get_real_name(username) or charlist.get_visible_name(username)
     player:set_nametag_attributes({
-        color = charlist.get_color(username),
+        color = "#" .. charlist.get_color(username),
         text = name
     })
 end
@@ -93,37 +93,39 @@ function charlist.set_visible_name(username, visible_name)
     update_nametag(username)
 end
 
-local function get_active_character(username) 
+function charlist.get_active_character(username) 
     return database.execute([[
-        SELECT `character`.*
-        FROM `characters` AS `character`
-        INNER JOIN `users` AS `user`
-            ON (`character`.`user_id` = `user`.`id`) 
-            WHERE `user`.`username` = '%s'
+        SELECT 
+            `character`.`real_name`    AS `real_name`,
+            `character`.`visible_name` AS `visible_name`,
+            `character`.`age`          AS `age`,
+            `character`.`appearance`   AS `appearance`, 
+            `character`.`quenta`       AS `quenta`, 
+            `class`.`title`            AS `class`,
+            `class`.`id`               AS `class_id`,
+            `race`.`title`             AS `race`,
+            `race`.`id`                AS `race_id`,
+            `sex`.`title`              AS `sex`,
+            `sex`.`id`                 AS `sex_id`
+
+        FROM characters AS character
+        INNER JOIN users      AS user
+            ON (`character`.`user_id` = `user`.`id`)
+
+        INNER JOIN `sexes`    AS `sex`
+            ON (`character`.`sex` = `sex`.`id`)
+
+        INNER JOIN `races`    AS `race`
+            ON (`character`.`race` = `race`.`id`)
+
+        INNER JOIN ch_classes AS class
+            ON (`character`.`class` = `class`.`id`)
+        WHERE
+            `user`.`username` = '%s' AND
+            (class.id = 20 OR class.id = -10)
         LIMIT 1;
-    ]], username)()
+    ]], username)() or {}
 end
-
-function charlist.get_visible_name(username)
-    local character = get_active_character(username) or {}
-    return character.visible_name
-end
-
-function charlist.get_real_name(username)
-    local character = get_active_character(username) or {}
-    return character.real_name
-end
-
-function charlist.get_quenta(username)
-    local character = get_active_character(username) or {}
-    return character.quenta
-end
-
-function charlist.get_age(username)
-    local character = get_active_character(username) or {}
-    return character.age
-end
-
 -- }}
 
 -- Skills
@@ -132,10 +134,10 @@ function charlist.get_skill_table(username)
     local skills = database.execute([[
         SELECT `skill`.`name`, `skill`.`level`
         FROM `skills` as `skill`
-            INNER JOIN `characters` AS `character`
-                ON (`skill`.`character_id` = `character`.`id`)  
-            INNER JOIN `users` AS `user`
-                ON (`character`.`user_id` = `user`.`id`)  
+        INNER JOIN `characters` AS `character`
+            ON (`skill`.`character_id` = `character`.`id`)  
+        INNER JOIN `users` AS `user`
+            ON (`character`.`user_id` = `user`.`id`)  
         WHERE `user`.`username` = '%s';
     ]], username)
 
@@ -157,8 +159,7 @@ function charlist.get_skill_level(username, skill_name)
                 ON (`character`.`user_id` = `user`.`id`)  
         WHERE `user`.`username` = '%s'
         LIMIT 1;
-    ]], username, skill_name)()
-    skill = skill or {}
+    ]], username, skill_name)() or {}
     return skill.level
 end
 -- }}
@@ -257,21 +258,39 @@ minetest.register_on_shutdown(function()
     database.stop()
 end)
 
-minetest.register_chatcommand("charlist_test", {
-    description = "",
+minetest.register_privilege("whois", {
+    description = "Даёт доступ к команде /whois", 
+    give_to_singleplayer = false
+})
+
+minetest.register_chatcommand("whois", {
+    params = "<name>",
+    privs = { whois=true },
+    description = "Позволяет узнать кто скрывается за указаным именем.",
     func = function(username, param)
-        print("\n=== charlist.find_name_owners test ===")
-        print("(\"sad\") name_owners: " .. dump(charlist.find_name_owners("sad")))
-
-        print("\n=== get_active_character test ===")
-        print("active_character: " .. dump(get_active_character(username)))
-        print("visible_name: " .. dump(charlist.get_visible_name(username)))
-        print("real_name: " .. dump(charlist.get_real_name(username)))
-        print("age: " .. dump(charlist.get_age(username)))
-        print("quenta: " .. dump(charlist.get_quenta(username)))
-
-        print("\n=== skills test ===")
-        print("skill_table: " .. dump(charlist.get_skill_table(username)))
-        print("skill_level: " .. dump(charlist.get_skill_level(username, "test")))
+        local result = ""
+        for _, name in pairs(charlist.find_name_owners(param)) do
+            local color = charlist.get_color(name)
+            result = result .. name .. ": "
+            result = result .. core.colorize(color or "FFFFFF", color or "OFFLINE") .. "\n"
+        end
+        minetest.chat_send_player(username, result)
     end
 })
+
+-- TESTING
+if minetest.setting_get("development") and minetest.setting_getbool("development") == true then
+    minetest.register_chatcommand("charlist_test", {
+        func = function(username, param)
+            print("\n=== charlist.find_name_owners test ===")
+            print("(\"sad\") name_owners: " .. dump(charlist.find_name_owners("sad")))
+
+            print("\n=== get_active_character test ===")
+            print("active_character: " .. dump(charlist.get_active_character(username)))
+
+            print("\n=== skills test ===")
+            print("skill_table: " .. dump(charlist.get_skill_table(username)))
+            print("skill_level: " .. dump(charlist.get_skill_level(username, "test")))
+        end
+    })
+end

@@ -105,12 +105,14 @@ function kmchat.process_messages(username, message)
     chat_string:set_format_string(kmchat[action_type].format_string)
     
     local name_color = charlist.get_color(username)
-    local real_name = charlist.get_real_name(username) or username
-    local visible_name = charlist.get_visible_name(username) or real_name
+    
+    local active_character = charlist.get_active_character(username)
+    local real_name = active_character.real_name or username
+    local visible_name = active_character.visible_name or real_name
 
     chat_string:set_variable("username", username)
-    chat_string:set_variable("visible_name", visible_name, name_color)
     chat_string:set_variable("real_name", real_name, name_color)
+    chat_string:set_variable("visible_name", visible_name, name_color)
     chat_string:set_variable("range_label", range_label)
     chat_string:set_variable("message", message)
     chat_string:set_variable("text", text)

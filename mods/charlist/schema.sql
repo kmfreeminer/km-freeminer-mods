@@ -2,7 +2,7 @@ PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
 CREATE TABLE users (
     id                   integer NOT NULL,
-    username             varchar(100) NOT NULL,
+    username             varchar(100) NOT NULL UNIQUE,
     CONSTRAINT Pk_users PRIMARY KEY ( id )
 );
 
@@ -34,7 +34,7 @@ INSERT INTO "ch_classes" VALUES(100, 'мёртв');
 
 CREATE TABLE characters ( 
 	id                   integer NOT NULL,
-	user_id              integer,
+	user_id              integer NOT NULL,
 	real_name            varchar(50) NOT NULL,
 	visible_name         varchar(50),
 	age                  integer NOT NULL,
