@@ -56,10 +56,10 @@ charlist.data = {}
 
 local function update_nametag(username)
     local player = minetest.get_player_by_name(username)
-    local name = username or charlist.get_real_name(username) or charlist.get_visible_name(username)
+    local active_character = charlist.get_active_character(username)
     player:set_nametag_attributes({
         color = "#" .. charlist.get_color(username),
-        text = name
+        text = active_character.visible_name or active_character.real_name or username
     })
 end
 
@@ -233,7 +233,9 @@ end
 
 function charlist.set_color(username, color)
     charlist.data.colors[username] = color
-    update_nametag(username)
+    if color ~= nil then
+        update_nametag(username)
+    end
 end
 -- }}
 
