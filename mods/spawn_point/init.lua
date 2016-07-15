@@ -1,11 +1,14 @@
 local spawn_position = nil
 
-minetest.register_on_respawnplayer(function(player)
+function spawn_player(player)
     if spawn_position then
         player:setpos(spawn_position)
         return true
     end
-end)
+end
+
+minetest.register_on_respawnplayer(spawn_player)
+minetest.register_on_newplayer(spawn_player)
 
 minetest.register_privilege("setspawn", {
     description = "Даёт доступ к команде /setspawn", 
