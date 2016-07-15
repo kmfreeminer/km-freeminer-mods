@@ -68,7 +68,7 @@ minetest.register_node("pirates:shell_1", {
 })
 
 minetest.register_node("pirates:shell_2", {
-	description = "Ракушка",
+	description = "Ракушка с жемчуженой",
     drawtype = "plantlike",
     paramtype = "light",
     tiles = {"shell_2.png"},
@@ -90,4 +90,32 @@ minetest.register_node("pirates:shell_3", {
         },
     },
     groups = {crumbly = 3},
+})
+
+minetest.register_node("pirates:shell_4", {
+	description = "Ракушка",
+    drawtype = "plantlike",
+    paramtype = "light",
+    tiles = {"shell_3.png"},
+    groups = {crumbly = 3},
+})
+
+minetest.register_node("pirates:flower_1", {
+	description = "Экзотический цветок",
+    drawtype = "plantlike",
+    paramtype = "light",
+    tiles = {"flower_1.png"},
+    groups = {snappy = 2, dig_immediate = 3, flammable = 2,
+        attached_node = 1, sapling = 1},
+    sounds = default.node_sound_leaves_defaults(),
+})
+
+minetest.register_node("pirates:flower_2", {
+	description = "Экзотический цветок",
+    drawtype = "plantlike",
+    paramtype = "light",
+    tiles = {"flower_2.png"},
+    groups = {snappy = 2, dig_immediate = 3, flammable = 2,
+        attached_node = 1, sapling = 1},
+    sounds = default.node_sound_leaves_defaults(),
 })
