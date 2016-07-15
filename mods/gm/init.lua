@@ -8,7 +8,9 @@ minetest.register_on_joinplayer(function(player)
     hud_flags.minimap = false
     if active_character.class_id == -10 or active_character.class == "ГМ" then
         hud_flags.minimap = true
+        -- Privileges
         privileges.whois = true
+        privileges.setspawn = true
     end
     player:hud_set_flags(hud_flags)
     minetest.set_player_privs(username, privileges)

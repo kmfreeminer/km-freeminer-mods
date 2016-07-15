@@ -262,7 +262,7 @@ end)
 
 minetest.register_privilege("whois", {
     description = "Даёт доступ к команде /whois", 
-    give_to_singleplayer = false
+    give_to_singleplayer = true
 })
 
 minetest.register_chatcommand("whois", {
