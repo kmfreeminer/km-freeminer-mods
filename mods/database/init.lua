@@ -43,8 +43,6 @@ else
     minetest.log("error", "Unable to initialize database. Please, install \"luasql.sqlite3\".")
     minetest.log("error", "Creating dummy database functions.")
 
-    function database.prepare() end
-    
     function database.execute()
         return function()
             return {}
