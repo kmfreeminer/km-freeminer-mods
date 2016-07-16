@@ -68,7 +68,7 @@ function ores.register_ore(name, oredef)
         y_max = oredef.y_max or 30912,
         y_min = oredef.y_min or -30912,
         flags = oredef.ore_flags or "",
-        noise_threshhold = oredef.noise_threshhold or 1.2,
+        noise_threshold = oredef.noise_threshhold or 1.2,
         noise_params = {
             offset = 0,
             scale = 1,

@@ -1,112 +1,30 @@
-local database = {}
-
-function database_init()
-    local env = require("luasql.sqlite3").sqlite3()
-    database.connection = env:connect(minetest.get_modpath("charlist") .. "/database.sqlite")
-    
-    database.connection:execute([[
-        CREATE TABLE characters ( 
-            id                   integer NOT NULL  ,
-            username             char(100) NOT NULL  ,
-            name                 varchar(100) NOT NULL  ,
-            visible_name         varchar(100)   ,
-            quenta               text   , active integer   NOT NULL DEFAULT 0,
-            CONSTRAINT Pk_characters PRIMARY KEY ( id )
-        );
-    ]])
-    
-    database.connection:execute([[
-        CREATE TABLE skills ( 
-            id                   integer NOT NULL  ,
-            character_id         integer NOT NULL  ,
-            name                 varchar(100) NOT NULL  ,
-            level                varchar(100) NOT NULL  ,
-            CONSTRAINT Pk_skills PRIMARY KEY ( id ),
-            FOREIGN KEY ( character_id ) REFERENCES characters( id )  
-        );
-    ]])
-    
-    database.connection:execute([[
-        CREATE INDEX idx_skills ON skills ( character_id );
-    ]])
-
-end
-
-if pcall(database_init) then    
-    function database.execute(sql, ...)
-        local tmp
-        
-        tmp = {}
-        for _, binding in pairs({...}) do
-            table.insert(tmp, database.connection:escape(binding))
-        end
-        
-        sql = string.format(sql, unpack(tmp))
-        
-        local cursor = database.connection:execute(sql)
-        
-        tmp = {}
-        local data
-        repeat
-            data = cursor:fetch({}, "a")
-            table.insert(tmp, data)
-        until not data
-        
-        local i = 0
-        return function()
-            i = i + 1
-            return tmp[i]
-        end
-    end
-    
-    function database.stop()
-        database.connection:close()
-    end
-else
-    function database.prepare() end
-    
-    function database.execute()
-        return function()
-            return {}
-        end
-    end
-    
-    function database.stop() end
-end
-
 charlist = {}
-
-minetest.register_privilege("gm", {
-    description = "Мастерская привелегия"
-})
-
 charlist.data = {}
 
 local function update_nametag(username)
     local player = minetest.get_player_by_name(username)
-    local name = username or charlist.get_real_name(username) or charlist.get_visible_name(username)
+    local active_character = charlist.get_active_character(username)
     player:set_nametag_attributes({
-        color = charlist.get_color(username),
-        text = name
+        color = "#" .. charlist.get_color(username),
+        text = active_character.visible_name or active_character.real_name or username
     })
 end
 
 -- Quenta
 -- {{
 function charlist.find_name_owners(name)
-    local characters = database.execute([[
-        SELECT * FROM `characters` AS `character` 
-        WHERE (`character`.`name`='%s' OR `character`.`name`='%s') 
-        AND `character`.`active` = 1;
+    local users = database.execute([[
+        SELECT `user`.`username` FROM `users` as `user`
+        INNER JOIN `characters` as `character` 
+            ON (`user`.`id` = `character`.`user_id`)  
+        WHERE 
+            `character`.`real_name`    = '%s' OR 
+            `character`.`visible_name` = '%s';
     ]], name, name)
-
+    
     local owners = {}
-    for character in characters do
+    for character in users do
         table.insert(owners, character.username)
-    end
-        
-    if #owners <= 0 then
-        return nil
     end
     
     return owners
@@ -122,26 +40,38 @@ function charlist.set_visible_name(username, visible_name)
     update_nametag(username)
 end
 
-local function get_active_character(username) 
+function charlist.get_active_character(username) 
     return database.execute([[
-        SELECT * FROM `characters` AS `character` 
-        WHERE `character`.`username`='%s' LIMIT 1;
-    ]], username)()
-end
+        SELECT 
+            `character`.`real_name`    AS `real_name`,
+            `character`.`visible_name` AS `visible_name`,
+            `character`.`age`          AS `age`,
+            `character`.`appearance`   AS `appearance`, 
+            `character`.`quenta`       AS `quenta`, 
+            `class`.`title`            AS `class`,
+            `class`.`id`               AS `class_id`,
+            `race`.`title`             AS `race`,
+            `race`.`id`                AS `race_id`,
+            `sex`.`title`              AS `sex`,
+            `sex`.`id`                 AS `sex_id`
 
-function charlist.get_visible_name(username)
-    local character = get_active_character(username) or {}
-    return character.visible_name
-end
+        FROM characters AS character
+        INNER JOIN users      AS user
+            ON (`character`.`user_id` = `user`.`id`)
 
-function charlist.get_real_name(username)
-    local character = get_active_character(username) or {}
-    return character.name
-end
+        INNER JOIN `sexes`    AS `sex`
+            ON (`character`.`sex` = `sex`.`id`)
 
-function charlist.get_quenta(username)
-    local character = get_active_character(username) or {}
-    return character.quenta
+        INNER JOIN `races`    AS `race`
+            ON (`character`.`race` = `race`.`id`)
+
+        INNER JOIN ch_classes AS class
+            ON (`character`.`class` = `class`.`id`)
+        WHERE
+            `user`.`username` = '%s' AND
+            (class.id = 20 OR class.id = -10)
+        LIMIT 1;
+    ]], username)() or {}
 end
 -- }}
 
@@ -149,11 +79,13 @@ end
 -- {{
 function charlist.get_skill_table(username)
     local skills = database.execute([[
-        SELECT `character`.`username`, `skill`.`name`, `skill`.`level` 
-        FROM `skills` AS `skill`
+        SELECT `skill`.`name`, `skill`.`level`
+        FROM `skills` as `skill`
         INNER JOIN `characters` AS `character`
-            ON (`skill`.`character_id` = `character`.`id`) 
-            WHERE `character`.`username` = '%s';
+            ON (`skill`.`character_id` = `character`.`id`)  
+        INNER JOIN `users` AS `user`
+            ON (`character`.`user_id` = `user`.`id`)  
+        WHERE `user`.`username` = '%s';
     ]], username)
 
     local skill_table = {}
@@ -165,17 +97,17 @@ function charlist.get_skill_table(username)
 end
 
 function charlist.get_skill_level(username, skill_name)
-    local tmp = database.execute([[
-        SELECT `character`.`username`, `skill`.`name`, `skill`.`level` 
-        FROM `skills` AS `skill`
-        INNER JOIN `characters` AS `character`
-            ON (`skill`.`character_id` = `character`.`id`) 
-            WHERE 
-                `character`.`username` = '%s' AND
-                `skill`.`name` = '%s'
+    local skill = database.execute([[
+        SELECT `skill`.`level`
+        FROM `skills` as `skill`
+            INNER JOIN `characters` AS `character`
+                ON (`skill`.`character_id` = `character`.`id`)  
+            INNER JOIN `users` AS `user`
+                ON (`character`.`user_id` = `user`.`id`)  
+        WHERE `user`.`username` = '%s'
         LIMIT 1;
-    ]], username, skill_name)()
-    return tmp.level
+    ]], username, skill_name)() or {}
+    return skill.level
 end
 -- }}
 
@@ -248,7 +180,9 @@ end
 
 function charlist.set_color(username, color)
     charlist.data.colors[username] = color
-    update_nametag(username)
+    if color ~= nil then
+        update_nametag(username)
+    end
 end
 -- }}
 
@@ -272,3 +206,40 @@ end)
 minetest.register_on_shutdown(function()
     database.stop()
 end)
+
+minetest.register_privilege("whois", {
+    description = "Даёт доступ к команде /whois", 
+    give_to_singleplayer = true
+})
+
+minetest.register_chatcommand("whois", {
+    params = "<name>",
+    privs = { whois=true },
+    description = "Позволяет узнать кто скрывается за указаным именем.",
+    func = function(username, param)
+        local result = ""
+        for _, name in pairs(charlist.find_name_owners(param)) do
+            local color = charlist.get_color(name)
+            result = result .. name .. ": "
+            result = result .. core.colorize(color or "FFFFFF", color or "OFFLINE") .. "\n"
+        end
+        minetest.chat_send_player(username, result)
+    end
+})
+
+-- TESTING
+if minetest.setting_get("development") and minetest.setting_getbool("development") == true then
+    minetest.register_chatcommand("charlist_test", {
+        func = function(username, param)
+            print("\n=== charlist.find_name_owners test ===")
+            print("(\"sad\") name_owners: " .. dump(charlist.find_name_owners("sad")))
+
+            print("\n=== get_active_character test ===")
+            print("active_character: " .. dump(charlist.get_active_character(username)))
+
+            print("\n=== skills test ===")
+            print("skill_table: " .. dump(charlist.get_skill_table(username)))
+            print("skill_level: " .. dump(charlist.get_skill_level(username, "test")))
+        end
+    })
+end
