@@ -654,6 +654,11 @@ minetest.register_on_joinplayer(function(player)
     player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
     player:hud_set_hotbar_itemcount(inventory.width)
 
+    -- Remove HUD wielditem
+    local hud_flags = player:hud_get_flags()
+    hud_flags.wielditem = false
+    player:hud_set_flags(hud_flags)
+
     -- Init attachments and clothes
     inventory.update_attachments(player)
     clothes.update_skin(player, inventory.get_clothes(player))
