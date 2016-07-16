@@ -1,8 +1,12 @@
-local function e()
-error("Function not implemented");
+local function not_impl()
+	error("Function not implemented");
 end
-local e=require"mime";
-module"encodings"
-stringprep={};
-base64={encode=e.b64,decode=e.unb64};
+
+local mime = require "mime";
+
+module "encodings"
+
+stringprep = {};
+base64 = { encode = mime.b64, decode = not_impl }; --mime.unb64 is buggy with \0
+
 return _M;

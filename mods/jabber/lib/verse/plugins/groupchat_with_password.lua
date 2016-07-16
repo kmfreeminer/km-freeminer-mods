@@ -8,7 +8,7 @@ room_mt.__index = room_mt;
 local xmlns_delay = "urn:xmpp:delay";
 local xmlns_muc = "http://jabber.org/protocol/muc";
 
-function verse.plugins.groupchat(stream)
+function verse.plugins.groupchat_with_password(stream)
     stream:add_plugin("presence")
     stream.rooms = {};
     

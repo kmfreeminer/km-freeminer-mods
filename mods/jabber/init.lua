@@ -13,7 +13,7 @@ local function init ()
 
     verse = require "verse".init("client")
     c = verse.new()
-    c:add_plugin("groupchat")
+    c:add_plugin("groupchat_with_password")
 
     jabber.jid = minetest.setting_get("jabber-jid")
     jabber.password = minetest.setting_get("jabber-password")
