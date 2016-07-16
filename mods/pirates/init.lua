@@ -59,6 +59,12 @@ minetest.register_node("pirates:skeleton", {
 	groups = { oddly_breakable_by_hand = 1 }
 })
 
+minetest.register_craftitem("pirates:perl", {
+    description = "Жемчужена",
+    inventory_image = "perl.png",
+     wield_image = "perl.png",
+})
+
 minetest.register_node("pirates:shell_1", {
 	description = "Ракушка",
     drawtype = "plantlike",
