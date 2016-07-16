@@ -11,8 +11,8 @@ clothes.command_desc = [[Добавляет текстуру одежды в с�
     [force] - не обязательный параметр, включает игнорирование ошибок, учитывается только при "set".]]
 
 local function download(texture)
-    print(minetest.setting_get("http_get_host"))
-    return "httpload:" .. texture
+    --print(minetest.setting_get("http_get_host"))
+    return "httpload:" .. texture .. ".png"
 end
 
 --{{{ Functions
@@ -65,7 +65,7 @@ end
 clothes.update_skin = function (player, clothes_list)
     -- Get base player skin
     local name = player:get_player_name()
-    local skin = download(name .. ".png")
+    local skin = download(name)
 
     -- Add clothes
     for _,itemstack in ipairs(clothes_list) do

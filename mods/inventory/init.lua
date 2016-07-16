@@ -56,12 +56,12 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Body",
-                position = {x = 0, y = 4.5, z = 1.4},
+                position = {x = 0, y = 4.5, z = 2.0},
                 rotation = {x = 0, y = 0, z = 180},
             },
             {
                 bone = "Body",
-                position = {x = 0, y = 4.5, z = 1.9},
+                position = {x = 0, y = 4.5, z = 2.5},
                 rotation = {x = 0, y = 0, z = 270},
             },
         }
