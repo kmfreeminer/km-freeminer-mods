@@ -19,6 +19,18 @@ minetest.register_node("pirates:yellow_star", {
 	groups = { snappy = 3 },
 })
 
+minetest.register_node("pirates:yellow_star_sand", {
+    description = "Песок с желтой морской звездой",
+    inventory_image = "default_sand.png^star_yellow.png",
+    tiles = {"default_sand.png^star_yellow.png", "default_sand.png"},
+    groups = {crumbly = 3, falling_node = 1, sand = 1},
+    sounds = default.node_sound_sand_defaults(),
+    on_punch = function(pos, node, puncher, pointed_thing)
+        puncher:get_inventory():add_item("main", "pirates:star_yellow")
+        minetest.set_node(pos, {name="default:sand"})
+    end,
+})
+
 minetest.register_node("pirates:blue_star", {
     description = "Синяя морская звезда",
     inventory_image = "star_blue.png",
@@ -38,6 +50,18 @@ minetest.register_node("pirates:blue_star", {
         },
     },
 	groups = { snappy = 3 },
+})
+
+minetest.register_node("pirates:blue_star_sand", {
+    description = "Песок с синей морской звездой",
+    inventory_image = "default_sand.png^star_blue.png",
+    tiles = {"default_sand.png^star_blue.png", "default_sand.png"},
+    groups = {crumbly = 3, falling_node = 1, sand = 1},
+    sounds = default.node_sound_sand_defaults(),
+    on_punch = function(pos, node, puncher, pointed_thing)
+        puncher:get_inventory():add_item("main", "pirates:blue_star")
+        minetest.set_node(pos, {name="default:sand"})
+    end,
 })
 
 minetest.register_node("pirates:skeleton", {
