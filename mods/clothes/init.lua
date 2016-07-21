@@ -37,7 +37,7 @@ clothes.get = function (itemstack, quiet)
                 return default
             else
                 if not quiet then
-                    minetest.log("error",
+                    minetest.log("verbose",
                         "Item (" .. itemstack:to_string() .. ") "..
                         "doesn't have a clothes texture"
                     )
@@ -52,7 +52,7 @@ clothes.get = function (itemstack, quiet)
             return default
         else
             if not quiet then
-                minetest.log("error",
+                minetest.log("verbose",
                     "Item (" .. itemstack:to_string() .. ") " ..
                     "doesn't have a serialized metadata"
                 )
