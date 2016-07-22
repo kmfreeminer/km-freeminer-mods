@@ -680,6 +680,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 end)
 
 minetest.register_entity("inventory:attached_item", {
+    hp_max = 1,
     physical = false,
     collide_with_objects = false,
     visual = "wielditem",
@@ -694,5 +695,4 @@ minetest.register_on_shutdown(function ()
         inventory.clean_attachments(player)
     end
 end)
-
 --}}}
