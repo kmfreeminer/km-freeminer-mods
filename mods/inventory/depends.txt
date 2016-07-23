@@ -2,3 +2,4 @@ default
 clothes
 creative
 lore
+gui

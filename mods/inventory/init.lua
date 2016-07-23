@@ -56,12 +56,12 @@ inventory.parts = {
         attachments = {
             {
                 bone = "Body",
-                position = {x = 0, y = 4.5, z = 1.4},
+                position = {x = 0, y = 4.5, z = 2.0},
                 rotation = {x = 0, y = 0, z = 180},
             },
             {
                 bone = "Body",
-                position = {x = 0, y = 4.5, z = 1.9},
+                position = {x = 0, y = 4.5, z = 2.5},
                 rotation = {x = 0, y = 0, z = 270},
             },
         }
@@ -632,6 +632,15 @@ function inventory.update(player, fields)
         )
     )
 end
+
+function inventory.clean_attachments(player)
+    local attached = default.get_attached(player)
+
+    for _, entity in pairs(attached) do
+        entity:set_detach()
+        entity:remove()
+    end
+end
 --}}}
 
 --{{{ minetest.register
@@ -654,19 +663,14 @@ minetest.register_on_joinplayer(function(player)
     player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
     player:hud_set_hotbar_itemcount(inventory.width)
 
+    -- Remove HUD wielditem
+    local hud_flags = player:hud_get_flags()
+    hud_flags.wielditem = false
+    player:hud_set_flags(hud_flags)
+
     -- Init attachments and clothes
     inventory.update_attachments(player)
     clothes.update_skin(player, inventory.get_clothes(player))
-end)
-
-minetest.register_on_leaveplayer(function(player)
-    -- Cleaning attachments
-    local attached = default.get_attached(player)
-
-    for _, entity in pairs(attached) do
-        entity:set_detach()
-        entity:remove()
-    end
 end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
@@ -676,9 +680,19 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 end)
 
 minetest.register_entity("inventory:attached_item", {
+    hp_max = 1,
     physical = false,
     collide_with_objects = false,
     visual = "wielditem",
     visual_size = {x=0.25, y=0.25},
 })
+
+-- Cleaning attachments
+minetest.register_on_leaveplayer(inventory.clean_attachments)
+minetest.register_on_shutdown(function ()
+    local players = minetest.get_connected_players()
+    for _, player in pairs(players) do
+        inventory.clean_attachments(player)
+    end
+end)
 --}}}
