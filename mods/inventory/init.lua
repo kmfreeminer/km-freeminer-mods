@@ -3,6 +3,7 @@ inventory = {}
 --{{{ Constants
 inventory.width = 10
 inventory.height = 1
+inventory.margin = { top = 0.2 }
 inventory.part = { width = 2, height = 4 }
 inventory.creative = { width = 4 }
 inventory.lore = { width = 3.5 }
@@ -197,7 +198,7 @@ function inventory.character (x, y, part)
             .. "character_" .. part .. "_selected.png"
             .. "]"
         .. "label["
-            .. (x + image_width) .. "," .. (y - 0.35) .. ";"
+            .. (x + image_width) .. "," .. (y - 0.45) .. ";"
             .. inventory.parts[part].tooltip
             .. "]"
         .. gui.get_hotbar_bg(x + image_width + 1, y + 3, 1)
@@ -306,7 +307,7 @@ function inventory.lore.fc(x, y, w, h, playername)
             .. current_label
             .. "]"
         .. "button["
-            .. (x + (w - bw)/2) .. "," .. (h - 1.2) .. ";"
+            .. (x + (w - bw)/2) .. "," .. (y + h - 1.2) .. ";"
             .. bw .. "," .. 0.5 .. ";"
             .. "lore_update" .. ";"
             .. "Записать"
@@ -315,8 +316,9 @@ end
 
 function inventory.default(playername, part, lore, creative, start)
     local creative = creative or false
+    local margin_top = inventory.margin.top
     local w = inventory.width
-    local h = inventory.height + inventory.part.height
+    local h = inventory.height + inventory.part.height + margin_top
     local lw = 0
     local cw = 0
 
@@ -324,7 +326,7 @@ function inventory.default(playername, part, lore, creative, start)
     if lore then
         lw = inventory.lore.width
         lore_fc = inventory.lore.fc(
-            0, 0,
+            0, margin_top,
             lw, h,
             playername
         )
@@ -332,7 +334,7 @@ function inventory.default(playername, part, lore, creative, start)
     local lore_button = ''
     if minetest.check_player_privs(playername, {lore = true}) then
         lore_button = "button["
-        .. lw .. ",0;"
+        .. lw .. "," .. margin_top .. ";"
         .. "1,1;lore_toggle;Lore"
         .. "]"
     end
@@ -341,7 +343,7 @@ function inventory.default(playername, part, lore, creative, start)
     if creative then
         cw = inventory.creative.width
         creative_fc = inventory.creative.fc(
-            (lw + w), 0,
+            (lw + w), margin_top,
             cw, h,
             start
         )
@@ -349,7 +351,7 @@ function inventory.default(playername, part, lore, creative, start)
     local creative_button = ''
     if minetest.check_player_privs(playername, {creative = true}) then
         creative_button = "button["
-        .. (lw + w - 1) .. ",0;"
+        .. (lw + w - 1) .. "," .. margin_top .. ";"
         .. "1,1;creative_toggle;CR"
         .. "]"
     end
@@ -368,9 +370,9 @@ function inventory.default(playername, part, lore, creative, start)
     --    .. "]"
     .. lore_button
     .. lore_fc
-    .. inventory.character(lw + 1.20, 0, part)
-    .. inventory.craft(lw + 5.80, 0)
-    .. inventory.main(lw + 0, 4.25)
+    .. inventory.character(lw + 1.20, margin_top, part)
+    .. inventory.craft(lw + 5.80, margin_top)
+    .. inventory.main(lw + 0, 4.25 + margin_top)
     .. creative_button
     .. creative_fc
 end
