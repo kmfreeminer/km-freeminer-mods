@@ -200,6 +200,7 @@ function inventory.character (x, y, part)
             .. (x + image_width) .. "," .. (y - 0.35) .. ";"
             .. inventory.parts[part].tooltip
             .. "]"
+        .. gui.get_hotbar_bg(x + image_width + 1, y + 3, 1)
         .. "list[current_player;" .. part .. ";"
             .. (x + image_width) .. "," .. y .. ";"
             .. "2,4;"
