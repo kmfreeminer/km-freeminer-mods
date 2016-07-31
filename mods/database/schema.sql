@@ -3,6 +3,7 @@ BEGIN TRANSACTION;
 CREATE TABLE users (
     id                   integer NOT NULL,
     username             varchar(100) NOT NULL UNIQUE,
+    password_hash        text  NOT NULL,
     CONSTRAINT Pk_users PRIMARY KEY ( id )
 );
 
@@ -27,9 +28,9 @@ CREATE TABLE ch_classes (
 	CONSTRAINT Pk_ch_classes PRIMARY KEY ( id )
 );
 INSERT INTO "ch_classes" VALUES(-10, 'ГМ');
-INSERT INTO "ch_classes" VALUES(0, 'непроверен');
-INSERT INTO "ch_classes" VALUES(10, 'требует исправлений');
-INSERT INTO "ch_classes" VALUES(20, 'проверен / жив');
+INSERT INTO "ch_classes" VALUES(  0, 'непроверен');
+INSERT INTO "ch_classes" VALUES( 10, 'требует исправлений');
+INSERT INTO "ch_classes" VALUES( 20, 'проверен / жив');
 INSERT INTO "ch_classes" VALUES(100, 'мёртв');
 
 CREATE TABLE characters ( 
@@ -38,8 +39,8 @@ CREATE TABLE characters (
 	real_name            varchar(50) NOT NULL,
 	visible_name         varchar(50),
 	age                  integer NOT NULL,
-	sex                  integer NOT NULL DEFAULT(0),
-	race                 integer NOT NULL DEFAULT(0),
+	sex                  integer NOT NULL DEFAULT(1),
+	race                 integer NOT NULL DEFAULT(1),
 	appearance           text NOT NULL,
 	quenta               text NOT NULL,
 	class                integer NOT NULL,
@@ -50,12 +51,27 @@ CREATE TABLE characters (
 	FOREIGN KEY ( class ) REFERENCES ch_classes( id )  
 );
 
+CREATE TABLE fudge_levels ( 
+	id                   integer NOT NULL,
+	level_name           varchar(100) NOT NULL,
+	CONSTRAINT Pk_fudge_levels PRIMARY KEY ( id )
+);
+INSERT INTO "fudge_levels"(level_name) VALUES('ужасно');
+INSERT INTO "fudge_levels"(level_name) VALUES('плохо');
+INSERT INTO "fudge_levels"(level_name) VALUES('посредственно');
+INSERT INTO "fudge_levels"(level_name) VALUES('нормально');
+INSERT INTO "fudge_levels"(level_name) VALUES('хорошо');
+INSERT INTO "fudge_levels"(level_name) VALUES('прекрасно');
+INSERT INTO "fudge_levels"(level_name) VALUES('превосходно');
+INSERT INTO "fudge_levels"(level_name) VALUES('легендарно');
+
 CREATE TABLE skills ( 
 	id                   integer NOT NULL,
 	character_id         integer NOT NULL,
 	name                 varchar(100) NOT NULL,
-	level                varchar(100) NOT NULL,
+	level_id             integer NOT NULL,
 	CONSTRAINT Pk_skills PRIMARY KEY ( id ),
-	FOREIGN KEY ( character_id ) REFERENCES characters( id )  
+	FOREIGN KEY ( character_id ) REFERENCES characters( id )
+	FOREIGN KEY ( level_id )     REFERENCES fudge_levels( id )  
 );
 COMMIT;
