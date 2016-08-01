@@ -153,14 +153,18 @@ end
 
 function inventory.craft (x, y)
     return "list[current_player;craft;"
-            .. x .. "," .. y
-            ..";3,3;]"
+            .. x .. "," .. y ..";"
+            .. "3,3;"
+            .. "]"
         .. "image["
-            .. (x + 1) .. "," .. (y + 3) .. ";"
-            .. "1,1;gui_furnace_arrow_bg.png^[transformR270]"
+            .. x .. "," .. (y + 3) .. ";"
+            .. "2,1;"
+            .. "inventory_craft_arrow.png"
+            .. "]"
         .. "list[current_player;craftpreview;"
             .. (x + 2) .. "," .. (y + 3) .. ";"
-            .. "1,1;]"
+            .. "1,1;"
+            .. "]"
 end
 
 function inventory.character (x, y, part)
@@ -217,7 +221,9 @@ function inventory.character (x, y, part)
 end
 
 function inventory.creative.fc(x, y, w, h, start)
-    local start = start or 0
+    local w = math.floor(w)
+    local h = math.floor(h)
+    local start = math.floor(start) or 0
     local page = h * (w - 1)
     local pagemax = math.ceil(creative.creative_inventory_size / page)
 
@@ -318,7 +324,7 @@ function inventory.default(playername, part, lore, creative, start)
     local creative = creative or false
     local margin_top = inventory.margin.top
     local w = inventory.width
-    local h = inventory.height + inventory.part.height + margin_top
+    local h = inventory.height + inventory.part.height
     local lw = 0
     local cw = 0
 
@@ -357,7 +363,7 @@ function inventory.default(playername, part, lore, creative, start)
     end
 
     return "size["
-        .. (lw + w + cw) .. "," .. h
+        .. (lw + w + cw) .. "," .. (h + margin_top)
         .. "]"
     .. gui.bg
     .. gui.bg_img
@@ -412,7 +418,7 @@ end
 local function turn_creative_page(formspec, backward)
     local backward = backward or false
     local w, h, start = string.match(formspec,
-        "list%[detached:creative;main;[%d.]+,[%d.]+;([%d.]+),([%d.]+);(%d+)%]"
+        "list%[detached:creative;main;[%d.]+,[%d.]+;(%d+),(%d+);(%d+)%]"
     )
     local page = w * h
     if backward
