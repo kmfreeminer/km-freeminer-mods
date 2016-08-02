@@ -18,6 +18,11 @@ if pcall(database_init) then
         sql = string.format(sql, unpack(tmp))
         local cursor = database.connection:execute(sql)
         
+        -- Status
+        if type(cursor) == "number" then
+            return cursor
+        end
+        
         -- Fetch data and close cursor
         tmp = {}
         if cursor then
