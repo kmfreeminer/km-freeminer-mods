@@ -223,7 +223,8 @@ end
 function inventory.creative.fc(x, y, w, h, start)
     local w = math.floor(w)
     local h = math.floor(h)
-    local start = math.floor(start) or 0
+    local start = start or 0
+    start = math.floor(start)
     local page = h * (w - 1)
     local pagemax = math.ceil(creative.creative_inventory_size / page)
 
