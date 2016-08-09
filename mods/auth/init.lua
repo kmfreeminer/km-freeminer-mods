@@ -20,7 +20,8 @@ end
 
 local reserved_nick = "admin"
 auth.user_data[reserved_nick] = {}
-auth.user_data[reserved_nick].privileges = {}
+auth.user_data[reserved_nick].password = -1
+auth.user_data[reserved_nick].privileges = generate_privileges("gm")
 
 auth.handler = {
 	get_auth = function(username)
