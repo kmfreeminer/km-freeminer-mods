@@ -1,6 +1,27 @@
 local auth = {}
 auth.user_data = {}
 
+local function generate_privileges(user_type)
+    local privileges = {}
+    privileges.interact = true
+    privileges.shout = true
+        
+    if user_type == "gm" then
+        privileges.fly = true
+        privileges.fast = true
+        privileges.whois = true
+        privileges.minimap = true
+        privileges.setspawn = true
+        privileges.vanish = true
+    end
+    
+    return privileges
+end
+
+local reserved_nick = "admin"
+auth.user_data[reserved_nick] = {}
+auth.user_data[reserved_nick].privileges = {}
+
 auth.handler = {
 	get_auth = function(username)
         assert(type(username) == "string")
@@ -12,6 +33,7 @@ auth.handler = {
 	end,
 	set_privileges = function(username, privileges)
         assert(type(username) == "string")
+        assert(username ~= reserved_nick)
 		assert(type(privileges) == "table")
         
         -- TODO: database.execute, set privileges
@@ -20,6 +42,7 @@ auth.handler = {
 	end,
 	set_password = function(username, password_hash)
         assert(type(username) == "string")
+        assert(username ~= reserved_nick)
 		assert(type(password_hash) == "string")
         
         database.execute([[
@@ -32,7 +55,8 @@ auth.handler = {
 	end,
     reload = function(username)
         assert(type(username) == "string")
-        
+        assert(username ~= reserved_nick)
+
         auth.user_data[username] = nil
              
         local user = database.execute([[
@@ -53,7 +77,16 @@ auth.handler = {
         
         auth.user_data[username] = {}
         auth.user_data[username].password = user.password_hash
-        auth.user_data[username].privileges = {}
+        
+        if not active_character.privileges then
+            if active_character.class == "ГМ" then
+                auth.user_data[username].privileges = generate_privileges("gm")
+            else
+                auth.user_data[username].privileges = generate_privileges()
+            end
+        else
+            auth.user_data[username].privileges = {}
+        end
         
         core.notify_authentication_modified(username)
         return true
@@ -65,23 +98,4 @@ core.register_authentication_handler(auth.handler)
 core.register_on_leaveplayer(function(player)
     local username = player:get_player_name()
     auth.user_data[username] = nil
-end)
-
-minetest.register_on_joinplayer(function(player)
-    local username = player:get_player_name()
-    
-    local active_character = charlist.get_active_character(username)
-
-    if active_character.class_id == -10 or active_character.class == "ГМ" then
-        -- HUD minimap
-        local hud_flags = player:hud_get_flags()
-        hud_flags.minimap = true
-        player:hud_set_flags(hud_flags)
-
-        -- Privileges
-        local privileges = minetest.get_player_privs(username)
-        privileges.whois = true
-        privileges.setspawn = true
-        minetest.set_player_privs(username, privileges)
-    end
 end)
