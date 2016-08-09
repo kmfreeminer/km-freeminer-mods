@@ -6,9 +6,6 @@ auth.handler = {
         assert(type(username) == "string")
         return auth.user_data[username]
 	end,
-    clear_auth = function(username)
-        auth.user_data[username] = nil
-    end,
     create_auth = function(username, password)
         assert(type(username) == "string")
         return auth.handler.reload(username)
@@ -36,8 +33,8 @@ auth.handler = {
     reload = function(username)
         assert(type(username) == "string")
         
-        auth.handler.clear_auth(username)
-        
+        auth.user_data[username] = nil
+             
         local user = database.execute([[
             SELECT `user`.`password_hash` FROM `users` as `user`
             WHERE `user`.`username`='%s'
@@ -67,7 +64,7 @@ core.register_authentication_handler(auth.handler)
 
 core.register_on_leaveplayer(function(player)
     local username = player:get_player_name()
-    auth.handler.clear_auth(username)
+    auth.user_data[username] = nil
 end)
 
 minetest.register_on_joinplayer(function(player)
