@@ -1,3 +1,9 @@
+if core.setting_get("development") and core.setting_getbool("development") then
+    if not (core.setting_get("auth_development") and core.setting_getbool("auth_development")) then
+        return
+    end
+end
+
 local auth = {}
 auth.user_data = {}
 
