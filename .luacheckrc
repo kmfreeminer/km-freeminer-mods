@@ -7,7 +7,8 @@ read_globals = {
 	"VoxelManip", "VoxelArea",
 	"PseudoRandom", "ItemStack",
 }
-globals = { "minetest", "core", "freeminer" }
+
+globals = { "minetest", "core", "freeminer", "dump", "dump2", "spawn_falling_node", "nodeupdate" }
 
 -- Don't report on legacy definitions of globals.
 files["mods/default/legacy.lua"].global = false
