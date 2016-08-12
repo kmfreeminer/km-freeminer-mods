@@ -15,9 +15,14 @@ function gui.get_hotbar_bg(x, y, w)
     return out
 end
 
+minetest.register_privilege("minimap", {
+    description = "Даёт возможность видеть миникарту", 
+    give_to_singleplayer = true
+})
+
 minetest.register_on_joinplayer(function(player)
     local hud_flags = player:hud_get_flags()
-    hud_flags.minimap = false
+    hud_flags.minimap = minetest.check_player_privs(player, "minimap")
     hud_flags.healthbar = false
     player:hud_set_flags(hud_flags)
 end)
