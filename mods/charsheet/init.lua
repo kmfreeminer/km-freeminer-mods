@@ -164,7 +164,7 @@ local function get_free_colors()
 end
 
 function charsheet.get_free_random_color()
-    local free_colors = {} --get_free_colors()
+    local free_colors = get_free_colors()
     if #free_colors <= 0 then
         local color_number = math.random(0, 16777215)
         return string.gsub(string.format("%6x", color_number), " ", "0")
