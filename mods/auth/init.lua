@@ -76,7 +76,7 @@ auth.handler = {
             return false
         end
         
-        local active_character = charlist.get_active_character(username)
+        local active_character = charsheet.get_active_character(username)
         
         if not active_character then
             return false

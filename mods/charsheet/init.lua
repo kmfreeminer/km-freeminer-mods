@@ -1,18 +1,18 @@
-charlist = {}
-charlist.data = {}
+charsheet = {}
+charsheet.data = {}
 
 local function update_nametag(username)
     local player = minetest.get_player_by_name(username)
-    local active_character = charlist.get_active_character(username)
+    local active_character = charsheet.get_active_character(username)
     player:set_nametag_attributes({
-        color = "#" .. charlist.get_color(username),
+        color = "#" .. charsheet.get_color(username),
         text = active_character.visible_name or active_character.real_name or username
     })
 end
 
 -- Quenta
 -- {{
-function charlist.find_name_owners(name)
+function charsheet.find_name_owners(name)
     local users = database.execute([[
         SELECT `user`.`username` FROM `users` as `user`
         INNER JOIN `characters` as `character` 
@@ -30,7 +30,7 @@ function charlist.find_name_owners(name)
     return owners
 end
 
-function charlist.set_visible_name(username, visible_name)
+function charsheet.set_visible_name(username, visible_name)
     database.execute([[
         UPDATE `characters` AS `character` 
         WHERE `character`.`username`='%s' 
@@ -40,7 +40,7 @@ function charlist.set_visible_name(username, visible_name)
     update_nametag(username)
 end
 
-function charlist.get_active_character(username) 
+function charsheet.get_active_character(username) 
     return database.execute([[
         SELECT 
             `character`.`real_name`    AS `real_name`,
@@ -77,7 +77,7 @@ end
 
 -- Skills
 -- {{
-function charlist.get_skill_table(username)
+function charsheet.get_skill_table(username)
     local skills = database.execute([[
         SELECT `skill`.`name`, `skill`.`level`
         FROM `skills` as `skill`
@@ -96,7 +96,7 @@ function charlist.get_skill_table(username)
     return skill_table
 end
 
-function charlist.get_skill_level(username, skill_name)
+function charsheet.get_skill_level(username, skill_name)
     local skill = database.execute([[
         SELECT `skill`.`level`
         FROM `skills` as `skill`
@@ -113,7 +113,7 @@ end
 
 -- Color
 -- {{
-charlist.data.colors = {}
+charsheet.data.colors = {}
 
 local colors ={}
 colors.primary = {
@@ -133,7 +133,7 @@ colors.secondary = {
 }
 
 local function find_color_owner(color)
-    for username, occupied_color in pairs(charlist.data.colors) do
+    for username, occupied_color in pairs(charsheet.data.colors) do
         if occupied_color == color then
             return username
         end
@@ -163,7 +163,7 @@ local function get_free_colors()
     return color_table
 end
 
-function charlist.get_free_random_color()
+function charsheet.get_free_random_color()
     local free_colors = get_free_colors()
     
     if #free_colors <= 0 then
@@ -174,12 +174,12 @@ function charlist.get_free_random_color()
     return free_colors[math.random(1, #free_colors)]
 end
 
-function charlist.get_color(username)
-    return charlist.data.colors[username]
+function charsheet.get_color(username)
+    return charsheet.data.colors[username]
 end
 
-function charlist.set_color(username, color)
-    charlist.data.colors[username] = color
+function charsheet.set_color(username, color)
+    charsheet.data.colors[username] = color
     if color ~= nil then
         update_nametag(username)
     end
@@ -193,13 +193,13 @@ end)
 
 minetest.register_on_joinplayer(function(player)  
     local username = player:get_player_name()
-    charlist.set_color(username, charlist.get_free_random_color())
+    charsheet.set_color(username, charsheet.get_free_random_color())
 end)
 
 -- Clear user on leave
 minetest.register_on_leaveplayer(function(player)
     local username = player:get_player_name()
-    charlist.set_color(username, nil)
+    charsheet.set_color(username, nil)
 end)
 -- }}
 
@@ -218,8 +218,8 @@ minetest.register_chatcommand("whois", {
     description = "Позволяет узнать кто скрывается за указаным именем.",
     func = function(username, param)
         local result = ""
-        for _, name in pairs(charlist.find_name_owners(param)) do
-            local color = charlist.get_color(name)
+        for _, name in pairs(charsheet.find_name_owners(param)) do
+            local color = charsheet.get_color(name)
             result = result .. name .. ": "
             result = result .. core.colorize(color or "FFFFFF", color or "OFFLINE") .. "\n"
         end
@@ -229,17 +229,17 @@ minetest.register_chatcommand("whois", {
 
 -- TESTING
 if minetest.setting_get("development") and minetest.setting_getbool("development") == true then
-    minetest.register_chatcommand("charlist_test", {
+    minetest.register_chatcommand("charsheet_test", {
         func = function(username, param)
-            print("\n=== charlist.find_name_owners test ===")
-            print("(\"sad\") name_owners: " .. dump(charlist.find_name_owners("sad")))
+            print("\n=== charsheet.find_name_owners test ===")
+            print("(\"sad\") name_owners: " .. dump(charsheet.find_name_owners("sad")))
 
             print("\n=== get_active_character test ===")
-            print("active_character: " .. dump(charlist.get_active_character(username)))
+            print("active_character: " .. dump(charsheet.get_active_character(username)))
 
             print("\n=== skills test ===")
-            print("skill_table: " .. dump(charlist.get_skill_table(username)))
-            print("skill_level: " .. dump(charlist.get_skill_level(username, "test")))
+            print("skill_table: " .. dump(charsheet.get_skill_table(username)))
+            print("skill_level: " .. dump(charsheet.get_skill_level(username, "test")))
         end
     })
 end

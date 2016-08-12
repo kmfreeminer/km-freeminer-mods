@@ -19,7 +19,7 @@ local function get_message_type_and_text(message)
 end
 
 local function find_skill_name(username, text_unparsed)
-    local skill_table = charlist.get_skill_table(username)
+    local skill_table = charsheet.get_skill_table(username)
     for skill_name, _ in pairs(skill_table) do
         if string.match(text_unparsed, "^"..skill_name) then
             return skill_name
@@ -77,7 +77,7 @@ function kmchat.process_messages(username, message)
             local skill_name = find_skill_name(username, text)
             
             if skill_name then
-                level = charlist.get_skill_level(username, skill_name)
+                level = charsheet.get_skill_level(username, skill_name)
                 if fudge.is_valid(level)  then
                     text = string.format("%s (%s)", level, text)
                 end
@@ -104,9 +104,9 @@ function kmchat.process_messages(username, message)
     chat_string:set_base_color(kmchat[action_type].color)
     chat_string:set_format_string(kmchat[action_type].format_string)
     
-    local name_color = charlist.get_color(username)
+    local name_color = charsheet.get_color(username)
     
-    local active_character = charlist.get_active_character(username)
+    local active_character = charsheet.get_active_character(username)
     local real_name = active_character.real_name or username
     local visible_name = active_character.visible_name or real_name
 
