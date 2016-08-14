@@ -12,26 +12,26 @@ CREATE TABLE sexes (
 	title                varchar(100) NOT NULL,
 	CONSTRAINT Pk_sexes PRIMARY KEY ( id )
 );
-INSERT INTO "sexes" VALUES(1, 'мужчина');
-INSERT INTO "sexes" VALUES(2, 'женщина');
+INSERT INTO sexes VALUES(1, 'мужчина');
+INSERT INTO sexes VALUES(2, 'женщина');
 
 CREATE TABLE races ( 
 	id                   integer NOT NULL,
 	title                varchar(100) NOT NULL,
 	CONSTRAINT Pk_Table_0 PRIMARY KEY ( id )
 );
-INSERT INTO "races" VALUES(1, 'человек');
+INSERT INTO races VALUES(1, 'человек');
 
 CREATE TABLE ch_classes ( 
 	id                   integer NOT NULL,
 	title                varchar(100) NOT NULL,
 	CONSTRAINT Pk_ch_classes PRIMARY KEY ( id )
 );
-INSERT INTO "ch_classes" VALUES(-10, 'ГМ');
-INSERT INTO "ch_classes" VALUES(  0, 'непроверен');
-INSERT INTO "ch_classes" VALUES( 10, 'требует исправлений');
-INSERT INTO "ch_classes" VALUES( 20, 'проверен / жив');
-INSERT INTO "ch_classes" VALUES(100, 'мёртв');
+INSERT INTO ch_classes VALUES(-10, 'ГМ');
+INSERT INTO ch_classes VALUES(  0, 'непроверен');
+INSERT INTO ch_classes VALUES( 10, 'требует исправлений');
+INSERT INTO ch_classes VALUES( 20, 'проверен / жив');
+INSERT INTO ch_classes VALUES(100, 'мёртв');
 
 CREATE TABLE characters ( 
 	id                   integer NOT NULL,
@@ -39,16 +39,17 @@ CREATE TABLE characters (
 	real_name            varchar(50) NOT NULL,
 	visible_name         varchar(50),
 	age                  integer NOT NULL,
-	sex                  integer NOT NULL DEFAULT(1),
-	race                 integer NOT NULL DEFAULT(1),
+	sex_id               integer NOT NULL DEFAULT(1),
+	race_id              integer NOT NULL DEFAULT(1),
 	appearance           text NOT NULL,
 	quenta               text NOT NULL,
-	class                integer NOT NULL,
+    class_id             integer NOT NULL,
+    privileges           text,
 	CONSTRAINT Pk_characters PRIMARY KEY ( id ),
 	FOREIGN KEY ( user_id ) REFERENCES users( id ),
-	FOREIGN KEY ( sex ) REFERENCES sexes( id ),
-	FOREIGN KEY ( race ) REFERENCES races( id ),
-	FOREIGN KEY ( class ) REFERENCES ch_classes( id )  
+	FOREIGN KEY ( sex_id ) REFERENCES sexes( id ),
+	FOREIGN KEY ( race_id ) REFERENCES races( id ),
+	FOREIGN KEY ( class_id ) REFERENCES ch_classes( id )  
 );
 
 CREATE TABLE fudge_levels ( 
@@ -56,14 +57,14 @@ CREATE TABLE fudge_levels (
 	level_name           varchar(100) NOT NULL,
 	CONSTRAINT Pk_fudge_levels PRIMARY KEY ( id )
 );
-INSERT INTO "fudge_levels"(level_name) VALUES('ужасно');
-INSERT INTO "fudge_levels"(level_name) VALUES('плохо');
-INSERT INTO "fudge_levels"(level_name) VALUES('посредственно');
-INSERT INTO "fudge_levels"(level_name) VALUES('нормально');
-INSERT INTO "fudge_levels"(level_name) VALUES('хорошо');
-INSERT INTO "fudge_levels"(level_name) VALUES('прекрасно');
-INSERT INTO "fudge_levels"(level_name) VALUES('превосходно');
-INSERT INTO "fudge_levels"(level_name) VALUES('легендарно');
+INSERT INTO fudge_levels(level_name) VALUES('ужасно');
+INSERT INTO fudge_levels(level_name) VALUES('плохо');
+INSERT INTO fudge_levels(level_name) VALUES('посредственно');
+INSERT INTO fudge_levels(level_name) VALUES('нормально');
+INSERT INTO fudge_levels(level_name) VALUES('хорошо');
+INSERT INTO fudge_levels(level_name) VALUES('прекрасно');
+INSERT INTO fudge_levels(level_name) VALUES('превосходно');
+INSERT INTO fudge_levels(level_name) VALUES('легендарно');
 
 CREATE TABLE skills ( 
 	id                   integer NOT NULL,

@@ -38,6 +38,10 @@ end
 
 xpcall(database_init, database_init_error)
 
+local function execute(sql)
+
+end
+
 function database.execute(sql, ...)
     local tmp
     
@@ -48,7 +52,12 @@ function database.execute(sql, ...)
     end
     
     sql = string.format(sql, unpack(tmp))
-    local cursor = database.connection:execute(sql)
+
+    local cursor, error_message = database.connection:execute(sql)
+
+    if error_message then
+        error(error_message)
+    end
     
     -- Status
     if type(cursor) == "number" then

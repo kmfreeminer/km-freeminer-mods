@@ -30,48 +30,47 @@ function charsheet.find_name_owners(name)
     return owners
 end
 
-function charsheet.set_visible_name(username, visible_name)
-    database.execute([[
-        UPDATE `characters` AS `character` 
-        WHERE `character`.`username`='%s' 
-        SET `character`.`visible_name`='%s'
-        LIMIT 1;
-    ]], username, visible_name)
-    update_nametag(username)
-end
-
 function charsheet.get_active_character(username) 
     return database.execute([[
-        SELECT 
-            `character`.`real_name`    AS `real_name`,
-            `character`.`visible_name` AS `visible_name`,
-            `character`.`age`          AS `age`,
-            `character`.`appearance`   AS `appearance`, 
-            `character`.`quenta`       AS `quenta`, 
-            `class`.`title`            AS `class`,
-            `class`.`id`               AS `class_id`,
-            `race`.`title`             AS `race`,
-            `race`.`id`                AS `race_id`,
-            `sex`.`title`              AS `sex`,
-            `sex`.`id`                 AS `sex_id`
-
-        FROM characters AS character
-        INNER JOIN users      AS user
-            ON (`character`.`user_id` = `user`.`id`)
-
-        INNER JOIN `sexes`    AS `sex`
-            ON (`character`.`sex` = `sex`.`id`)
-
-        INNER JOIN `races`    AS `race`
-            ON (`character`.`race` = `race`.`id`)
-
-        INNER JOIN ch_classes AS class
-            ON (`character`.`class` = `class`.`id`)
-        WHERE
-            `user`.`username` = '%s' AND
-            (class.id = 20 OR class.id = -10)
+        SELECT
+            ch.id           id, 
+            ch.real_name    real_name, 
+            ch.visible_name visible_name, 
+            ch.age          age, 
+            ch.appearance   appearance, 
+            ch.quenta       quenta, 
+            ch.privileges   privileges, 
+            sex.id          sex_id, 
+            sex.title       sex, 
+            race.id         race_id, 
+            race.title      race, 
+            ch_class.id     class_id, 
+            ch_class.title  class
+        FROM characters ch
+            INNER JOIN users usr  ON ( ch.user_id = usr.id  )  
+            INNER JOIN sexes sex  ON ( ch.sex_id = sex.id  )  
+            INNER JOIN races race ON ( ch.race_id = race.id  )  
+            INNER JOIN ch_classes ch_class ON ( ch.class_id = ch_class.id  )  
+        WHERE 
+            usr.username = '%s' AND
+            (ch_class.id = 20 OR ch_class.id = -10)
         LIMIT 1;
     ]], username)() or {}
+end
+
+function charsheet.get_real_name(username)
+    local character = charsheet.get_active_character(username) 
+    return character.real_name
+end
+
+function charsheet.get_visible_name(username)
+    local character = charsheet.get_active_character(username) 
+    return character.visible_name
+end
+
+function charsheet.set_visible_name(username, visible_name)
+    -- TODO: implement
+    update_nametag(username)
 end
 -- }}
 
