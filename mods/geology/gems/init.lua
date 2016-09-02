@@ -438,7 +438,7 @@ gems.register_drop("default:stone", {
     diamond = gems.very_rare,
 })
 
-gems.register_drop("ores:iron_ore", {
+gems.register_drop("ores:iron", {
     ruby = gems.rare,
     opal = gems.rare,
     sapphire = gems.rare,

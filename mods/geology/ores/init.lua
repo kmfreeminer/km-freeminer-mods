@@ -174,4 +174,5 @@ ores.register_ore("ores:sulfur", {
 
 --{{{ Aliases
 minetest.register_alias("default:stone_with_coal", "ores:bituminous_coal")
+minetest.register_alias("default:stone_with_iron", "ores:iron")
 --}}}

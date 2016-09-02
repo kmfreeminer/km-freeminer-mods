@@ -254,7 +254,7 @@ metals.register_metal("pig_iron", {
     uses_mod = 2.3,
     color = "#605759:127",
     is_alloy = false,
-    minerals = {"iron_ore"}
+    minerals = {"iron"}
 })
 
 -- Alloys
