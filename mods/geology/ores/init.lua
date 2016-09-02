@@ -37,7 +37,7 @@ function ores.register_ore(name, oredef)
             tiles = {name_ .. ".png"}
         end
     end
-    
+
     -- Register node
     minetest.register_node(name, {
         description = oredef.description or "Руда",
@@ -88,7 +88,7 @@ for ore, ore_desc in pairs(minerals.list) do
     if not ores.manual_reg[ore] then
         ores.register_ore("ores:" .. ore, {
             description = ore_desc .. " (руда)"
-        }) 
+        })
     end
 end
 
@@ -104,7 +104,7 @@ ores.register_ore("ores:limestone", {
     --ore_scarcity or 3*3*3*2,
     ore_num_ores = 32767,
     ore_clust_size = 32,
-}) 
+})
 
 ores.register_ore("ores:marble", {
     description = ores.list.marble,
@@ -118,7 +118,7 @@ ores.register_ore("ores:marble", {
     --ore_scarcity or 3*3*3*2,
     ore_num_ores = 32767,
     ore_clust_size = 32,
-}) 
+})
 
 ores.register_ore("ores:granite", {
     description = ores.list.granite,
@@ -128,7 +128,7 @@ ores.register_ore("ores:granite", {
         ore = 1,
     },
     drop = "ores:granite",
-    
+
     ore_type = "sheet",
     --ore_scarcity or 3*3*3*2,
     ore_num_ores = 32767,
@@ -170,4 +170,8 @@ ores.register_ore("ores:sulfur", {
     y_min = -50,
     y_max = -200,
 })
+--}}}
+
+--{{{ Aliases
+minetest.register_alias("default:stone_with_coal", "ores:bituminous_coal")
 --}}}
