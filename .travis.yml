@@ -1,11 +1,11 @@
-language: ruby
-
-sudo: required
-
+language: generic
+sudo: false
+addons:
+  apt:
+    packages:
+    - luarocks
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install -y luarocks
-  - sudo luarocks install luacheck
+  - luarocks install --local luacheck
   - rm -rf ./mods/jabber/lib
-
-script: luacheck --no-color ./mods
+script: 
+- $HOME/.luarocks/bin/luacheck --no-color ./mods
